@@ -18,6 +18,7 @@
         <Menu>
             <MenuItem Header="File">
                 <MenuItem Header="Sprite Sheet Editor" Command="{Binding ShowSpriteSheetEditorCommand}" />
+                <MenuItem Header="World Editor" Command="{Binding ShowWorldEditorCommand}" />
             </MenuItem>
         </Menu>
     </Grid>

@@ -15,6 +15,7 @@ namespace Tyler.ViewModels
     public class SpriteSheetEditorViewModel : ViewModel
     {
         readonly RoutingService _routingService;
+        readonly SettingsService _settingsService;
 
         SpriteSheetViewModel _spriteSheet = new SpriteSheetViewModel();
         public SpriteSheetViewModel SpriteSheet
@@ -39,6 +40,7 @@ namespace Tyler.ViewModels
         public SpriteSheetEditorViewModel()
         {
             _routingService = ContainerService.Instance.GetOrCreate<RoutingService>();
+            _settingsService = ContainerService.Instance.GetOrCreate<SettingsService>();
         }
 
         public CommandModel AddSpriteCommand => new CommandModel(() =>
@@ -67,17 +69,10 @@ namespace Tyler.ViewModels
         
         public CommandModel OpenPNGCommand => new CommandModel(() =>
         {
-            var dialog = new Microsoft.Win32.OpenFileDialog
-            {
-                Filter = "PNG Files (*.png)|*.png"
-            };
-            if (dialog.ShowDialog().GetValueOrDefault() && File.Exists(dialog.FileName))
-            {
+            var fileName = _routingService.ShowOpenFileDialog("Open Sprite Sheet PNG", ".png", Vars.FileDialogTypePNG);
+            if (File.Exists(fileName))
                 if (_routingService.ShowConfirmDialog("Warning", "Your unsaved changes will be lost. Are you sure?"))
-                {
-                    LoadPNG(dialog.FileName);
-                }
-            }
+                    LoadPNG(fileName);
         });
 
         public SpriteViewModel AddSprite()

@@ -1,4 +1,6 @@
-﻿using Net.Essentials;
+﻿using Microsoft.Win32;
+
+using Net.Essentials;
 
 using System;
 using System.Collections.Generic;
@@ -15,6 +17,13 @@ namespace Tyler.Services
 {
     public class RoutingService : Singleton<RoutingService>
     {
+        readonly SettingsService _settingsService;
+
+        public RoutingService()
+        {
+            _settingsService = ContainerService.Instance.GetOrCreate<SettingsService>();
+        }
+
         public bool ShowConfirmDialog(string title, string text)
         {
             var result = MessageBox.Show(text, title, MessageBoxButton.YesNo, MessageBoxImage.Question);
@@ -27,9 +36,48 @@ namespace Tyler.Services
             return result == MessageBoxResult.Yes;
         }
 
+        string GetFileFilter(string extension, string typeName)
+        {
+            return $"{typeName} (*{extension})|*{extension}";
+        }
+
+        public string ShowOpenFileDialog(string title, string extension, string typeName)
+        {
+            var dialog = new OpenFileDialog();
+            dialog.Title = title;
+            dialog.Filter = GetFileFilter(extension, typeName);
+            if (File.Exists(_settingsService.Data.LastOpenedPNGPath))
+                dialog.InitialDirectory = Path.GetDirectoryName(_settingsService.Data.LastOpenedPNGPath);
+            var result = dialog.ShowDialog();
+            if (result == true && File.Exists(dialog.FileName))
+                return dialog.FileName;
+            return null;
+        }
+
+        public string ShowSaveFileDialog(string title, string extension, string typeName)
+        {
+            var dialog = new SaveFileDialog
+            {
+                Title = title,
+                Filter = GetFileFilter(extension, typeName)
+            };
+            if (File.Exists(_settingsService.Data.LastOpenedPNGPath))
+                dialog.InitialDirectory = Path.GetDirectoryName(_settingsService.Data.LastOpenedPNGPath);
+            var result = dialog.ShowDialog();
+            if (result == true)
+            {
+                if (File.Exists(dialog.FileName) &&
+                    ShowConfirmDialog("Confirm Overwrite", $"File {dialog.FileName} already exists. Are you sure you want to overwrite it?"))
+                    return dialog.FileName;
+            }
+            return null;
+        }
+
         public void ShowSpriteSheetEditor()
         {
-            ShowSpriteSheetEditor(null);
+            var lastPngPath = _settingsService.Data.LastOpenedPNGPath;
+            if (!File.Exists(lastPngPath)) lastPngPath = null;
+            ShowSpriteSheetEditor(lastPngPath);
         }
 
         public void ShowSpriteSheetEditor(string path)
@@ -46,6 +94,35 @@ namespace Tyler.Services
         {
             var window = new AutoSliceWindow();
             var vm = new AutoSliceViewModel(editor);
+            window.DataContext = vm;
+            window.Show();
+        }
+
+        public void ShowWorldEditor()
+        {
+            var window = new WorldEditorWindow();
+            var vm = new WorldViewModel();
+            if (File.Exists(_settingsService.Data.LastWorldPath))
+            {
+                vm.Path = _settingsService.Data.LastWorldPath;
+                vm.Load();
+            }
+            window.DataContext = vm;
+            window.Show();
+        }
+
+        public void ShowTileDefsEditor(WorldViewModel world)
+        {
+            var window = new TileDefsEditorWindow();
+            var vm = new TileDefsEditorViewModel(world);
+            window.DataContext = vm;
+            window.Show();
+        }
+
+        public void ShowWorldSpriteSheetManager(WorldViewModel world)
+        {
+            var window = new WorldSpriteSheetManagerWindow();
+            var vm = new WorldSpriteSheetManagerViewModel(world);
             window.DataContext = vm;
             window.Show();
         }

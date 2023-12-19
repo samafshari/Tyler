@@ -61,12 +61,26 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Models\Board.cs" />
+    <Compile Include="Models\Settings.cs" />
     <Compile Include="Models\Sprite.cs" />
+    <Compile Include="Models\Tile.cs" />
+    <Compile Include="Models\TileDef.cs" />
+    <Compile Include="Models\World.cs" />
     <Compile Include="Services\RoutingService.cs" />
+    <Compile Include="Services\SettingsService.cs" />
+    <Compile Include="Vars.cs" />
     <Compile Include="ViewModels\AutoSliceViewModel.cs" />
+    <Compile Include="ViewModels\BoardViewModel.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
+    <Compile Include="ViewModels\SettingsViewModel.cs" />
     <Compile Include="ViewModels\SpriteViewModel.cs" />
     <Compile Include="ViewModels\SpriteSheetViewModel.cs" />
+    <Compile Include="ViewModels\TileDefsEditorViewModel.cs" />
+    <Compile Include="ViewModels\TileDefViewModel.cs" />
+    <Compile Include="ViewModels\TileViewModel.cs" />
+    <Compile Include="ViewModels\WorldSpriteSheetManagerViewModel.cs" />
+    <Compile Include="ViewModels\WorldViewModel.cs" />
     <Compile Include="Views\AutoSliceWindow.xaml.cs">
       <DependentUpon>AutoSliceWindow.xaml</DependentUpon>
     </Compile>
@@ -83,6 +97,18 @@
     </Compile>
     <Compile Include="Views\SpriteSheetEditorWindow.xaml.cs">
       <DependentUpon>SpriteSheetEditorWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SpriteSheetExplorerControl.xaml.cs">
+      <DependentUpon>SpriteSheetExplorerControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\TileDefsEditorWindow.xaml.cs">
+      <DependentUpon>TileDefsEditorWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\WorldEditorWindow.xaml.cs">
+      <DependentUpon>WorldEditorWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\WorldSpriteSheetManagerWindow.xaml.cs">
+      <DependentUpon>WorldSpriteSheetManagerWindow.xaml</DependentUpon>
     </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -113,6 +139,22 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\SpriteSheetEditorWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\SpriteSheetExplorerControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\TileDefsEditorWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\WorldEditorWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\WorldSpriteSheetManagerWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
