@@ -69,7 +69,7 @@ namespace Tyler.ViewModels
                     var json = File.ReadAllText(jsonPath);
                     Sprites = new ObservableCollection<SpriteViewModel>(
                         JsonConvert.DeserializeObject<List<Sprite>>(json)
-                        .Select(x => new SpriteViewModel(x)));
+                        .Select(x => new SpriteViewModel(Path, x)));
                 }
                 else
                 {

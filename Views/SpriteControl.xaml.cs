@@ -35,18 +35,10 @@ namespace Tyler.Views
         public static readonly DependencyProperty SpriteProperty =
             DependencyProperty.Register("Sprite", typeof(SpriteViewModel), typeof(SpriteControl), new PropertyMetadata(OnSpritePropertyChanged));
 
-        public string Path
-        {
-            get => (string)GetValue(PathProperty);
-            set => SetValue(PathProperty, value);
-        }
-
-        public static readonly DependencyProperty PathProperty =
-            DependencyProperty.Register("Path", typeof(string), typeof(SpriteControl), new PropertyMetadata(OnSpritePropertyChanged));
-
         public SpriteControl()
         {
             InitializeComponent();
+            SetValue(RenderOptions.BitmapScalingModeProperty, BitmapScalingMode.NearestNeighbor);
             Update();
         }
 
@@ -57,10 +49,10 @@ namespace Tyler.Views
 
         void Update()
         {
-            if (Sprite == null || !File.Exists(Path)) Source = null;
+            if (Sprite == null || !File.Exists(Sprite.Path)) Source = null;
             else
             {
-                var bmp = ContainerService.Instance.GetOrCreate<BitmapCache>().Get(Path);
+                var bmp = ContainerService.Instance.GetOrCreate<BitmapCache>().Get(Sprite.Path);
                 var cropped = new CroppedBitmap(bmp, new Int32Rect(Sprite.X, Sprite.Y, Sprite.Width, Sprite.Height));
                 Source = cropped;
             }

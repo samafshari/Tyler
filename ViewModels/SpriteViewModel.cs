@@ -47,12 +47,20 @@ namespace Tyler.ViewModels
             set => SetProperty(ref _height, value);
         }
 
+        string _path;
+        public string Path
+        {
+            get => _path;
+            set => SetProperty(ref _path, value);
+        }
+
         public SpriteViewModel()
         {
         }
 
-        public SpriteViewModel(Sprite sprite)
+        public SpriteViewModel(string path, Sprite sprite)
         {
+            Path = path;
             sprite.Inject(this);
         }
     }

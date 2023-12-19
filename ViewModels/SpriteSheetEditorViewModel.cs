@@ -82,7 +82,7 @@ namespace Tyler.ViewModels
             if (SpriteSheet.Sprites.Any())
                 id = SpriteSheet.Sprites.Select(x => int.TryParse(x.Id, out var _i) ? _i : 0).Max() + 1 + "";
 
-            SpriteSheet.Sprites.Add(new SpriteViewModel { Id = SpriteSheet.Sprites.Count.ToString() });
+            SpriteSheet.Sprites.Add(new SpriteViewModel { Path = SpriteSheet.Path, Id = SpriteSheet.Sprites.Count.ToString() });
             SelectedSprite = SpriteSheet.Sprites.Last();
             return SelectedSprite;
         }

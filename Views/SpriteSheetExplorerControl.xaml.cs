@@ -13,6 +13,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
+using Tyler.ViewModels;
+
 namespace Tyler.Views
 {
     /// <summary>
@@ -20,9 +22,31 @@ namespace Tyler.Views
     /// </summary>
     public partial class SpriteSheetExplorerControl : UserControl
     {
+        public SpriteSheetViewModel SpriteSheet
+        {
+            get => (SpriteSheetViewModel)GetValue(SpriteSheetProperty);
+            set => SetValue(SpriteSheetProperty, value);
+        }
+
+        // Two way dependency property for SpriteSheet
+        public static readonly DependencyProperty SpriteSheetProperty =
+            DependencyProperty.Register("SpriteSheet", typeof(SpriteSheetViewModel), typeof(SpriteSheetExplorerControl), new PropertyMetadata(OnSpriteSheetPropertyChanged));
+
         public SpriteSheetExplorerControl()
         {
             InitializeComponent();
+            grd.DataContext = this;
+            Update();
+        }
+
+        static void OnSpriteSheetPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is SpriteSheetExplorerControl control) control.Update();
+        }
+
+        void Update()
+        {
+
         }
     }
 }

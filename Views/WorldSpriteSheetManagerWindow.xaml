@@ -50,11 +50,22 @@
                             </StackPanel>
                         </DataTemplate>
                     </ListView.ItemTemplate>
+                    <ListView.Template>
+                        <ControlTemplate TargetType="ListView">
+                            <Border>
+                                <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+                                    <ItemsPresenter />
+                                </ScrollViewer>
+                            </Border>
+                        </ControlTemplate>
+                    </ListView.Template>
                 </ListView>
             </Grid>
             <Grid Grid.Column="1">
-                <Image Source="{Binding SpriteSheet.Path}" />
+                <!--<Image Source="{Binding SpriteSheet.Path}" />-->
+                <local:SpriteSheetExplorerControl SpriteSheet="{Binding SpriteSheet}" />
             </Grid>
+            <GridSplitter Grid.Column="1" />
         </Grid>
     </Grid>
 </Window>
