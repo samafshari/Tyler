@@ -36,14 +36,24 @@ namespace Tyler.ViewModels
         public int Width
         {
             get => _width;
-            set => SetProperty(ref _width, value);
+            set
+            {
+                var dirty = Width != value;
+                SetProperty(ref _width, value);
+                if (dirty) BuildTileGrid();
+            }
         }
 
         int _height;
         public int Height
         {
             get => _height;
-            set => SetProperty(ref _height, value);
+            set
+            {
+                var dirty = Height != value;
+                SetProperty(ref _height, value);
+                if (dirty) BuildTileGrid();
+            }
         }
 
         string _name;
@@ -64,11 +74,20 @@ namespace Tyler.ViewModels
             set => SetProperty(ref _tiles, value);
         }
 
+        public readonly Dictionary<(int, int), TileViewModel> TileGrid = new Dictionary<(int, int), TileViewModel>();
+
         string _script;
         public string Script
         {
             get => _script;
             set => SetProperty(ref _script, value);
+        }
+
+        int _state = Vars.StateMin;
+        public int State
+        {
+            get => _state;
+            set => SetProperty(ref _state, value);
         }
 
         public BoardViewModel() : this(null, new Board())
@@ -91,6 +110,54 @@ namespace Tyler.ViewModels
             Width = board.Width;
             Height = board.Height;
             Tiles = new ObservableCollection<TileViewModel>(board.Tiles.Select(x => new TileViewModel(x)));
+            Script = _scriptingService.BoardToScript(board);
+            BuildTileGrid();
+        }
+
+        public void SetTile(Tile tile)
+        {
+            var vm = new TileViewModel(tile);
+            if (TileGrid.TryGetValue((tile.X, tile.Y), out var oldTile))
+            {
+                Tiles.Remove(oldTile);
+                TileGrid.Remove((tile.X, tile.Y));
+            }
+            Tiles.Add(vm);
+            TileGrid[(tile.X, tile.Y)] = vm;
+            BumpState();
+        }
+
+        public void SetTile(int x, int y, int z, char c)
+        {
+            var tile = new Tile
+            {
+                X = x,
+                Y = y,
+                Z = z,
+                Char = c,
+                Script = ""
+            };
+            SetTile(tile);
+        }
+
+        void BuildTileGrid()
+        {
+            TileGrid.Clear();
+            foreach (var tile in Tiles)
+                TileGrid[(tile.X, tile.Y)] = tile;
+            for (int x = 0; x < Width; x++)
+                for (int y = 0; y < Height; y++)
+                {
+                    if (!TileGrid.ContainsKey((x, y)))
+                        TileGrid[(x, y)] = null;
+                }
+            BumpState();
+        }
+
+        void BumpState()
+        {
+            Vars.BumpState(ref _state);
+            RaisePropertyChanged(nameof(State));
         }
 
         public Board Serialize()
@@ -132,8 +199,8 @@ namespace Tyler.ViewModels
         public void ShowSettings()
         {
             _routingService.ShowBoardSettings(this);
-
         }
+
         public CommandModel ReadScriptCommand => new CommandModel(ReadScript);
         public CommandModel WriteScriptCommand => new CommandModel(WriteScript);
         public CommandModel ShowSettingsCommand => new CommandModel(ShowSettings);

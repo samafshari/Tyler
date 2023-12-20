@@ -62,6 +62,20 @@ namespace Tyler.ViewModels
             set => SetProperty(ref _height, value);
         }
 
+        int _tileWidth = 32;
+        public int TileWidth
+        {
+            get => _tileWidth;
+            set => SetProperty(ref _tileWidth, value);
+        }
+
+        int _tileHeight = 32;
+        public int TileHeight
+        {
+            get => _tileHeight;
+            set => SetProperty(ref _tileHeight, value);
+        }
+
         BoardViewModel _selectedBoard;
         public BoardViewModel SelectedBoard
         {
@@ -139,11 +153,7 @@ namespace Tyler.ViewModels
             if (confirm)
             {
                 Path = null;
-                Boards.Clear();
-                TileDefs.Clear();
-                SpriteSheets.Clear();
-                Width = 0;
-                Height = 0;
+                Load(new World());
             }
         }
         public void Load(World worldDef)
@@ -151,9 +161,12 @@ namespace Tyler.ViewModels
             if (worldDef == null) return;
             Boards = new ObservableCollection<BoardViewModel>(worldDef.Boards.Select(x => new BoardViewModel(this, x)));
             TileDefs = new ObservableCollection<TileDefViewModel>(worldDef.TileDefs.Select(x => new TileDefViewModel(this, x)));
-            SpriteSheets = new ObservableCollection<SpriteSheetViewModel>(worldDef.SpriteSheets.Select(x => new SpriteSheetViewModel { Path = x }));
+            SpriteSheets = new ObservableCollection<SpriteSheetViewModel>(worldDef.SpriteSheets.Select(x => new SpriteSheetViewModel(x)));
             Width = worldDef.Width;
             Height = worldDef.Height;
+            TileWidth = worldDef.TileWidth;
+            TileHeight = worldDef.TileHeight;
+            ReinitializeSpriteMap();
         }
 
         public World Serialize()
@@ -271,11 +284,12 @@ namespace Tyler.ViewModels
         public CommandModel SaveAsCommand => new CommandModel(SaveAs);
         public CommandModel AddBoardCommand => new CommandModel(AddBoard);
         public CommandModel RemoveBoardCommand => new CommandModel(RemoveBoard);
-        public CommandModel BoardSettingsCommand => SelectedBoard?.ShowSettingsCommand;
+        public CommandModel BoardSettingsCommand => new CommandModel(() => SelectedBoard?.ShowSettings());
         public CommandModel AddSpriteSheetCommand => new CommandModel(AddSpriteSheet);
         public CommandModel RemoveSpriteSheetCommand => new CommandModel(RemoveSpriteSheet);
         public CommandModel ShowTileDefsEditorCommand => new CommandModel(() => _routingService.ShowTileDefsEditor(this));
         public CommandModel ShowSpriteSheetManagerCommand => new CommandModel(() => _routingService.ShowWorldSpriteSheetManager(this));
+        public CommandModel ShowSettingsCommand => new CommandModel(() => _routingService.ShowWorldSettings(this));
         public CommandModel ReinitializeSpriteMapCommand => new CommandModel(ReinitializeSpriteMap);
     }
 }

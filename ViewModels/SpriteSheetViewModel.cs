@@ -46,6 +46,12 @@ namespace Tyler.ViewModels
             _settingsService = ContainerService.Instance.GetOrCreate<SettingsService>();
         }
 
+        public SpriteSheetViewModel(string path) : this()
+        {
+            Path = path;
+            LoadFromFile();
+        }
+
         public void SaveToFile()
         {
             var json = JsonConvert.SerializeObject(Sprites.Select(x => x.Serialize()), Formatting.Indented);

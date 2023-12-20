@@ -66,6 +66,7 @@ namespace Tyler.Services
             var lines = script.Split('\n').Select(x => x.Trim()).ToArray();
             if (!lines.Any()) return board;
 
+            board.Height = 0;
             board.Width = lines[0].Length;
             bool isReadingGrid = true;
             var tileMap = new Dictionary<(int, int), Tile>();
@@ -98,16 +99,16 @@ namespace Tyler.Services
                     continue;
                 }
 
-                var lower = lines[0].ToLower();
+                var lower = lines[i].ToLower();
                 var split = lower.IndexOf(' ');
-                var command = lower.Substring(0, split);
+                var command = split < 0 ? "" : lower.Substring(0, split);
                 if (command == "board_name")
-                    board.Name = lines[0].Substring(split + 1);
+                    board.Name = lines[i].Substring(split + 1);
                 else if (command == "board_id")
-                    board.Id = lines[0].Substring(split + 1);
+                    board.Id = lines[i].Substring(split + 1);
                 else if (command == "pos")
                 {
-                    var args = lines[0].Substring(split + 1).Split(',');
+                    var args = lines[i].Substring(split + 1).Split(',');
                     var pX = int.Parse(args[0]);
                     var pY = int.Parse(args[1]);
                     tileMap.TryGetValue((pX, pY), out selE);
@@ -115,9 +116,10 @@ namespace Tyler.Services
                 else if (selE != null)
                 {
                     if (selE.Script == null) selE.Script = "";
-                    selE.Script += $"{lines[0]}\n";
+                    selE.Script += $"{lines[i]}\n";
                 }
             }
+
             return board;
         }
     }

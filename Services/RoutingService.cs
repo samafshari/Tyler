@@ -66,7 +66,7 @@ namespace Tyler.Services
             var result = dialog.ShowDialog();
             if (result == true)
             {
-                if (File.Exists(dialog.FileName) &&
+                if (!File.Exists(dialog.FileName) ||
                     ShowConfirmDialog("Confirm Overwrite", $"File {dialog.FileName} already exists. Are you sure you want to overwrite it?"))
                     return dialog.FileName;
             }
@@ -141,6 +141,13 @@ namespace Tyler.Services
         {
             var window = new BoardSettingsWindow();
             window.DataContext = board;
+            window.ShowDialog();
+        }
+
+        public void ShowWorldSettings(WorldViewModel world)
+        {
+            var window = new WorldSettingsWindow();
+            window.DataContext = world;
             window.ShowDialog();
         }
     }

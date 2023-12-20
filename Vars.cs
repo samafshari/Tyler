@@ -14,5 +14,13 @@ namespace Tyler
         public const string FileDialogTypeSheet = "Tyler Sprite Sheet";
         public const string FileDialogTypeWorld = "Tyler World";
         public const char DefaultChar = '.';
+        public const int StateMax = int.MaxValue - 1;
+        public const int StateMin = int.MinValue + 1;
+
+        public static void BumpState(ref int state)
+        {
+            if (state < StateMax) state++;
+            else state = StateMin;
+        }
     }
 }

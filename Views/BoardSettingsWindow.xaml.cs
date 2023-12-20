@@ -15,18 +15,13 @@ using System.Windows.Shapes;
 namespace Tyler.Views
 {
     /// <summary>
-    /// Interaction logic for WorldEditorWindow.xaml
+    /// Interaction logic for BoardSettingsWindow.xaml
     /// </summary>
-    public partial class WorldEditorWindow : Window
+    public partial class BoardSettingsWindow : Window
     {
-        public WorldEditorWindow()
+        public BoardSettingsWindow()
         {
             InitializeComponent();
-        }
-
-        private void btnRefreshBoardPreview_Click(object sender, RoutedEventArgs e)
-        {
-            boardPreviewControl.Update();
         }
     }
 }

@@ -25,5 +25,11 @@ namespace Tyler
             _settingsService = ContainerService.Instance.GetOrCreate<SettingsService>();
             _routingService = ContainerService.Instance.GetOrCreate<RoutingService>();
         }
+
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            base.OnStartup(e);
+            _routingService.ShowWorldEditor();
+        }
     }
 }

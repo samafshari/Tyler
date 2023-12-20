@@ -13,5 +13,7 @@ namespace Tyler.Models
         public List<string> SpriteSheets { get; set; } = new List<string>();
         public int Width { get; set; } = 100;
         public int Height { get; set; } = 100;
+        public int TileWidth { get; set; } = 32;
+        public int TileHeight { get; set; } = 32;
     }
 }
