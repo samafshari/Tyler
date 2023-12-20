@@ -13,5 +13,6 @@ namespace Tyler.Models
         public int Y { get; set; }
         public int Width { get; set; }
         public int Height { get; set; }
+        public char Char { get; set; } = Vars.DefaultChar;
     }
 }

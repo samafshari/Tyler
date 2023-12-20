@@ -32,6 +32,16 @@ namespace Tyler.Views
         public static readonly DependencyProperty SpriteSheetProperty =
             DependencyProperty.Register("SpriteSheet", typeof(SpriteSheetViewModel), typeof(SpriteSheetExplorerControl), new PropertyMetadata(OnSpriteSheetPropertyChanged));
 
+        public SpriteViewModel SelectedSprite
+        {
+            get => (SpriteViewModel)GetValue(SelectedSpriteProperty);
+            set => SetValue(SelectedSpriteProperty, value);
+        }
+
+        // Two way dependency property for SelectedSprite
+        public static readonly DependencyProperty SelectedSpriteProperty =
+            DependencyProperty.Register("SelectedSprite", typeof(SpriteViewModel), typeof(SpriteSheetExplorerControl), new PropertyMetadata(OnSpriteSheetPropertyChanged));
+
         public SpriteSheetExplorerControl()
         {
             InitializeComponent();

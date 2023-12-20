@@ -12,11 +12,17 @@ namespace Tyler.ViewModels
 {
     public class SpriteViewModel : ViewModel
     {
+        public string DisplayName => ToString();
+
         string _id;
         public string Id
         {
             get => _id;
-            set => SetProperty(ref _id, value);
+            set
+            {
+                SetProperty(ref _id, value);
+                RaisePropertyChanged(nameof(DisplayName));
+            }
         }
 
         int _x;
@@ -47,6 +53,17 @@ namespace Tyler.ViewModels
             set => SetProperty(ref _height, value);
         }
 
+        char _char = Vars.DefaultChar;
+        public string Char
+        {
+            get => _char.ToString();
+            set
+            {
+                SetProperty(ref _char, value?.LastOrDefault() ?? Vars.DefaultChar);
+                RaisePropertyChanged(nameof(DisplayName));
+            }
+        }
+
         string _path;
         public string Path
         {
@@ -62,6 +79,11 @@ namespace Tyler.ViewModels
         {
             Path = path;
             sprite.Inject(this);
+        }
+
+        public override string ToString()
+        {
+            return $"[{Char}] {Id}";
         }
     }
 }

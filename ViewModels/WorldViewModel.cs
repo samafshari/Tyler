@@ -163,6 +163,11 @@ namespace Tyler.ViewModels
 
         public void Save()
         {
+            if (string.IsNullOrWhiteSpace(Path))
+            {
+                SaveAs();
+                return;
+            }
             var worldDef = Serialize();
             var json = JsonConvert.SerializeObject(worldDef, Formatting.Indented);
             File.WriteAllText(Path, json);

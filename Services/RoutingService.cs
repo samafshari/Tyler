@@ -90,6 +90,16 @@ namespace Tyler.Services
             window.Show();
         }
 
+        public void ShowSpriteSheetEditor(SpriteSheetViewModel spriteSheet, SpriteViewModel selectedSprite)
+        {
+            var window = new SpriteSheetEditorWindow();
+            var vm = new SpriteSheetEditorViewModel();
+            vm.SpriteSheet = spriteSheet;
+            vm.SelectedSprite = selectedSprite;
+            window.DataContext = vm;
+            window.Show();
+        }
+
         public void ShowAutoSlice(SpriteSheetEditorViewModel editor)
         {
             var window = new AutoSliceWindow();

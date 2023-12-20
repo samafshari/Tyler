@@ -6,10 +6,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Tyler.Services;
+
 namespace Tyler.ViewModels
 {
     public class WorldSpriteSheetManagerViewModel : ViewModel
     {
+        readonly RoutingService _routingService;
+
         public WorldViewModel World { get; } = new WorldViewModel();
 
 
@@ -24,9 +28,11 @@ namespace Tyler.ViewModels
 
         public WorldSpriteSheetManagerViewModel(WorldViewModel world)
         {
+            _routingService = ContainerService.Instance.GetOrCreate<RoutingService>();
             World = world;
         }
 
         public CommandModel RemoveSpriteSheetCommand => new CommandModel(() => World.RemoveSpriteSheet(SpriteSheet));
+        public CommandModel EditSpriteSheetCommand => new CommandModel(() => _routingService.ShowSpriteSheetEditor(SpriteSheet, null));
     }
 }

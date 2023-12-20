@@ -13,5 +13,6 @@ namespace Tyler
         public const string FileDialogTypePNG = "PNG Image";
         public const string FileDialogTypeSheet = "Tyler Sprite Sheet";
         public const string FileDialogTypeWorld = "Tyler World";
+        public const char DefaultChar = '.';
     }
 }
