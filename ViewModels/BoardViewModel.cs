@@ -129,7 +129,13 @@ namespace Tyler.ViewModels
             Script = _scriptingService.BoardToScript(board);
         }
 
+        public void ShowSettings()
+        {
+            _routingService.ShowBoardSettings(this);
+
+        }
         public CommandModel ReadScriptCommand => new CommandModel(ReadScript);
         public CommandModel WriteScriptCommand => new CommandModel(WriteScript);
+        public CommandModel ShowSettingsCommand => new CommandModel(ShowSettings);
     }
 }

@@ -43,6 +43,9 @@ namespace Tyler.Services
                 sb.AppendLine();
             }
             sb.AppendLine("ENDGRID");
+            sb.AppendLine($"board_id {board.Id}");
+            sb.AppendLine($"board_name {board.Name}");
+            sb.AppendLine();
             foreach (var tile in board.Tiles)
             {
                 if (!string.IsNullOrWhiteSpace(tile.Script))
@@ -57,7 +60,65 @@ namespace Tyler.Services
 
         public Board ScriptToBoard(string script)
         {
-            throw new NotImplementedException();
+            var board = new Board();
+            if (string.IsNullOrWhiteSpace(script)) return board;
+
+            var lines = script.Split('\n').Select(x => x.Trim()).ToArray();
+            if (!lines.Any()) return board;
+
+            board.Width = lines[0].Length;
+            bool isReadingGrid = true;
+            var tileMap = new Dictionary<(int, int), Tile>();
+            Tile selE = null;
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                if (isReadingGrid)
+                {
+                    if (lines[i] == "ENDGRID")
+                    {
+                        isReadingGrid = false;
+                        continue;
+                    }
+
+                    for (int x = 0; x < lines[i].Length; x++)
+                    {
+                        var tile = new Tile
+                        {
+                            Char = lines[i][x],
+                            X = x,
+                            Y = i,
+                            Z = 0,
+                            Script = ""
+                        };
+                        tileMap[(x, i)] = tile;
+                        board.Tiles.Add(tile);
+                    }
+                    board.Height++;
+                    continue;
+                }
+
+                var lower = lines[0].ToLower();
+                var split = lower.IndexOf(' ');
+                var command = lower.Substring(0, split);
+                if (command == "board_name")
+                    board.Name = lines[0].Substring(split + 1);
+                else if (command == "board_id")
+                    board.Id = lines[0].Substring(split + 1);
+                else if (command == "pos")
+                {
+                    var args = lines[0].Substring(split + 1).Split(',');
+                    var pX = int.Parse(args[0]);
+                    var pY = int.Parse(args[1]);
+                    tileMap.TryGetValue((pX, pY), out selE);
+                }
+                else if (selE != null)
+                {
+                    if (selE.Script == null) selE.Script = "";
+                    selE.Script += $"{lines[0]}\n";
+                }
+            }
+            return board;
         }
     }
 }

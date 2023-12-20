@@ -35,6 +35,11 @@
             <MenuItem Header="Board">
                 <MenuItem Header="New Board" Command="{Binding AddBoardCommand}" />
                 <MenuItem Header="Delete Board..." Command="{Binding RemoveBoardCommand}" />
+                <Separator />
+                <MenuItem Header="Board Settings..." Command="{Binding BoardSettingsCommand}" />
+                <Separator />
+                <MenuItem Header="Read Script..." Command="{Binding SelectedBoard.ReadScriptCommand}" />
+                <MenuItem Header="Write Script..." Command="{Binding SelectedBoard.WriteScriptCommand}" />
             </MenuItem>
         </Menu>
         <Grid Grid.Row="1">
@@ -61,16 +66,44 @@
                     Sprites="{Binding SpriteMapList}"
                     SelectedSprite="{Binding SelectedSprite, Mode=TwoWay}"
                     />
-                
+
                 <GridSplitter Height="5" VerticalAlignment="Top" Grid.Row="1" />
             </Grid>
 
             <Grid Grid.Column="1" x:Name="MiddleGrid">
-                
+
             </Grid>
 
             <Grid Grid.Column="2" x:Name="RightGrid">
-                
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <TextBlock
+                    Grid.Row="0"
+                    Text="Board Script:" />
+                <TextBox
+                    Grid.Row="1"
+                    DataContext="{Binding SelectedBoard}" 
+                    Text="{Binding Script}" FontFamily="Consolas" FontSize="10" AcceptsReturn="True" AcceptsTab="True"
+                    />
+                <Grid Grid.Row="2" Margin="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="1" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Button
+                        Content="Script -> Board"
+                        Command="{Binding SelectedBoard.ReadScriptCommand}"
+                        />
+                    <Button
+                        Grid.Column="2"
+                        Content="Board -> Script"
+                        Command="{Binding SelectedBoard.WriteScriptCommand}"
+                        />
+                </Grid>
             </Grid>
             <GridSplitter HorizontalAlignment="Right" Width="5" />
             <GridSplitter HorizontalAlignment="Left" Width="5" Grid.Column="2" />

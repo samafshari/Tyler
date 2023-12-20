@@ -271,6 +271,7 @@ namespace Tyler.ViewModels
         public CommandModel SaveAsCommand => new CommandModel(SaveAs);
         public CommandModel AddBoardCommand => new CommandModel(AddBoard);
         public CommandModel RemoveBoardCommand => new CommandModel(RemoveBoard);
+        public CommandModel BoardSettingsCommand => SelectedBoard?.ShowSettingsCommand;
         public CommandModel AddSpriteSheetCommand => new CommandModel(AddSpriteSheet);
         public CommandModel RemoveSpriteSheetCommand => new CommandModel(RemoveSpriteSheet);
         public CommandModel ShowTileDefsEditorCommand => new CommandModel(() => _routingService.ShowTileDefsEditor(this));

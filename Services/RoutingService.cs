@@ -136,5 +136,12 @@ namespace Tyler.Services
             window.DataContext = vm;
             window.Show();
         }
+
+        public void ShowBoardSettings(BoardViewModel board)
+        {
+            var window = new BoardSettingsWindow();
+            window.DataContext = board;
+            window.ShowDialog();
+        }
     }
 }

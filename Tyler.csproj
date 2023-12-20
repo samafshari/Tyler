@@ -72,6 +72,9 @@
     <Compile Include="Services\SettingsService.cs" />
     <Compile Include="Vars.cs" />
     <Compile Include="ViewModels\AutoSliceViewModel.cs" />
+    <Compile Include="Views\BoardSettingsWindow.xaml.cs">
+      <DependentUpon>BoardSettingsWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ViewModels\BoardViewModel.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="ViewModels\SettingsViewModel.cs" />
@@ -123,6 +126,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Views\BoardSettingsWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\AutoSliceWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
