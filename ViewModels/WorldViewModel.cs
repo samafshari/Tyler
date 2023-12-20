@@ -83,6 +83,22 @@ namespace Tyler.ViewModels
             set => SetProperty(ref _selectedSpriteSheet, value);
         }
 
+        SpriteViewModel _selectedSprite;
+        public SpriteViewModel SelectedSprite
+        {
+            get => _selectedSprite;
+            set => SetProperty(ref _selectedSprite, value);
+        }
+
+        public Dictionary<char, SpriteViewModel> SpriteMap = new Dictionary<char, SpriteViewModel>();
+
+        List<SpriteViewModel> _spriteMapList = new List<SpriteViewModel>();
+        public List<SpriteViewModel> SpriteMapList
+        {
+            get => _spriteMapList;
+            set => SetProperty(ref _spriteMapList, value);
+        }
+
         public WorldViewModel()
         {
             _routingService = ContainerService.Instance.GetOrCreate<RoutingService>();
@@ -219,6 +235,7 @@ namespace Tyler.ViewModels
                 spriteSheet.LoadFromFile();
                 SpriteSheets.Add(spriteSheet);
                 SelectedSpriteSheet = spriteSheet;
+                ReinitializeSpriteMap();
             }
         }
 
@@ -229,12 +246,22 @@ namespace Tyler.ViewModels
                 if (SelectedSpriteSheet == spriteSheet)
                     SelectedSpriteSheet = null;
                 SpriteSheets.Remove(spriteSheet);
+                ReinitializeSpriteMap();
             }
         }
 
         public void RemoveSpriteSheet()
         {
             RemoveSpriteSheet(SelectedSpriteSheet);
+        }
+
+        public void ReinitializeSpriteMap()
+        {
+            SpriteMap.Clear();
+            foreach (var spriteSheet in SpriteSheets)
+                foreach (var sprite in spriteSheet.Sprites)
+                    SpriteMap[sprite.RealChar] = sprite;
+            SpriteMapList = SpriteMap.Values.ToList();
         }
 
         public CommandModel NewCommand => new CommandModel(New);
@@ -248,5 +275,6 @@ namespace Tyler.ViewModels
         public CommandModel RemoveSpriteSheetCommand => new CommandModel(RemoveSpriteSheet);
         public CommandModel ShowTileDefsEditorCommand => new CommandModel(() => _routingService.ShowTileDefsEditor(this));
         public CommandModel ShowSpriteSheetManagerCommand => new CommandModel(() => _routingService.ShowWorldSpriteSheetManager(this));
+        public CommandModel ReinitializeSpriteMapCommand => new CommandModel(ReinitializeSpriteMap);
     }
 }

@@ -9,7 +9,7 @@
     mc:Ignorable="d" 
     d:DesignHeight="450" d:DesignWidth="800">
     <Grid x:Name="grd">
-        <ListView x:Name="lst" ItemsSource="{Binding SpriteSheet.Sprites}" SelectedItem="{Binding SelectedSprite}">
+        <ListView x:Name="lst" ItemsSource="{Binding Sprites}" SelectedItem="{Binding SelectedSprite}">
             <ListView.ItemsPanel>
                 <ItemsPanelTemplate>
                     <WrapPanel />

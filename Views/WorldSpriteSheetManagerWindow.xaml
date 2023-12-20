@@ -64,7 +64,7 @@
             </Grid>
             <Grid Grid.Column="1">
                 <!--<Image Source="{Binding SpriteSheet.Path}" />-->
-                <local:SpriteSheetExplorerControl SpriteSheet="{Binding SpriteSheet}" />
+                <local:SpriteSheetExplorerControl Sprites="{Binding SpriteSheet.Sprites}" />
             </Grid>
             <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Left" />
         </Grid>

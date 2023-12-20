@@ -22,15 +22,15 @@ namespace Tyler.Views
     /// </summary>
     public partial class SpriteSheetExplorerControl : UserControl
     {
-        public SpriteSheetViewModel SpriteSheet
+        public IEnumerable<SpriteViewModel> Sprites
         {
-            get => (SpriteSheetViewModel)GetValue(SpriteSheetProperty);
-            set => SetValue(SpriteSheetProperty, value);
+            get => (IEnumerable<SpriteViewModel>)GetValue(SpritesProperty);
+            set => SetValue(SpritesProperty, value);
         }
 
         // Two way dependency property for SpriteSheet
-        public static readonly DependencyProperty SpriteSheetProperty =
-            DependencyProperty.Register("SpriteSheet", typeof(SpriteSheetViewModel), typeof(SpriteSheetExplorerControl), new PropertyMetadata(OnSpriteSheetPropertyChanged));
+        public static readonly DependencyProperty SpritesProperty =
+            DependencyProperty.Register("Sprites", typeof(IEnumerable<SpriteViewModel>), typeof(SpriteSheetExplorerControl), new PropertyMetadata(OnSpriteSheetPropertyChanged));
 
         public SpriteViewModel SelectedSprite
         {

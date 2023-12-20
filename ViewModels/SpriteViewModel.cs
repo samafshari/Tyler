@@ -61,8 +61,11 @@ namespace Tyler.ViewModels
             {
                 SetProperty(ref _char, value?.LastOrDefault() ?? Vars.DefaultChar);
                 RaisePropertyChanged(nameof(DisplayName));
+                RaisePropertyChanged(nameof(RealChar));
             }
         }
+
+        public char RealChar => _char;
 
         string _path;
         public string Path
@@ -79,6 +82,14 @@ namespace Tyler.ViewModels
         {
             Path = path;
             sprite.Inject(this);
+            Char = sprite.Char.ToString();
+        }
+
+        public Sprite Serialize()
+        {
+            var sprite = this.ReturnAs<Sprite>();
+            sprite.Char = RealChar;
+            return sprite;
         }
 
         public override string ToString()

@@ -48,7 +48,7 @@ namespace Tyler.ViewModels
 
         public void SaveToFile()
         {
-            var json = JsonConvert.SerializeObject(Sprites.ReturnAsList<Sprite>(), Formatting.Indented);
+            var json = JsonConvert.SerializeObject(Sprites.Select(x => x.Serialize()), Formatting.Indented);
             var jsonPath = System.IO.Path.ChangeExtension(Path, Vars.SpriteSheetExtension);
             if (File.Exists(jsonPath) && 
                 !_routingService.ShowConfirmDialog("Confirm Overwrite", $"File {jsonPath} already exists. Are you sure you want to overwrite it?"))

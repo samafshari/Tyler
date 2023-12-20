@@ -72,7 +72,7 @@
                     <local:RelativeRect Sprite="{Binding SelectedSprite}" Path="{Binding SpriteSheet.Path}" />
                 </Grid>
                 <Grid Grid.Row="1">
-                    <local:SpriteSheetExplorerControl SpriteSheet="{Binding SpriteSheet}" SelectedSprite="{Binding SelectedSprite}" />
+                    <local:SpriteSheetExplorerControl Sprites="{Binding SpriteSheet.Sprites}" SelectedSprite="{Binding SelectedSprite, Mode=TwoWay}" />
                 </Grid>
                 <GridSplitter Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Height="5" />
             </Grid>

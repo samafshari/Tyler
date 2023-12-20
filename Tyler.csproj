@@ -68,6 +68,7 @@
     <Compile Include="Models\TileDef.cs" />
     <Compile Include="Models\World.cs" />
     <Compile Include="Services\RoutingService.cs" />
+    <Compile Include="Services\ScriptingService.cs" />
     <Compile Include="Services\SettingsService.cs" />
     <Compile Include="Vars.cs" />
     <Compile Include="ViewModels\AutoSliceViewModel.cs" />

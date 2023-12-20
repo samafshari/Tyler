@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Net.Essentials;
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,12 +10,41 @@ using Tyler.Models;
 
 namespace Tyler.ViewModels
 {
-    public class TileViewModel
+    public class TileViewModel : ViewModel
     {
-        public int X { get; set; }
-        public int Y { get; set; }
-        public int Z { get; set; }
-        public char Char { get; set; }
+        int _x, _y, _z;
+        char _char;
+        string _script;
+
+        public int X
+        {
+            get => _x;
+            set => SetProperty(ref _x, value);
+        }
+
+        public int Y
+        {
+            get => _y;
+            set => SetProperty(ref _y, value);
+        }
+
+        public int Z
+        {
+            get => _z;
+            set => SetProperty(ref _z, value);
+        }
+
+        public char Char
+        {
+            get => _char;
+            set => SetProperty(ref _char, value);
+        }
+
+        public string Script
+        {
+            get => _script;
+            set => SetProperty(ref _script, value);
+        }
 
         public TileViewModel(Tile model)
         {
@@ -21,6 +52,7 @@ namespace Tyler.ViewModels
             Y = model.Y;
             Z = model.Z;
             Char = model.Char;
+            Script = model.Script;
         }
 
         public Tile Serialize()
@@ -30,7 +62,8 @@ namespace Tyler.ViewModels
                 X = X,
                 Y = Y,
                 Z = Z,
-                Char = Char
+                Char = Char,
+                Script = Script
             };
         }
     }

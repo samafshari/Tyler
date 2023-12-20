@@ -12,5 +12,6 @@ namespace Tyler.Models
         public int Y { get; set; }
         public int Z { get; set; }
         public char Char { get; set; } 
+        public string Script { get; set; }
     }
 }

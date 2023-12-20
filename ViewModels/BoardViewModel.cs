@@ -15,14 +15,21 @@ namespace Tyler.ViewModels
     public class BoardViewModel : ViewModel
     {
         readonly RoutingService _routingService;
+        readonly ScriptingService _scriptingService;
 
         public WorldViewModel World { get; } = new WorldViewModel();
+
+        public string DisplayName => ToString();
 
         string _id;
         public string Id
         {
             get => _id;
-            set => SetProperty(ref _id, value);
+            set
+            {
+                SetProperty(ref _id, value);
+                RaisePropertyChanged(nameof(DisplayName));
+            }
         }
 
         int _width;
@@ -43,7 +50,11 @@ namespace Tyler.ViewModels
         public string Name
         {
             get => _name;
-            set => SetProperty(ref _name, value);
+            set
+            {
+                SetProperty(ref _name, value);
+                RaisePropertyChanged(nameof(DisplayName));
+            }
         }
 
         ObservableCollection<TileViewModel> _tiles = new ObservableCollection<TileViewModel>();
@@ -53,6 +64,13 @@ namespace Tyler.ViewModels
             set => SetProperty(ref _tiles, value);
         }
 
+        string _script;
+        public string Script
+        {
+            get => _script;
+            set => SetProperty(ref _script, value);
+        }
+
         public BoardViewModel() : this(null, new Board())
         {
         }
@@ -60,7 +78,19 @@ namespace Tyler.ViewModels
         public BoardViewModel(WorldViewModel world, Board board)
         {
             _routingService = ContainerService.Instance.GetOrCreate<RoutingService>();
+            _scriptingService = ContainerService.Instance.GetOrCreate<ScriptingService>();
+
             World = world;
+            Load(board);
+        }
+
+        public void Load(Board board)
+        {
+            Id = board.Id;
+            Name = board.Name;
+            Width = board.Width;
+            Height = board.Height;
+            Tiles = new ObservableCollection<TileViewModel>(board.Tiles.Select(x => new TileViewModel(x)));
         }
 
         public Board Serialize()
@@ -75,5 +105,31 @@ namespace Tyler.ViewModels
             };
             return model;
         }
+
+        public override string ToString()
+        {
+            return $"[{Id}] {Name}";
+        }
+
+        public void ReadScript()
+        {
+            if (!_routingService.ShowConfirmDialog("Warning", "You might lose your pending changes. Do you want to continue?"))
+                return;
+
+            var board = _scriptingService.ScriptToBoard(Script);
+            Load(board);
+        }
+
+        public void WriteScript()
+        {
+            if (!_routingService.ShowConfirmDialog("Warning", "This will rewrite the script. Do you want to continue?"))
+                return;
+
+            var board = Serialize();
+            Script = _scriptingService.BoardToScript(board);
+        }
+
+        public CommandModel ReadScriptCommand => new CommandModel(ReadScript);
+        public CommandModel WriteScriptCommand => new CommandModel(WriteScript);
     }
 }
