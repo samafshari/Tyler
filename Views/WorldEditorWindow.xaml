@@ -14,6 +14,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="100" />
         </Grid.RowDefinitions>
         <Menu>
             <MenuItem Header="File">
@@ -57,7 +58,7 @@
             <Grid Grid.Column="0" x:Name="LeftGrid">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" />
-                    <RowDefinition Height="*" />
+                    <!--<RowDefinition Height="*" />-->
                 </Grid.RowDefinitions>
 
                 <TabControl>
@@ -89,23 +90,12 @@
                     </TabItem>
                 </TabControl>
 
-                <TabControl Grid.Row="1">
-                    <TabItem Header="TileDefs">
-                        <local:SpriteSheetExplorerControl
-                            Grid.Row="3"
-                            Sprites="{Binding SpriteMapList}"
-                            SelectedSprite="{Binding SelectedSprite, Mode=TwoWay}"
-                            />
-                        
-                    </TabItem>
-                </TabControl>
 
                 <GridSplitter Height="5" VerticalAlignment="Top" Grid.Row="1" />
             </Grid>
 
-            <Grid Grid.Column="1" x:Name="MiddleGrid" Background="Blue">
+            <Grid Grid.Column="1" x:Name="MiddleGrid">
                 <local:BoardPreviewControl
-                    Background="Red"
                     x:Name="boardPreviewControl"
                     TileWidth="{Binding TileWidth}"
                     TileHeight="{Binding TileHeight}"
@@ -176,5 +166,18 @@
             <GridSplitter HorizontalAlignment="Right" Width="5" />
             <GridSplitter HorizontalAlignment="Left" Width="5" Grid.Column="2" />
         </Grid>
+
+        <TabControl Grid.Row="2" TabStripPlacement="Left">
+            <TabItem Header="TileDefs">
+                <local:SpriteSheetExplorerControl
+                            Grid.Row="3"
+                            Sprites="{Binding SpriteMapList}"
+                            SelectedSprite="{Binding SelectedSprite, Mode=TwoWay}"
+                            />
+
+            </TabItem>
+        </TabControl>
+        
+        <GridSplitter Height="5" VerticalAlignment="Bottom" Grid.Row="1" />
     </Grid>
 </Window>

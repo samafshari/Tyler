@@ -147,20 +147,21 @@ namespace Tyler.Views
                     spriteControl.SetValue(Grid.RowProperty, r);
                     spriteControl.SetValue(Grid.ColumnProperty, c);
                     spriteControl.Tag = new Point(c, r);
-                    spriteControl.MouseDown += SpriteControl_MouseDown;
+                    spriteControl.MouseMove += SpriteControl_MouseMove;// += SpriteControl_MouseDown;
                 }
             }
         }
 
-        private void SpriteControl_MouseDown(object sender, MouseButtonEventArgs e)
+        private void SpriteControl_MouseMove(object sender, MouseEventArgs e)
         {
-            if (e.Source is SpriteControl spriteControl && spriteControl.Tag is Point p)
-            {
-                if (World.SelectedSprite != null)
+            if (e.LeftButton == MouseButtonState.Pressed)
+                if (e.Source is SpriteControl spriteControl && spriteControl.Tag is Point p)
                 {
-                    Board.SetTile((int)p.X, (int)p.Y, 0, World.SelectedSprite.RealChar);
+                    if (World.SelectedSprite != null)
+                    {
+                        Board.SetTile((int)p.X, (int)p.Y, 0, World.SelectedSprite.RealChar);
+                    }
                 }
-            }
         }
     }
 }

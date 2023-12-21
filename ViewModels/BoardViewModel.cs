@@ -149,7 +149,18 @@ namespace Tyler.ViewModels
                 for (int y = 0; y < Height; y++)
                 {
                     if (!TileGrid.ContainsKey((x, y)))
-                        TileGrid[(x, y)] = null;
+                    {
+                        var tile = new Tile
+                        {
+                            X = x,
+                            Y = y,
+                            Z = 0,
+                            Char = Vars.DefaultChar,
+                            Script = ""
+                        };
+                        var vm = new TileViewModel(tile);
+                        TileGrid[(x, y)] = vm;
+                    }
                 }
             BumpState();
         }

@@ -18,7 +18,7 @@
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <StackPanel>
-                        <local:SpriteControl Sprite="{Binding}" Source="{Binding Path}" Width="75" Height="75" />
+                        <local:SpriteControl Sprite="{Binding}" Source="{Binding Path}" Width="50" Height="50" />
                         <TextBlock Text="{Binding DisplayName}" HorizontalAlignment="Center" />
                     </StackPanel>
                 </DataTemplate>

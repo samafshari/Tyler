@@ -46,6 +46,13 @@
                 <ListView Grid.Row="1" ItemsSource="{Binding SpriteSheet.Sprites}" SelectedItem="{Binding SelectedSprite}">
                     <ListView.View>
                         <GridView>
+                            <GridViewColumn Header="Sprite" Width="32">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <local:SpriteControl Sprite="{Binding}" />
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
                             <GridViewColumn Header="Id" DisplayMemberBinding="{Binding Id}" Width="40" />
                             <GridViewColumn Header="Char" DisplayMemberBinding="{Binding Char}" Width="40" />
                             <GridViewColumn Header="X" DisplayMemberBinding="{Binding X}" Width="30"/>
