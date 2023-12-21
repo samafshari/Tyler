@@ -17,7 +17,7 @@ namespace Tyler.Views
     /// <summary>
     /// Interaction logic for WorldSpriteSheetManagerWindow.xaml
     /// </summary>
-    public partial class WorldSpriteSheetManagerWindow : Window
+    public partial class WorldSpriteSheetManagerWindow
     {
         public WorldSpriteSheetManagerWindow()
         {

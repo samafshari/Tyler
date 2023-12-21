@@ -17,7 +17,7 @@ namespace Tyler.Views
     /// <summary>
     /// Interaction logic for WorldSettingsWindow.xaml
     /// </summary>
-    public partial class WorldSettingsWindow : Window
+    public partial class WorldSettingsWindow
     {
         public WorldSettingsWindow()
         {

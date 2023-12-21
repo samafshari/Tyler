@@ -17,7 +17,7 @@ namespace Tyler.Views
     /// <summary>
     /// Interaction logic for AutoSliceWindow.xaml
     /// </summary>
-    public partial class AutoSliceWindow : Window
+    public partial class AutoSliceWindow 
     {
         public AutoSliceWindow()
         {

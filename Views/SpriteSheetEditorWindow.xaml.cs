@@ -17,7 +17,7 @@ namespace Tyler.Views
     /// <summary>
     /// Interaction logic for SpriteSheetEditorWindow.xaml
     /// </summary>
-    public partial class SpriteSheetEditorWindow : Window
+    public partial class SpriteSheetEditorWindow : WindowBase
     {
         public SpriteSheetEditorWindow()
         {

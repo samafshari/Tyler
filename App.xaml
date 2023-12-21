@@ -1,20 +1,34 @@
 ﻿<Application x:Class="Tyler.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:Tyler"
-             StartupUri="MainWindow.xaml">
+             xmlns:ui="using:Microsoft.UI.Xaml.Controls"
+             xmlns:wui="http://schemas.modernwpf.com/2019"
+             xmlns:local="clr-namespace:Tyler">
     <Application.Resources>
-        <Style TargetType="Window">
-            <Setter Property="Background" Value="#333" />
-        </Style>
-        <Style TargetType="GridSplitter">
-            <Setter Property="Background" Value="#222" />
-        </Style>
-        <Style TargetType="Image">
-            <Setter Property="RenderOptions.BitmapScalingMode" Value="NearestNeighbor" />
-        </Style>
-        <Style TargetType="Label">
-            <Setter Property="Foreground" Value="#EEE" />
-        </Style>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <wui:ThemeResources RequestedTheme="Light" AccentColor="Orange" />
+                <wui:XamlControlsResources />
+            </ResourceDictionary.MergedDictionaries>
+            <Style TargetType="Window" >
+                <Setter Property="wui:WindowHelper.UseModernWindowStyle" Value="True" />
+            </Style>
+            <Style TargetType="GridSplitter" x:Key="GridSplitterBase">
+                <Setter Property="Background" Value="#AAA" />
+            </Style>
+            <Style TargetType="GridSplitter" BasedOn="{StaticResource GridSplitterBase}" x:Key="GSH">
+                <Setter Property="VerticalAlignment" Value="Bottom" />
+                <Setter Property="HorizontalAlignment" Value="Stretch" />
+                <Setter Property="Height" Value="1" />
+            </Style>
+            <Style TargetType="GridSplitter" BasedOn="{StaticResource GridSplitterBase}" x:Key="GSV">
+                <Setter Property="VerticalAlignment" Value="Stretch" />
+                <Setter Property="HorizontalAlignment" Value="Left" />
+                <Setter Property="Width" Value="1" />
+            </Style>
+            <Style TargetType="Image">
+                <Setter Property="RenderOptions.BitmapScalingMode" Value="NearestNeighbor" />
+            </Style>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>

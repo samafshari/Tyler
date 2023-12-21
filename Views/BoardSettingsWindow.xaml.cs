@@ -17,7 +17,7 @@ namespace Tyler.Views
     /// <summary>
     /// Interaction logic for BoardSettingsWindow.xaml
     /// </summary>
-    public partial class BoardSettingsWindow : Window
+    public partial class BoardSettingsWindow
     {
         public BoardSettingsWindow()
         {

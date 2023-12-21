@@ -17,7 +17,7 @@ namespace Tyler.Views
     /// <summary>
     /// Interaction logic for TileDefsEditorWindow.xaml
     /// </summary>
-    public partial class TileDefsEditorWindow : Window
+    public partial class TileDefsEditorWindow
     {
         public TileDefsEditorWindow()
         {
