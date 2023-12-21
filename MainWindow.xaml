@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Tyler.Views"
         xmlns:vm="clr-namespace:Tyler.ViewModels"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="450" Width="800" Icon="/lolli.ico">
     <Window.DataContext>
         <vm:MainViewModel />
     </Window.DataContext>
