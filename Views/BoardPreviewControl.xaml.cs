@@ -98,7 +98,7 @@ namespace Tyler.Views
         public void Update()
         {
             if (Board == null) return;
-            if (Board.Width != grd.ColumnDefinitions.Count || Board.Height != grd.ColumnDefinitions.Count)
+            //if (Board.Width != grd.ColumnDefinitions.Count || Board.Height != grd.ColumnDefinitions.Count)
                 RebuildGrid();
 
             foreach (var sc in spriteControls)
@@ -146,6 +146,19 @@ namespace Tyler.Views
                     spriteControls[(c, r)] = spriteControl;
                     spriteControl.SetValue(Grid.RowProperty, r);
                     spriteControl.SetValue(Grid.ColumnProperty, c);
+                    spriteControl.Tag = new Point(c, r);
+                    spriteControl.MouseDown += SpriteControl_MouseDown;
+                }
+            }
+        }
+
+        private void SpriteControl_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.Source is SpriteControl spriteControl && spriteControl.Tag is Point p)
+            {
+                if (World.SelectedSprite != null)
+                {
+                    Board.SetTile((int)p.X, (int)p.Y, 0, World.SelectedSprite.RealChar);
                 }
             }
         }

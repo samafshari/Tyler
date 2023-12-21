@@ -12,20 +12,23 @@ namespace Tyler.Services
 {
     public class ScriptingService : Singleton<ScriptingService>
     {
-        public char[] BoardToCharGrid(Board board)
+        public char[,] BoardToCharGrid(Board board)
         {
-            var sz = board.Width * board.Height;
-            var grid = new char[sz];
+            var grid = new char[board.Width, board.Height];
             var sortedTiles = board.Tiles
                 .OrderBy(t => t.Z)
-                .GroupBy(t => t.Y * board.Height + t.X)
+                .GroupBy(t => (t.X, t.Y))
                 .ToDictionary(t => t.Key, t => t.FirstOrDefault());
 
-            for (var i = 0; i < sz; i++)
+            for (int x = 0; x < board.Width; x++)
             {
-                char c = Vars.DefaultChar;
-                if (sortedTiles.ContainsKey(i)) c = sortedTiles[i].Char;
-                grid[i] = c;
+                for (int y = 0; y < board.Height; y++)
+                {
+                    if (sortedTiles.TryGetValue((x, y), out var tile) && tile != null)
+                        grid[x, y] = tile.Char;
+                    else
+                        grid[x, y] = Vars.DefaultChar;
+                }
             }
 
             return grid;
@@ -39,7 +42,7 @@ namespace Tyler.Services
             for (int y = 0; y < board.Height; y++)
             { 
                 for (int x = 0; x < board.Width; x++, i++)
-                    sb.Append(charGrid[i].ToString());
+                    sb.Append(charGrid[x, y].ToString());
                 sb.AppendLine();
             }
             sb.AppendLine("ENDGRID");
@@ -63,7 +66,7 @@ namespace Tyler.Services
             var board = new Board();
             if (string.IsNullOrWhiteSpace(script)) return board;
 
-            var lines = script.Split('\n').Select(x => x.Trim()).ToArray();
+            var lines = script.Replace("\r", "").Split('\n').Select(x => x.Trim()).ToArray();
             if (!lines.Any()) return board;
 
             board.Height = 0;
@@ -81,7 +84,8 @@ namespace Tyler.Services
                         isReadingGrid = false;
                         continue;
                     }
-
+                    if (lines[i].Length != board.Width)
+                        throw new Exception($"Line sizes don't match");
                     for (int x = 0; x < lines[i].Length; x++)
                     {
                         var tile = new Tile

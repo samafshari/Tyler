@@ -68,8 +68,11 @@
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
                 <Grid>
-                    <local:SpriteSheetControl DataContext="{Binding SpriteSheet}" />
-                    <local:RelativeRect Sprite="{Binding SelectedSprite}" Path="{Binding SpriteSheet.Path}" />
+                    <local:SpriteSheetControl 
+                        SpriteSheet="{Binding SpriteSheet}" 
+                        Sprite="{Binding SelectedSprite}"
+                        />
+                   
                 </Grid>
                 <Grid Grid.Row="1">
                     <local:SpriteSheetExplorerControl Sprites="{Binding SpriteSheet.Sprites}" SelectedSprite="{Binding SelectedSprite, Mode=TwoWay}" />

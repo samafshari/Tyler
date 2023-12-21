@@ -103,8 +103,9 @@
                 <GridSplitter Height="5" VerticalAlignment="Top" Grid.Row="1" />
             </Grid>
 
-            <Grid Grid.Column="1" x:Name="MiddleGrid">
+            <Grid Grid.Column="1" x:Name="MiddleGrid" Background="Blue">
                 <local:BoardPreviewControl
+                    Background="Red"
                     x:Name="boardPreviewControl"
                     TileWidth="{Binding TileWidth}"
                     TileHeight="{Binding TileHeight}"

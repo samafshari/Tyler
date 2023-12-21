@@ -34,7 +34,7 @@ namespace Tyler.Views
         // Dependency Property for Sprite
         public static readonly DependencyProperty SpriteProperty =
             DependencyProperty.Register("Sprite", typeof(SpriteViewModel), typeof(SpriteControl), new PropertyMetadata(OnSpritePropertyChanged));
-
+        
         public SpriteControl()
         {
             InitializeComponent();

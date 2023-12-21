@@ -24,17 +24,43 @@ namespace Tyler.Views
     /// </summary>
     public partial class SpriteSheetControl : UserControl
     {
-        SpriteSheetViewModel ViewModel => DataContext as SpriteSheetViewModel;
         readonly ContainerService _containerService;
         readonly BitmapCache _cache;
+        public SpriteViewModel Sprite
+        {
+            get => (SpriteViewModel)GetValue(SpriteProperty);
+            set => SetValue(SpriteProperty, value);
+        }
+
+        // Dependency Property for Sprite
+        public static readonly DependencyProperty SpriteProperty =
+            DependencyProperty.Register("Sprite", typeof(SpriteViewModel), typeof(SpriteSheetControl), new PropertyMetadata(OnSpritePropertyChanged));
+
+        public SpriteSheetViewModel SpriteSheet
+        {
+            get => (SpriteSheetViewModel)GetValue(SpriteSheetProperty);
+            set => SetValue(SpriteSheetProperty, value);
+        }
+
+        public static readonly DependencyProperty SpriteSheetProperty =
+            DependencyProperty.Register("SpriteSheet", typeof(SpriteSheetViewModel), typeof(SpriteSheetControl), new PropertyMetadata(OnSpritePropertyChanged));
+
         public SpriteSheetControl()
         {
             InitializeComponent();
             _containerService = ContainerService.Instance;
             _cache = _containerService.GetOrCreate<BitmapCache>();
-
+            rect.DataContext = this;
             Update();
             DataContextChanged += SpriteSheetControl_DataContextChanged;
+        }
+
+        static void OnSpritePropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is SpriteSheetControl control)
+            {
+                control.Update();
+            }
         }
 
         private void SpriteSheetControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -42,12 +68,19 @@ namespace Tyler.Views
             Update();
         }
 
+        protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
+        {
+            base.OnRenderSizeChanged(sizeInfo);
+            Update();
+        }
+
         void Update()
         {
-            var vm = ViewModel;
+            var vm = SpriteSheet;
             if (vm == null) return;
             if (vm.Sprites == null) return;
-            img.Source = _cache.Get(vm.Path);
+            var bmp = _cache.Get(vm.Path);
+            img.Source = bmp;
         }
     }
 }

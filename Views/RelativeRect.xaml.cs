@@ -35,15 +35,6 @@ namespace Tyler.Views
         public static readonly DependencyProperty SpriteProperty =
             DependencyProperty.Register("Sprite", typeof(SpriteViewModel), typeof(RelativeRect), new PropertyMetadata(OnSpritePropertyChanged));
 
-        public string Path
-        {
-            get => (string)GetValue(PathProperty);
-            set => SetValue(PathProperty, value);
-        }
-
-        public static readonly DependencyProperty PathProperty =
-            DependencyProperty.Register("Path", typeof(string), typeof(RelativeRect), new PropertyMetadata(OnSpritePropertyChanged));
-
         public RelativeRect()
         {
             InitializeComponent();
@@ -81,26 +72,20 @@ namespace Tyler.Views
 
         void Update()
         {
-            if (Sprite == null || !File.Exists(Path)) return;
+            if (Sprite == null) return;
             else
             {
-                var bmp = ContainerService.Instance.GetOrCreate<BitmapCache>().Get(Path);
-                var ar = bmp.PixelWidth / bmp.PixelHeight;
-                var wCoef = ActualWidth / bmp.PixelWidth;
+                var sz = Sprite.GetImageSize();
+                if (sz.Width <= 0 || sz.Height <= 0) return;
 
-                if (double.IsNaN(wCoef)) return;
-                var x = Sprite.X * wCoef;
-                var w = Sprite.Width * wCoef;
-                var y = Sprite.Y * wCoef;
-                var h = Sprite.Height * wCoef;
-                rect.VerticalAlignment = VerticalAlignment.Top;
+                rect.Width = (double)Sprite.Width * ActualWidth / sz.Width;
+                rect.Height = (double)Sprite.Height * ActualHeight / sz.Height;
+                rect.Margin = new Thickness(
+                    (double)Sprite.X * ActualWidth / sz.Width,
+                    (double)Sprite.Y * ActualHeight / sz.Height
+                    , 0, 0);
                 rect.HorizontalAlignment = HorizontalAlignment.Left;
-                rect.Width = w;
-                rect.Height = h;
-                rect.Margin = new Thickness(x, y, 0, 0);
-                HorizontalAlignment = HorizontalAlignment.Stretch;
-                VerticalAlignment = VerticalAlignment.Top;
-                Height = ActualWidth / ar;
+                rect.VerticalAlignment = VerticalAlignment.Top;
             }
         }
     }

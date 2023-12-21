@@ -2,16 +2,21 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 using Tyler.Models;
+using Tyler.Views;
 
 namespace Tyler.ViewModels
 {
     public class SpriteViewModel : ViewModel
     {
+        readonly BitmapCache _bitmapCache;
+
         public string DisplayName => ToString();
 
         string _id;
@@ -76,9 +81,10 @@ namespace Tyler.ViewModels
 
         public SpriteViewModel()
         {
+            _bitmapCache = ContainerService.Instance.GetOrCreate<BitmapCache>();
         }
 
-        public SpriteViewModel(string path, Sprite sprite)
+        public SpriteViewModel(string path, Sprite sprite) : this()
         {
             Path = path;
             sprite.Inject(this);
@@ -95,6 +101,13 @@ namespace Tyler.ViewModels
         public override string ToString()
         {
             return $"[{Char}] {Id}";
+        }
+
+        public Size GetImageSize()
+        {
+            if (!File.Exists(Path)) return Size.Empty;
+            var bmp = _bitmapCache.Get(Path);
+            return new Size(bmp.Width, bmp.Height);
         }
     }
 }

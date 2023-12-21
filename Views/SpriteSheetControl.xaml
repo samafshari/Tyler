@@ -6,11 +6,20 @@
              xmlns:local="clr-namespace:Tyler.Views"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" Background="#101">
-    <Grid>
+    <Grid 
+        HorizontalAlignment="Left"
+        VerticalAlignment="Top">
         <Image 
             x:Name="img" 
             Stretch="Uniform"
+            HorizontalAlignment="Left"
             VerticalAlignment="Top"
+            />
+        <local:RelativeRect 
+            x:Name="rect"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            Sprite="{Binding Sprite}" 
             />
     </Grid>
 </UserControl>
