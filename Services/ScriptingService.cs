@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -125,6 +126,38 @@ namespace Tyler.Services
             }
 
             return board;
+        }
+
+        public void ExportBoardsToFolder(List<Board> boards, string folderPath)
+        {
+            Directory.CreateDirectory(folderPath);
+            var mapsDirectory = Path.Combine(folderPath, "maps");
+            int i = 0;
+            var fileNames = new List<string>();
+            foreach (var board in boards)
+            {
+                var script = BoardToScript(board);
+                var fileName = $"{i++}.txt";
+                fileNames.Add(fileName);
+                var path = Path.Combine(mapsDirectory, fileName);
+                File.WriteAllText(path, script);
+            }
+            File.WriteAllLines(Path.Combine(folderPath, "levels.txt"), fileNames);
+        }
+
+        public List<Board> ImportBoardsFromFolder(string levelsListPath)
+        {
+            var boards = new List<Board>();
+            var lines = File.ReadAllLines(levelsListPath);
+            var folderPath = Path.GetDirectoryName(levelsListPath);
+            foreach (var line in lines)
+            {
+                var path = Path.Combine(folderPath, line);
+                var script = File.ReadAllText(path);
+                var board = ScriptToBoard(script);
+                boards.Add(board);
+            }
+            return boards;
         }
     }
 }

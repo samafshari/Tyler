@@ -19,6 +19,7 @@ namespace Tyler.ViewModels
     {
         readonly RoutingService _routingService;
         readonly SettingsService _settingsService;
+        readonly ScriptingService _scriptingService;
 
         ObservableCollection<BoardViewModel> _boards = new ObservableCollection<BoardViewModel>();
         public ObservableCollection<BoardViewModel> Boards
@@ -117,6 +118,7 @@ namespace Tyler.ViewModels
         {
             _routingService = ContainerService.Instance.GetOrCreate<RoutingService>();
             _settingsService = ContainerService.Instance.GetOrCreate<SettingsService>();
+            _scriptingService = ContainerService.Instance.GetOrCreate<ScriptingService>();
         }
 
         public WorldViewModel(string path) : this()
@@ -234,6 +236,21 @@ namespace Tyler.ViewModels
                 }
         }
 
+        public void MoveBoard(BoardViewModel board, int direction)
+        {
+            if (board == null) return;
+            var index = Boards.IndexOf(board);
+            if (index == -1) return;
+            var newIndex = index + direction;
+            if (newIndex < 0 || newIndex >= Boards.Count) return;
+            Boards.Move(index, newIndex);
+        }
+
+        public void MoveBoard(int direction)
+        {
+            MoveBoard(SelectedBoard, direction);
+        }
+
         public void AddSpriteSheet()
         {
             var path = _routingService.ShowOpenFileDialog("Open Sprite Sheet PNG", ".png", Vars.FileDialogTypePNG);
@@ -277,6 +294,36 @@ namespace Tyler.ViewModels
             SpriteMapList = SpriteMap.Values.ToList();
         }
 
+        public void DuplicateBoard()
+        {
+            if (SelectedBoard == null) return;
+            var board = SelectedBoard.Serialize();
+            board.Id = Boards.Count.ToString();
+            board.Name += " (Copy)";
+            Boards.Add(new BoardViewModel(this, board));
+        }
+
+        public void ExportLevels()
+        {
+            var folderPath = _routingService.ShowOpenFolderDialog("Select Folder to Export Levels");
+            if (folderPath != null)
+            {
+                _scriptingService.ExportBoardsToFolder(Boards.Select(x => x.Serialize()).ToList(), folderPath);
+                _routingService.ShowDialog("Success", $"Levels exported to {folderPath}");
+            }
+        }
+
+        public void ImportLevels()
+        {
+            var path = _routingService.ShowOpenFileDialog("Select levels.txt", ".txt", "levels.txt");
+            if (path != null)
+            {
+                var boards = _scriptingService.ImportBoardsFromFolder(path);
+                Boards = new ObservableCollection<BoardViewModel>(boards.Select(x => new BoardViewModel(this, x)));
+                _routingService.ShowDialog("Success", $"Levels imported from {path}");
+            }
+        }
+
         public CommandModel NewCommand => new CommandModel(New);
         public CommandModel OpenCommand => new CommandModel(LoadAs);
         public CommandModel RevertCommand => new CommandModel(Load);
@@ -291,5 +338,10 @@ namespace Tyler.ViewModels
         public CommandModel ShowSpriteSheetManagerCommand => new CommandModel(() => _routingService.ShowWorldSpriteSheetManager(this));
         public CommandModel ShowSettingsCommand => new CommandModel(() => _routingService.ShowWorldSettings(this));
         public CommandModel ReinitializeSpriteMapCommand => new CommandModel(ReinitializeSpriteMap);
+        public CommandModel MoveBoardUpCommand => new CommandModel(() => MoveBoard(SelectedBoard, -1));
+        public CommandModel MoveBoardDownCommand => new CommandModel(() => MoveBoard(SelectedBoard, 1));
+        public CommandModel ExportLevelsCommand => new CommandModel(ExportLevels);
+        public CommandModel ImportLevelsCommand => new CommandModel(ImportLevels);
+        public CommandModel DuplicateBoardCommand => new CommandModel(DuplicateBoard);
     }
 }

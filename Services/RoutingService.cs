@@ -73,6 +73,17 @@ namespace Tyler.Services
             return null;
         }
 
+        public string ShowOpenFolderDialog(string title)
+        {
+            // Use OpenFolderDialog
+            var dialog = new OpenFolderDialog();
+            dialog.Title = title;
+            var result = dialog.ShowDialog();
+            if (result == true && Directory.Exists(dialog.FolderName))
+                return dialog.FolderName;
+            return null;
+        }
+
         public void ShowSpriteSheetEditor()
         {
             var lastPngPath = _settingsService.Data.LastOpenedPNGPath;

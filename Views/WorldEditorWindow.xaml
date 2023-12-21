@@ -48,6 +48,9 @@
                 </MenuItem>
                 <MenuItem Header="World">
                     <MenuItem Header="World Settings..." Command="{Binding ShowSettingsCommand}" />
+                    <Separator />
+                    <MenuItem Header="Export Levels..." Command="{Binding ExportLevelsCommand}" />
+                    <MenuItem Header="Import Levels..." Command="{Binding ImportLevelsCommand}" />
                 </MenuItem>
             </Menu>
         </Border>
@@ -73,7 +76,11 @@
                             <ListBox.ContextMenu>
                                 <ContextMenu>
                                     <MenuItem Header="Board Settings..." Command="{Binding BoardSettingsCommand}" />
+                                    <MenuItem Header="Duplicate Board..." Command="{Binding DuplicateBoardCommand}" />
                                     <MenuItem Header="Delete Board..." Command="{Binding RemoveBoardCommand}" />
+                                    <Separator />
+                                    <MenuItem Header="Move Board Up" Command="{Binding MoveBoardUpCommand}" />
+                                    <MenuItem Header="Move Board Down" Command="{Binding MoveBoardDownCommand}" />
                                 </ContextMenu>
                             </ListBox.ContextMenu>
                         </ListBox>
