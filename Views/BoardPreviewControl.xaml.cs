@@ -28,6 +28,7 @@ namespace Tyler.Views
     {
         readonly Dictionary<(int, int), SpriteControl> spriteControls = new Dictionary<(int, int), SpriteControl>();
         readonly Dictionary<(int, int), Image> scriptIcons = new Dictionary<(int, int), Image>();
+        SelectionRectangle selectionRectangle;
 
         public BoardViewModel Board
         {
@@ -54,7 +55,7 @@ namespace Tyler.Views
         }
 
         public static readonly DependencyProperty SelectedTileProperty =
-            DependencyProperty.Register("SelectedTile", typeof(TileViewModel), typeof(BoardPreviewControl), new PropertyMetadata(OnBoardPropertyChanged));
+            DependencyProperty.Register("SelectedTile", typeof(TileViewModel), typeof(BoardPreviewControl), new PropertyMetadata(null));
 
         public int TileWidth
         {
@@ -109,15 +110,14 @@ namespace Tyler.Views
         public void Update()
         {
             if (Board == null) return;
-            //if (Board.Width != grd.ColumnDefinitions.Count || Board.Height != grd.ColumnDefinitions.Count)
-            RebuildGrid();
-
+            if (Board.Width != grd.ColumnDefinitions.Count || Board.Height != grd.ColumnDefinitions.Count)
+                RebuildGrid();
+            
             foreach (var sc in spriteControls)
             {
                 bool found = false;
                 if (Board.TileGrid.TryGetValue(sc.Key, out var tile))
                 {
-                    var grid = ((Grid)sc.Value.Parent);
                     scriptIcons[sc.Key].DataContext = tile;
                     if (tile == null)
                         sc.Value.Sprite = null;
@@ -134,6 +134,10 @@ namespace Tyler.Views
             grd.Children.Clear();
             grd.ColumnDefinitions.Clear();
             grd.RowDefinitions.Clear();
+            selectionRectangle = new SelectionRectangle();
+            selectionRectangle.DataContext = this;
+            selectionRectangle.SetBinding(Grid.RowProperty, "SelectedTile.Y");
+            selectionRectangle.SetBinding(Grid.ColumnProperty, "SelectedTile.X");
             for (int r = 0; r < Board.Height; r++)
             {
                 var rd = new RowDefinition();
@@ -176,6 +180,8 @@ namespace Tyler.Views
                     scriptIcons[(c, r)] = img;
                 }
             }
+
+            grd.Children.Add(selectionRectangle);
         }
 
         private void SpriteControl_MouseDown(object sender, MouseButtonEventArgs e)

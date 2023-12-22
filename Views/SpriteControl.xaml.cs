@@ -25,6 +25,8 @@ namespace Tyler.Views
     /// </summary>
     public partial class SpriteControl
     {
+        SpriteViewModel _oldSprite;
+
         public SpriteViewModel Sprite
         {
             get => (SpriteViewModel)GetValue(SpriteProperty);
@@ -50,9 +52,10 @@ namespace Tyler.Views
         void Update()
         {
             if (Sprite == null || !File.Exists(Sprite.Path)) Source = null;
-            else
+            else if (_oldSprite != Sprite)
             {
-                var bmp = ContainerService.Instance.GetOrCreate<BitmapCache>().Get(Sprite.Path);
+                _oldSprite = Sprite;
+                var bmp = ContainerService.Instance.Get<BitmapCache>().Get(Sprite.Path);
                 var cropped = new CroppedBitmap(bmp, new Int32Rect(Sprite.X, Sprite.Y, Sprite.Width, Sprite.Height));
                 Source = cropped;
             }
