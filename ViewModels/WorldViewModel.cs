@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 using Tyler.Models;
 using Tyler.Services;
@@ -81,7 +82,12 @@ namespace Tyler.ViewModels
         public BoardViewModel SelectedBoard
         {
             get => _selectedBoard;
-            set => SetProperty(ref _selectedBoard, value);
+            set
+            {
+                var isDirty = value != SelectedBoard;
+                SetProperty(ref _selectedBoard, value);
+                if (isDirty) SelectedTile = null;
+            }
         }
 
         TileDefViewModel _selectedTileDef;
@@ -112,6 +118,19 @@ namespace Tyler.ViewModels
         {
             get => _spriteMapList;
             set => SetProperty(ref _spriteMapList, value);
+        }
+
+        public Visibility SelectedTileVisibility => SelectedTile == null ? Visibility.Collapsed : Visibility.Visible;
+
+        TileViewModel _selectedTile;
+        public TileViewModel SelectedTile
+        {
+            get => _selectedTile;
+            set
+            {
+                SetProperty(ref _selectedTile, value);
+                RaisePropertyChanged(nameof(SelectedTileVisibility));
+            }
         }
 
         public WorldViewModel()
@@ -324,6 +343,21 @@ namespace Tyler.ViewModels
             }
         }
 
+        public void EditSpriteSheet()
+        {
+            if (SelectedSpriteSheet == null) return;
+            _routingService.ShowSpriteSheetEditor(SelectedSpriteSheet, SelectedSprite);
+        }
+
+        public void SelectTile(int x, int y)
+        {
+            if (SelectedBoard == null) return;
+            SelectedBoard.TileGrid.TryGetValue((x, y), out var tile);
+            SelectedTile = tile;
+            if (SelectedTile != null && SpriteMap.TryGetValue(SelectedTile.Char, out var sprite))
+                SelectedSprite = sprite;
+        }
+
         public CommandModel NewCommand => new CommandModel(New);
         public CommandModel OpenCommand => new CommandModel(LoadAs);
         public CommandModel RevertCommand => new CommandModel(Load);
@@ -343,5 +377,6 @@ namespace Tyler.ViewModels
         public CommandModel ExportLevelsCommand => new CommandModel(ExportLevels);
         public CommandModel ImportLevelsCommand => new CommandModel(ImportLevels);
         public CommandModel DuplicateBoardCommand => new CommandModel(DuplicateBoard);
+        public CommandModel EditSpriteSheetCommand => new CommandModel(EditSpriteSheet);
     }
 }

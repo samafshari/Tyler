@@ -17,6 +17,7 @@ using System.Windows.Shapes;
 
 using Tyler.Models;
 using Tyler.ViewModels;
+using System.Linq;
 
 namespace Tyler.Views
 {
@@ -26,6 +27,7 @@ namespace Tyler.Views
     public partial class BoardPreviewControl : UserControl
     {
         readonly Dictionary<(int, int), SpriteControl> spriteControls = new Dictionary<(int, int), SpriteControl>();
+        readonly Dictionary<(int, int), Image> scriptIcons = new Dictionary<(int, int), Image>();
 
         public BoardViewModel Board
         {
@@ -44,6 +46,15 @@ namespace Tyler.Views
 
         public static readonly DependencyProperty WorldProperty =
             DependencyProperty.Register("World", typeof(WorldViewModel), typeof(BoardPreviewControl), new PropertyMetadata(OnBoardPropertyChanged));
+
+        public TileViewModel SelectedTile
+        {
+            get => (TileViewModel)GetValue(SelectedTileProperty);
+            set => SetValue(SelectedTileProperty, value);
+        }
+
+        public static readonly DependencyProperty SelectedTileProperty =
+            DependencyProperty.Register("SelectedTile", typeof(TileViewModel), typeof(BoardPreviewControl), new PropertyMetadata(OnBoardPropertyChanged));
 
         public int TileWidth
         {
@@ -99,13 +110,15 @@ namespace Tyler.Views
         {
             if (Board == null) return;
             //if (Board.Width != grd.ColumnDefinitions.Count || Board.Height != grd.ColumnDefinitions.Count)
-                RebuildGrid();
+            RebuildGrid();
 
             foreach (var sc in spriteControls)
             {
                 bool found = false;
                 if (Board.TileGrid.TryGetValue(sc.Key, out var tile))
                 {
+                    var grid = ((Grid)sc.Value.Parent);
+                    scriptIcons[sc.Key].DataContext = tile;
                     if (tile == null)
                         sc.Value.Sprite = null;
                     else if (World.SpriteMap.TryGetValue(tile.Char, out var sprite))
@@ -137,6 +150,7 @@ namespace Tyler.Views
             }
 
             spriteControls.Clear();
+            scriptIcons.Clear();
             for (int r = 0; r < Board.Height; r++)
             {
                 for (int c = 0; c < Board.Width; c++)
@@ -147,21 +161,49 @@ namespace Tyler.Views
                     spriteControl.SetValue(Grid.RowProperty, r);
                     spriteControl.SetValue(Grid.ColumnProperty, c);
                     spriteControl.Tag = new Point(c, r);
-                    spriteControl.MouseMove += SpriteControl_MouseMove;// += SpriteControl_MouseDown;
+                    spriteControl.MouseMove += SpriteControl_MouseMove;
+                    spriteControl.MouseDown += SpriteControl_MouseDown;
+
+                    var img = new Image
+                    {
+                        Style = (Style)FindResource("ScriptIcon")
+                    };
+                    grd.Children.Add(img);
+                    img.SetValue(Grid.RowProperty, r);
+                    img.SetValue(Grid.ColumnProperty, c);
+                    img.SetBinding(Image.VisibilityProperty, "ScriptIconVisibility");
+                    img.Tag = spriteControl.Tag;
+                    scriptIcons[(c, r)] = img;
                 }
+            }
+        }
+
+        private void SpriteControl_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.Source is SpriteControl spriteControl && spriteControl.Tag is Point p)
+            {
+                if (e.LeftButton == MouseButtonState.Pressed)
+                    World.SelectTile((int)p.X, (int)p.Y);
+                else if (e.RightButton == MouseButtonState.Pressed)
+                    Draw(p);
             }
         }
 
         private void SpriteControl_MouseMove(object sender, MouseEventArgs e)
         {
-            if (e.LeftButton == MouseButtonState.Pressed)
+            if (e.RightButton == MouseButtonState.Pressed)
                 if (e.Source is SpriteControl spriteControl && spriteControl.Tag is Point p)
                 {
-                    if (World.SelectedSprite != null)
-                    {
-                        Board.SetTile((int)p.X, (int)p.Y, 0, World.SelectedSprite.RealChar);
-                    }
+                    Draw(p);
                 }
+        }
+
+        void Draw(Point p)
+        {
+            if (World.SelectedSprite != null)
+            {
+                Board.SetTile((int)p.X, (int)p.Y, 0, World.SelectedSprite.RealChar);
+            }
         }
     }
 }

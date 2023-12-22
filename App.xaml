@@ -10,8 +10,13 @@
                 <wui:ThemeResources RequestedTheme="Light" AccentColor="Orange" />
                 <wui:XamlControlsResources />
             </ResourceDictionary.MergedDictionaries>
-            <Style TargetType="Window" >
-                <Setter Property="wui:WindowHelper.UseModernWindowStyle" Value="True" />
+            <Style TargetType="Image" x:Key="ScriptIcon">
+                <Setter Property="Width" Value="16" />
+                <Setter Property="Height" Value="16" />
+                <Setter Property="VerticalAlignment" Value="Bottom" />
+                <Setter Property="HorizontalAlignment" Value="Right" />
+                <Setter Property="Margin" Value="1" />
+                <Setter Property="Source" Value="/setting.png" />
             </Style>
             <Style TargetType="GridSplitter" x:Key="GridSplitterBase">
                 <Setter Property="Background" Value="#AAA" />

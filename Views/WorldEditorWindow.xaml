@@ -88,14 +88,21 @@
                     <TabItem Header="Sprite Sheets">
                         <ListBox
                             ItemsSource="{Binding SpriteSheets}"
-                            DisplayMemberPath="FileName"
                             SelectedItem="{Binding SelectedSpriteSheet, Mode=TwoWay}">
                             <ListBox.ContextMenu>
                                 <ContextMenu>
-                                    <MenuItem Header="Manage Sprite Sheet..." Command="{Binding ShowSpriteSheetManagerCommand}" />
+                                    <MenuItem Header="Edit Sprite Sheet..." Command="{Binding EditSpriteSheetCommand}" />
                                     <MenuItem Header="Unload Sprite Sheet..." Command="{Binding RemoveSpriteSheetCommand}" />
                                 </ContextMenu>
                             </ListBox.ContextMenu>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Image Width="32" Height="32" Source="{Binding Path}" Margin="0, 0, 3, 0" />
+                                        <TextBlock Text="{Binding FileName}" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
                         </ListBox>
                     </TabItem>
                 </TabControl>
@@ -148,7 +155,7 @@
                             </Grid>
                         </Grid>
                     </TabItem>
-                    <TabItem Header="Tile">
+                    <TabItem Header="Tile" Visibility="{Binding SelectedTileVisibility}">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
@@ -160,12 +167,22 @@
                                 Text="Tile Script:" />
                             <TextBox
                                 Grid.Row="1"
-                                DataContext="{Binding SelectedTile}" 
+                                DataContext="{Binding SelectedTile}"
                                 Text="{Binding Script}" 
                                 FontFamily="Consolas" 
                                 FontSize="10" 
                                 AcceptsReturn="True" 
                                 AcceptsTab="True"
+                                TextChanged="TextBox_TextChanged"
+                                />
+                            <local:TilePreviewControl
+                                Grid.Row="2"
+                                Width="64"
+                                Height="64"
+                                Margin="10"
+                                HorizontalAlignment="Center" 
+                                World="{Binding}"
+                                Tile="{Binding SelectedTile}"
                                 />
                         </Grid>
                     </TabItem>

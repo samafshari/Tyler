@@ -11,6 +11,9 @@
 
   <ItemGroup>
     <Content Include="lolli.ico" />
+    <Content Include="setting.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>

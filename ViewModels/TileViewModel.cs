@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 using Tyler.Models;
 
@@ -40,10 +41,16 @@ namespace Tyler.ViewModels
             set => SetProperty(ref _char, value);
         }
 
+        public Visibility ScriptIconVisibility => string.IsNullOrWhiteSpace(Script) ? Visibility.Collapsed : Visibility.Visible;
+
         public string Script
         {
             get => _script;
-            set => SetProperty(ref _script, value);
+            set
+            {
+                SetProperty(ref _script, value);
+                RaisePropertyChanged(nameof(ScriptIconVisibility));
+            }
         }
 
         public TileViewModel(Tile model)
