@@ -198,8 +198,13 @@
                 <local:SpriteSheetExplorerControl
                             Grid.Row="3"
                             Sprites="{Binding SpriteMapList}"
-                            SelectedSprite="{Binding SelectedSprite, Mode=TwoWay}"
-                            />
+                            SelectedSprite="{Binding SelectedSprite, Mode=TwoWay}">
+                    <local:SpriteSheetExplorerControl.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Edit..." Command="{Binding EditTileDefCommand}" />
+                        </ContextMenu>
+                    </local:SpriteSheetExplorerControl.ContextMenu>
+                </local:SpriteSheetExplorerControl>
 
             </TabItem>
         </TabControl>

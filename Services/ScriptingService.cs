@@ -132,6 +132,7 @@ namespace Tyler.Services
         {
             Directory.CreateDirectory(folderPath);
             var mapsDirectory = Path.Combine(folderPath, "maps");
+            Directory.CreateDirectory(mapsDirectory);
             int i = 0;
             var fileNames = new List<string>();
             foreach (var board in boards)

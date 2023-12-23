@@ -349,6 +349,18 @@ namespace Tyler.ViewModels
             _routingService.ShowSpriteSheetEditor(SelectedSpriteSheet, SelectedSprite);
         }
 
+        public void EditTileDef()
+        {
+            if (SelectedSprite == null) return;
+            try
+            {
+                var sprite = SpriteMap[SelectedSprite.RealChar];
+                var spritesheet = SpriteSheets.First(x => x.Sprites.Contains(sprite));
+                _routingService.ShowSpriteSheetEditor(spritesheet, sprite);
+            }
+            catch { }
+        }
+
         public void SelectTile(int x, int y)
         {
             if (SelectedBoard == null) return;
@@ -378,5 +390,6 @@ namespace Tyler.ViewModels
         public CommandModel ImportLevelsCommand => new CommandModel(ImportLevels);
         public CommandModel DuplicateBoardCommand => new CommandModel(DuplicateBoard);
         public CommandModel EditSpriteSheetCommand => new CommandModel(EditSpriteSheet);
+        public CommandModel EditTileDefCommand => new CommandModel(EditTileDef);
     }
 }

@@ -14,6 +14,7 @@ namespace Tyler
         public const string FileDialogTypeSheet = "Tyler Sprite Sheet";
         public const string FileDialogTypeWorld = "Tyler World";
         public const char DefaultChar = '.';
+        public const char UnassignedChar = ' ';
         public const int StateMax = int.MaxValue - 1;
         public const int StateMin = int.MinValue + 1;
 

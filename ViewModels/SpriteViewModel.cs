@@ -58,7 +58,7 @@ namespace Tyler.ViewModels
             set => SetProperty(ref _height, value);
         }
 
-        char _char = Vars.DefaultChar;
+        char _char = Vars.UnassignedChar;
         public string Char
         {
             get => _char.ToString();
