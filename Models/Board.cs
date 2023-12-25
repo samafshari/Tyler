@@ -13,5 +13,7 @@ namespace Tyler.Models
         public int Width { get; set; } 
         public int Height { get; set; }
         public List<Tile> Tiles { get; set; } = new List<Tile>();
+        public string BeforeScript { get; set; }
+        public string AfterScript { get; set; }
     }
 }

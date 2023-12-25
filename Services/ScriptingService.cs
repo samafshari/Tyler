@@ -49,6 +49,12 @@ namespace Tyler.Services
             sb.AppendLine("ENDGRID");
             sb.AppendLine($"board_id {board.Id}");
             sb.AppendLine($"board_name {board.Name}");
+            if (!string.IsNullOrWhiteSpace(board.BeforeScript))
+            {
+                sb.AppendLine("begin_section");
+                sb.AppendLine(board.BeforeScript);
+                sb.AppendLine("end_before_script");
+            }
             sb.AppendLine();
             foreach (var tile in board.Tiles)
             {
@@ -58,6 +64,12 @@ namespace Tyler.Services
                     sb.AppendLine(tile.Script);
                     sb.AppendLine();
                 }
+            }
+            if (!string.IsNullOrWhiteSpace(board.AfterScript))
+            {
+                sb.AppendLine("begin_section");
+                sb.AppendLine(board.BeforeScript);
+                sb.AppendLine("end_after_script");
             }
             return sb.ToString();
         }
@@ -73,6 +85,9 @@ namespace Tyler.Services
             board.Height = 0;
             board.Width = lines[0].Length;
             bool isReadingGrid = true;
+            var sb = new StringBuilder();
+            bool isReadingSection = false;
+
             var tileMap = new Dictionary<(int, int), Tile>();
             Tile selE = null;
 
@@ -104,9 +119,35 @@ namespace Tyler.Services
                     continue;
                 }
 
+
                 var lower = lines[i].ToLower();
                 var split = lower.IndexOf(' ');
-                var command = split < 0 ? "" : lower.Substring(0, split);
+                var command = split < 0 ? lower : lower.Substring(0, split);
+                if (command == null) command = "";
+                if (isReadingSection)
+                {
+                    if (command == "end_before_script")
+                    {
+                        isReadingSection = false;
+                        board.BeforeScript = sb.ToString();
+                        continue;
+                    }
+                    if (command == "end_after_script")
+                    {
+                        isReadingSection = false;
+                        board.AfterScript = sb.ToString();
+                        continue;
+                    }
+
+                    sb.AppendLine(lines[i]);
+                    continue;
+                }
+                if (command == "begin_section")
+                {
+                    isReadingSection = true;
+                    sb.Clear();
+                    continue;
+                }
                 if (command == "board_name")
                     board.Name = lines[i].Substring(split + 1);
                 else if (command == "board_id")

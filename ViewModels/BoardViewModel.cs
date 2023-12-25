@@ -76,6 +76,20 @@ namespace Tyler.ViewModels
 
         public readonly Dictionary<(int, int), TileViewModel> TileGrid = new Dictionary<(int, int), TileViewModel>();
 
+        string _beforeScript;
+        public string BeforeScript
+        {
+            get => _beforeScript;
+            set => SetProperty(ref _beforeScript, value);
+        }
+
+        string _afterScript;
+        public string AfterScript
+        {
+            get => _afterScript;
+            set => SetProperty(ref _afterScript, value);
+        }
+
         string _script;
         public string Script
         {
@@ -110,6 +124,8 @@ namespace Tyler.ViewModels
             Width = board.Width;
             Height = board.Height;
             Tiles = new ObservableCollection<TileViewModel>(board.Tiles.Select(x => new TileViewModel(x)));
+            BeforeScript = board.BeforeScript;
+            AfterScript = board.AfterScript;
             Script = _scriptingService.BoardToScript(board);
             BuildTileGrid();
         }
@@ -140,7 +156,7 @@ namespace Tyler.ViewModels
             SetTile(tile);
         }
 
-        void BuildTileGrid()
+        public void BuildTileGrid()
         {
             TileGrid.Clear();
             foreach (var tile in Tiles)
@@ -179,7 +195,9 @@ namespace Tyler.ViewModels
                 Name = Name,
                 Width = Width,
                 Height = Height,
-                Tiles = Tiles.Select(x => x.Serialize()).ToList()
+                Tiles = Tiles.Select(x => x.Serialize()).ToList(),
+                BeforeScript = BeforeScript,
+                AfterScript = AfterScript
             };
             return model;
         }
@@ -215,5 +233,6 @@ namespace Tyler.ViewModels
         public CommandModel ReadScriptCommand => new CommandModel(ReadScript);
         public CommandModel WriteScriptCommand => new CommandModel(WriteScript);
         public CommandModel ShowSettingsCommand => new CommandModel(ShowSettings);
+        public CommandModel BuildTileGridCommand => new CommandModel(BuildTileGrid);
     }
 }

@@ -18,6 +18,7 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
@@ -31,6 +32,9 @@
                 <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Height}" />
                 <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Id}" />
                 <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Name}" />
+                <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+                    <Button Content="Rebuild Tile Grid" Command="{Binding BuildTileGridCommand}" />
+                </StackPanel>
             </Grid>
         </StackPanel>
     </Grid>

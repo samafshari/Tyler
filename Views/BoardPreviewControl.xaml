@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:Tyler.Views"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid x:Name="grd">
+        <Grid x:Name="grd" HorizontalAlignment="Left" VerticalAlignment="Top">
             
-    </Grid>
+        </Grid>
 </UserControl>
