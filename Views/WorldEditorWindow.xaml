@@ -7,7 +7,7 @@
         xmlns:vm="clr-namespace:Tyler.ViewModels"
         mc:Ignorable="d"
         Title="World Editor" Height="450" Width="800"
-        WindowStartupLocation="CenterScreen" WindowState="Maximized">
+        WindowStartupLocation="CenterScreen" WindowState="Maximized" UseLayoutRounding="False">
     <d:Window.DataContext>
         <vm:WorldViewModel />
     </d:Window.DataContext>
@@ -110,7 +110,7 @@
             </Grid>
 
             <Grid Grid.Column="1" x:Name="MiddleGrid">
-                <ScrollViewer>
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                     <local:BoardPreviewControl
                         x:Name="boardPreviewControl"
                         TileWidth="{Binding TileWidth}"

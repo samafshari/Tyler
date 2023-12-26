@@ -26,9 +26,12 @@ namespace Tyler.Views
     /// </summary>
     public partial class BoardPreviewControl : UserControl
     {
+        readonly BitmapCache _bitmapCache;
+
         readonly Dictionary<(int, int), SpriteControl> spriteControls = new Dictionary<(int, int), SpriteControl>();
         readonly Dictionary<(int, int), Image> scriptIcons = new Dictionary<(int, int), Image>();
         SelectionRectangle selectionRectangle;
+        Image previewImg;
 
         public BoardViewModel Board
         {
@@ -87,7 +90,15 @@ namespace Tyler.Views
 
         public BoardPreviewControl()
         {
+            _bitmapCache = ContainerService.Instance.GetOrCreate<BitmapCache>();
             InitializeComponent();
+            previewImg = new Image
+            {
+                HorizontalAlignment = HorizontalAlignment.Left,
+                VerticalAlignment = VerticalAlignment.Top,
+            };
+            RenderOptions.SetBitmapScalingMode(previewImg, BitmapScalingMode.NearestNeighbor);
+            grd.Children.Add(previewImg);
             grd.DataContext = this;
         }
 
@@ -109,10 +120,11 @@ namespace Tyler.Views
 
         public void Update()
         {
-            if (Board == null) return;
+            Render();
+            return;
             if (Board.Width != grd.ColumnDefinitions.Count || Board.Height != grd.ColumnDefinitions.Count)
                 RebuildGrid();
-            
+
             foreach (var sc in spriteControls)
             {
                 bool found = false;
@@ -131,6 +143,7 @@ namespace Tyler.Views
 
         void RebuildGrid()
         {
+            return;
             grd.Children.Clear();
             grd.ColumnDefinitions.Clear();
             grd.RowDefinitions.Clear();
@@ -210,6 +223,58 @@ namespace Tyler.Views
             {
                 Board.SetTile((int)p.X, (int)p.Y, 0, World.SelectedSprite.RealChar);
             }
+        }
+
+        void Render()
+        {
+            if (Board == null || World == null)
+            {
+                previewImg.Source = null;
+                return;
+            }
+
+            PresentationSource source = PresentationSource.FromVisual(this);
+            var dpiX = 96.0;// * source.CompositionTarget.TransformToDevice.M11;
+            var dpiY = 96.0;// * source.CompositionTarget.TransformToDevice.M22;
+            var upscale = 1;
+            var rt = new RenderTargetBitmap(
+                upscale * Board.Width * World.TileWidth,
+                upscale * Board.Height * World.TileHeight,
+                dpiX,
+                dpiY,
+                PixelFormats.Pbgra32);
+            previewImg.Width = Board.Width * World.TileWidth;
+            previewImg.Height = Board.Height * World.TileHeight;
+            var drawingVisual = new DrawingVisual();
+            RenderOptions.SetBitmapScalingMode(drawingVisual, BitmapScalingMode.NearestNeighbor);
+            
+            using var context = drawingVisual.RenderOpen();
+            for (int r = 0; r < Board.Height; r++)
+            {
+                for (int c = 0; c < Board.Width; c++)
+                {
+                    if (Board.TileGrid.TryGetValue((c, r), out var tile))
+                    {
+                        if (World.SpriteMap.TryGetValue(tile.Char, out var sprite))
+                        {
+                            var img = _bitmapCache.Get(sprite.Path, sprite.X, sprite.Y, sprite.Width, sprite.Height);
+                            
+                            context.DrawImage(img, new Rect(
+                                upscale * c * World.TileWidth,
+                                upscale * r * World.TileHeight,
+                                upscale * World.TileWidth,
+                                upscale * World.TileHeight));
+                        }
+                    }
+                }
+            }
+            context.Close();
+            rt.Render(drawingVisual);
+            RenderOptions.SetBitmapScalingMode(rt, BitmapScalingMode.NearestNeighbor);
+
+            previewImg.Source = rt;
+            RenderOptions.SetBitmapScalingMode(previewImg, BitmapScalingMode.NearestNeighbor);
+            previewImg.SetValue(RenderOptions.BitmapScalingModeProperty, BitmapScalingMode.NearestNeighbor);
         }
     }
 }

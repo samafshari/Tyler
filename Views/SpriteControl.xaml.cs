@@ -55,9 +55,7 @@ namespace Tyler.Views
             else if (_oldSprite != Sprite)
             {
                 _oldSprite = Sprite;
-                var bmp = ContainerService.Instance.Get<BitmapCache>().Get(Sprite.Path);
-                var cropped = new CroppedBitmap(bmp, new Int32Rect(Sprite.X, Sprite.Y, Sprite.Width, Sprite.Height));
-                Source = cropped;
+                Source = ContainerService.Instance.Get<BitmapCache>().Get(Sprite.Path, Sprite.X, Sprite.Y, Sprite.Width, Sprite.Height);
             }
         }
     }
