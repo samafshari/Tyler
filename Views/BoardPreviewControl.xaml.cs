@@ -58,7 +58,7 @@ namespace Tyler.Views
         }
 
         public static readonly DependencyProperty SelectedTileProperty =
-            DependencyProperty.Register("SelectedTile", typeof(TileViewModel), typeof(BoardPreviewControl), new PropertyMetadata(null));
+            DependencyProperty.Register("SelectedTile", typeof(TileViewModel), typeof(BoardPreviewControl), new PropertyMetadata(OnSelectionChanged));
 
         public int TileWidth
         {
@@ -118,11 +118,17 @@ namespace Tyler.Views
             if (d is BoardPreviewControl control) control.Update();
         }
 
+        static void OnSelectionChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is BoardPreviewControl control) control.Update();
+        }
+
+        int w;
+        int h;
         public void Update()
         {
-            Render();
-            return;
-            if (Board.Width != grd.ColumnDefinitions.Count || Board.Height != grd.ColumnDefinitions.Count)
+            if (Board == null) return;
+            if (Board.Width != w || Board.Height != h)
                 RebuildGrid();
 
             foreach (var sc in spriteControls)
@@ -130,7 +136,7 @@ namespace Tyler.Views
                 bool found = false;
                 if (Board.TileGrid.TryGetValue(sc.Key, out var tile))
                 {
-                    scriptIcons[sc.Key].DataContext = tile;
+                    scriptIcons[sc.Key].Visibility = tile.ScriptIconVisibility;
                     if (tile == null)
                         sc.Value.Sprite = null;
                     else if (World.SpriteMap.TryGetValue(tile.Char, out var sprite))
@@ -139,32 +145,27 @@ namespace Tyler.Views
                 }
                 if (!found) sc.Value.Sprite = null;
             }
+
+            if (SelectedTile == null) 
+                selectionRectangle.Visibility = Visibility.Hidden;
+            else
+            {
+                selectionRectangle.Visibility = Visibility.Visible;
+                selectionRectangle.Margin = new Thickness(
+                    SelectedTile.X * World.TileWidth,
+                    SelectedTile.Y * World.TileHeight,
+                    0,
+                    0);
+            }
         }
 
         void RebuildGrid()
         {
-            return;
+            w = Board.Width;
+            h = Board.Height;
             grd.Children.Clear();
             grd.ColumnDefinitions.Clear();
             grd.RowDefinitions.Clear();
-            selectionRectangle = new SelectionRectangle();
-            selectionRectangle.DataContext = this;
-            selectionRectangle.SetBinding(Grid.RowProperty, "SelectedTile.Y");
-            selectionRectangle.SetBinding(Grid.ColumnProperty, "SelectedTile.X");
-            for (int r = 0; r < Board.Height; r++)
-            {
-                var rd = new RowDefinition();
-                rd.SetBinding(RowDefinition.HeightProperty, "TileHeight");
-                rd.DataContext = this;
-                grd.RowDefinitions.Add(rd);
-            }
-            for (int c = 0; c < Board.Width; c++)
-            {
-                var cd = new ColumnDefinition();
-                cd.SetBinding(ColumnDefinition.WidthProperty, "TileWidth");
-                cd.DataContext = this;
-                grd.ColumnDefinitions.Add(cd);
-            }
 
             spriteControls.Clear();
             scriptIcons.Clear();
@@ -175,8 +176,16 @@ namespace Tyler.Views
                     var spriteControl = new SpriteControl();
                     grd.Children.Add(spriteControl);
                     spriteControls[(c, r)] = spriteControl;
-                    spriteControl.SetValue(Grid.RowProperty, r);
-                    spriteControl.SetValue(Grid.ColumnProperty, c);
+                    spriteControl.Margin = new Thickness(
+                        c * World.TileWidth,
+                        r * World.TileHeight,
+                        0,
+                        0);
+                    spriteControl.Width = World.TileWidth;
+                    spriteControl.Height = World.TileHeight;
+                    spriteControl.HorizontalAlignment = HorizontalAlignment.Left;
+                    spriteControl.VerticalAlignment = VerticalAlignment.Top;
+                    
                     spriteControl.Tag = new Point(c, r);
                     spriteControl.MouseMove += SpriteControl_MouseMove;
                     spriteControl.MouseDown += SpriteControl_MouseDown;
@@ -186,15 +195,29 @@ namespace Tyler.Views
                         Style = (Style)FindResource("ScriptIcon")
                     };
                     grd.Children.Add(img);
-                    img.SetValue(Grid.RowProperty, r);
-                    img.SetValue(Grid.ColumnProperty, c);
-                    img.SetBinding(Image.VisibilityProperty, "ScriptIconVisibility");
+                    img.Margin = new Thickness(
+                        (c + 0.6) * World.TileWidth,
+                        (r + 0.6) * World.TileHeight,
+                        0,
+                        0);
+                    img.Width = World.TileWidth / 2.5;
+                    img.Height = World.TileHeight / 2.5;
+                    img.HorizontalAlignment = HorizontalAlignment.Left;
+                    img.VerticalAlignment = VerticalAlignment.Top;
                     img.Tag = spriteControl.Tag;
                     scriptIcons[(c, r)] = img;
                 }
             }
 
-            grd.Children.Add(selectionRectangle);
+            if (selectionRectangle == null)
+            {
+                selectionRectangle = new SelectionRectangle();
+                selectionRectangle.Width = World.TileWidth;
+                selectionRectangle.Height = World.TileHeight;
+                selectionRectangle.HorizontalAlignment = HorizontalAlignment.Left;
+                selectionRectangle.VerticalAlignment = VerticalAlignment.Top;
+                grd.Children.Add(selectionRectangle);
+            }
         }
 
         private void SpriteControl_MouseDown(object sender, MouseButtonEventArgs e)
@@ -247,7 +270,7 @@ namespace Tyler.Views
             previewImg.Height = Board.Height * World.TileHeight;
             var drawingVisual = new DrawingVisual();
             RenderOptions.SetBitmapScalingMode(drawingVisual, BitmapScalingMode.NearestNeighbor);
-            
+
             using var context = drawingVisual.RenderOpen();
             for (int r = 0; r < Board.Height; r++)
             {
@@ -258,7 +281,7 @@ namespace Tyler.Views
                         if (World.SpriteMap.TryGetValue(tile.Char, out var sprite))
                         {
                             var img = _bitmapCache.Get(sprite.Path, sprite.X, sprite.Y, sprite.Width, sprite.Height);
-                            
+
                             context.DrawImage(img, new Rect(
                                 upscale * c * World.TileWidth,
                                 upscale * r * World.TileHeight,
