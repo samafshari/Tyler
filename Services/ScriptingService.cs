@@ -52,7 +52,7 @@ namespace Tyler.Services
             if (!string.IsNullOrWhiteSpace(board.BeforeScript))
             {
                 sb.AppendLine("begin_section");
-                sb.AppendLine(board.BeforeScript);
+                sb.AppendLine(board.BeforeScript.Trim());
                 sb.AppendLine("end_before_script");
             }
             sb.AppendLine();
@@ -61,14 +61,14 @@ namespace Tyler.Services
                 if (!string.IsNullOrWhiteSpace(tile.Script))
                 {
                     sb.AppendLine($"pos {tile.X},{tile.Y}");
-                    sb.AppendLine(tile.Script);
+                    sb.AppendLine(tile.Script.Trim());
                     sb.AppendLine();
                 }
             }
             if (!string.IsNullOrWhiteSpace(board.AfterScript))
             {
                 sb.AppendLine("begin_section");
-                sb.AppendLine(board.BeforeScript);
+                sb.AppendLine(board.AfterScript.Trim());
                 sb.AppendLine("end_after_script");
             }
             return sb.ToString();
@@ -129,13 +129,13 @@ namespace Tyler.Services
                     if (command == "end_before_script")
                     {
                         isReadingSection = false;
-                        board.BeforeScript = sb.ToString();
+                        board.BeforeScript = sb.ToString().Trim();
                         continue;
                     }
                     if (command == "end_after_script")
                     {
                         isReadingSection = false;
-                        board.AfterScript = sb.ToString();
+                        board.AfterScript = sb.ToString().Trim();
                         continue;
                     }
 

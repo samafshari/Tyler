@@ -155,6 +155,13 @@ namespace Tyler.ViewModels
             }
         }
 
+        public void Revert()
+        {
+            var confirm = _routingService.ShowConfirmDialog("Warning", "Your unsaved changes will be lost. Are you sure?");
+            if (confirm)
+                Load();
+        }
+
         public void Load()
         {
             if (!File.Exists(Path))
@@ -372,7 +379,7 @@ namespace Tyler.ViewModels
 
         public CommandModel NewCommand => new CommandModel(New);
         public CommandModel OpenCommand => new CommandModel(LoadAs);
-        public CommandModel RevertCommand => new CommandModel(Load);
+        public CommandModel RevertCommand => new CommandModel(Revert);
         public CommandModel SaveCommand => new CommandModel(Save);
         public CommandModel SaveAsCommand => new CommandModel(SaveAs);
         public CommandModel AddBoardCommand => new CommandModel(AddBoard);

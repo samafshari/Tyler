@@ -241,7 +241,9 @@
                         </ContextMenu>
                     </local:SpriteSheetExplorerControl.ContextMenu>
                 </local:SpriteSheetExplorerControl>
-
+            </TabItem>
+            <TabItem Header="Board">
+                <local:BoardSettingsControl DataContext="{Binding SelectedBoard}"/>
             </TabItem>
         </TabControl>
         

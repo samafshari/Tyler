@@ -10,32 +10,5 @@
     <d:Window.DataContext>
         <vm:BoardViewModel />
     </d:Window.DataContext>
-    <Grid>
-        <StackPanel Margin="10">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.Row="0" Grid.Column="0" Text="Width:" />
-                <TextBlock Grid.Row="1" Grid.Column="0" Text="Height:" />
-                <TextBlock Grid.Row="2" Grid.Column="0" Text="Id:" />
-                <TextBlock Grid.Row="3" Grid.Column="0" Text="Name:" />
-                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Width}" />
-                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Height}" />
-                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Id}" />
-                <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Name}" />
-                <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
-                    <Button Content="Rebuild Tile Grid" Command="{Binding BuildTileGridCommand}" />
-                </StackPanel>
-            </Grid>
-        </StackPanel>
-    </Grid>
+    <local:BoardSettingsControl />
 </local:WindowBase>
