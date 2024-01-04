@@ -1,0 +1,36 @@
+<UserControl 
+	xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:vm="clr-namespace:Tyler.ViewModels"
+	xmlns:local="clr-namespace:Tyler.Views"
+    mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+    x:Class="Tyler.Views.SpriteSheetExplorerControl">
+	<Grid x:Name="grd">
+		<!--<ListView x:Name="lst" ItemsSource="{Binding Sprites}" SelectedItem="{Binding SelectedSprite}">
+			<ListView.ItemsPanel>
+				<ItemsPanelTemplate>
+					<WrapPanel />
+				</ItemsPanelTemplate>
+			</ListView.ItemsPanel>
+			<ListView.ItemTemplate>
+				<DataTemplate>
+					<StackPanel>
+						<local:SpriteControl Sprite="{Binding}" Source="{Binding Path}" Width="50" Height="50" />
+						<TextBlock Text="{Binding DisplayName}" HorizontalAlignment="Center" />
+					</StackPanel>
+				</DataTemplate>
+			</ListView.ItemTemplate>
+			<ListView.Template>
+				<ControlTemplate TargetType="ListView">
+					<Border>
+						<ScrollViewer HorizontalScrollBarVisibility="Disabled">
+							<ItemsPresenter />
+						</ScrollViewer>
+					</Border>
+				</ControlTemplate>
+			</ListView.Template>
+		</ListView>-->
+	</Grid>
+</UserControl>

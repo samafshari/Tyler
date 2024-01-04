@@ -1,0 +1,27 @@
+<UserControl 
+	xmlns="https://github.com/avaloniaui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:local="clr-namespace:Tyler.Views"
+	xmlns:vm="clr-namespace:Tyler.ViewModels"
+	mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+	x:Class="Tyler.Views.SpriteSheetControl">
+	<Grid
+		HorizontalAlignment="Left"
+		VerticalAlignment="Top">
+		<Image
+            x:Name="img"
+            Stretch="Uniform"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            />
+		<local:RelativeRect
+            x:Name="rect"
+			x:DataType="local:SpriteSheetControl"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            Sprite="{Binding Sprite}"
+            />
+	</Grid>
+</UserControl>
