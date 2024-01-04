@@ -16,6 +16,8 @@ namespace Tyler.Services
     {
         readonly SettingsService _settingsService;
 
+        public Func<Window?> GetWindowFunc;
+
         public RoutingService()
         {
             _settingsService = ContainerService.Instance.GetOrCreate<SettingsService>();
@@ -23,6 +25,9 @@ namespace Tyler.Services
 
         public Window? GetMainWindow()
         {
+            if (GetWindowFunc != null)
+                return GetWindowFunc();
+
             var windows = (Avalonia.Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.Windows;
             return windows?.FirstOrDefault();
         }
@@ -128,73 +133,78 @@ namespace Tyler.Services
 
         public void ShowSpriteSheetEditor(string? path)
         {
-            //var window = new SpriteSheetEditorWindow();
-            //var vm = new SpriteSheetEditorViewModel();
-            //if (File.Exists(path)) vm.LoadPNG(path);
-            //window.DataContext = vm;
-
-            //window.Show();
+            var window = new SpriteSheetEditorWindow();
+            var vm = new SpriteSheetEditorViewModel();
+            if (File.Exists(path)) vm.LoadPNG(path);
+            window.DataContext = vm;
+            window.Show();
         }
 
         public void ShowSpriteSheetEditor(SpriteSheetViewModel spriteSheet, SpriteViewModel? selectedSprite)
         {
-            //var window = new SpriteSheetEditorWindow();
-            //var vm = new SpriteSheetEditorViewModel();
-            //vm.SpriteSheet = spriteSheet;
-            //vm.SelectedSprite = selectedSprite;
-            //window.DataContext = vm;
-            //window.Show();
+            var window = new SpriteSheetEditorWindow();
+            var vm = new SpriteSheetEditorViewModel();
+            vm.SpriteSheet = spriteSheet;
+            vm.SelectedSprite = selectedSprite;
+            window.DataContext = vm;
+            window.Show();
         }
 
         public void ShowAutoSlice(SpriteSheetEditorViewModel editor)
         {
-            //var window = new AutoSliceWindow();
-            //var vm = new AutoSliceViewModel(editor);
-            //window.DataContext = vm;
-            //window.Show();
+            var window = new AutoSliceWindow();
+            var vm = new AutoSliceViewModel(editor);
+            window.DataContext = vm;
+            window.Show();
         }
 
         public void ShowWorldEditor()
         {
-            //var window = new WorldEditorWindow();
-            //var vm = new WorldViewModel();
-            //if (File.Exists(_settingsService.Data.LastWorldPath))
-            //{
-            //    vm.Path = _settingsService.Data.LastWorldPath;
-            //    vm.Load();
-            //}
-            //window.DataContext = vm;
-            //window.Show();
+            var window = new WorldEditorWindow();
+            var vm = new WorldViewModel();
+            if (File.Exists(_settingsService.Data.LastWorldPath))
+            {
+                vm.Path = _settingsService.Data.LastWorldPath;
+                vm.Load();
+            }
+            window.DataContext = vm;
+            window.Show();
         }
 
         public void ShowTileDefsEditor(WorldViewModel world)
         {
-            //var window = new TileDefsEditorWindow();
-            //var vm = new TileDefsEditorViewModel(world);
-            //window.DataContext = vm;
-            //window.Show();
+            var window = new TileDefsEditorWindow();
+            var vm = new TileDefsEditorViewModel(world);
+            window.DataContext = vm;
+            window.Show();
         }
 
         public void ShowWorldSpriteSheetManager(WorldViewModel world)
         {
-            //var window = new WorldSpriteSheetManagerWindow();
-            //var vm = new WorldSpriteSheetManagerViewModel(world);
-            //window.DataContext = vm;
-            //window.Show();
+            var window = new WorldSpriteSheetManagerWindow();
+            var vm = new WorldSpriteSheetManagerViewModel(world);
+            window.DataContext = vm;
+            window.Show();
         }
 
         public void ShowBoardSettings(BoardViewModel board)
         {
-            //var window = new BoardSettingsWindow();
-            //window.DataContext = board;
-            //window.ShowDialog();
+            var owner = GetMainWindow();
+            if (owner == null)
+                throw new InvalidOperationException("Cannot show board settings without a parent window.");
+            var window = new BoardSettingsWindow();
+            window.DataContext = board;
+            window.ShowDialog(owner);
         }
 
         public void ShowWorldSettings(WorldViewModel world)
         {
-            //var window = new WorldSettingsWindow();
-            //window.DataContext = world;
-            //window.ShowDialog();
+            var owner = GetMainWindow();
+            if (owner == null)
+                throw new InvalidOperationException("Cannot show world settings without a parent window.");
+            var window = new WorldSettingsWindow();
+            window.DataContext = world;
+            window.ShowDialog(owner);
         }
     }
 }

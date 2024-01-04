@@ -125,7 +125,7 @@ namespace Tyler.Views
         public void Update()
         {
             if (Board == null || World == null) return;
-            if (Board.Width != w || Board.Height != h)
+            if (Board.Width != w || Board.Height != h || selectionRectangle == null)
                 RebuildGrid();
 
             foreach (var sc in spriteControls)

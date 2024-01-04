@@ -7,22 +7,22 @@
 	xmlns:local="clr-namespace:Tyler.Views"
     mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
     x:Class="Tyler.Views.SpriteSheetExplorerControl">
-	<Grid x:Name="grd">
-		<!--<ListView x:Name="lst" ItemsSource="{Binding Sprites}" SelectedItem="{Binding SelectedSprite}">
-			<ListView.ItemsPanel>
+	<Grid x:Name="grd" x:DataType="local:SpriteSheetExplorerControl">
+		<ListBox x:Name="lst" ItemsSource="{Binding Sprites}" SelectedItem="{Binding SelectedSprite}">
+			<!--<ListView.ItemsPanel>
 				<ItemsPanelTemplate>
 					<WrapPanel />
 				</ItemsPanelTemplate>
-			</ListView.ItemsPanel>
-			<ListView.ItemTemplate>
+			</ListView.ItemsPanel>-->
+			<ListBox.ItemTemplate>
 				<DataTemplate>
 					<StackPanel>
 						<local:SpriteControl Sprite="{Binding}" Source="{Binding Path}" Width="50" Height="50" />
 						<TextBlock Text="{Binding DisplayName}" HorizontalAlignment="Center" />
 					</StackPanel>
 				</DataTemplate>
-			</ListView.ItemTemplate>
-			<ListView.Template>
+			</ListBox.ItemTemplate>
+			<!--<ListView.Template>
 				<ControlTemplate TargetType="ListView">
 					<Border>
 						<ScrollViewer HorizontalScrollBarVisibility="Disabled">
@@ -30,7 +30,7 @@
 						</ScrollViewer>
 					</Border>
 				</ControlTemplate>
-			</ListView.Template>
-		</ListView>-->
+			</ListView.Template>-->
+		</ListBox>
 	</Grid>
 </UserControl>

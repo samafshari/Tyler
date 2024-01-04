@@ -3,6 +3,11 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 
+using Net.Essentials;
+
+using System;
+
+using Tyler.Services;
 using Tyler.ViewModels;
 using Tyler.Views;
 
@@ -10,6 +15,13 @@ namespace Tyler;
 
 public partial class App : Application
 {
+    readonly RoutingService routingService;
+
+    public App()
+    {
+        routingService = ContainerService.Instance.GetOrCreate<RoutingService>();
+    }
+
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
@@ -23,18 +35,17 @@ public partial class App : Application
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            desktop.MainWindow = new MainWindow
-            {
-                DataContext = new MainViewModel()
-            };
+            routingService.GetWindowFunc = () => desktop.MainWindow;
+            routingService.ShowWorldEditor();
         }
-        else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform)
-        {
-            singleViewPlatform.MainView = new MainView
-            {
-                DataContext = new MainViewModel()
-            };
-        }
+        else throw new NotSupportedException("Unsupported application lifetime.");
+        //else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform)
+        //{
+        //    singleViewPlatform.MainView = new MainView
+        //    {
+        //        DataContext = new MainViewModel()
+        //    };
+        //}
 
         base.OnFrameworkInitializationCompleted();
     }
