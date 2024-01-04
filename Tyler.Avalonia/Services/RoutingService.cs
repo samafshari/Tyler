@@ -16,7 +16,7 @@ namespace Tyler.Services
     {
         readonly SettingsService _settingsService;
 
-        public Func<Window?> GetWindowFunc;
+        public Func<Window?>? GetWindowFunc;
 
         public RoutingService()
         {
@@ -25,11 +25,17 @@ namespace Tyler.Services
 
         public Window? GetMainWindow()
         {
+            Window? window = null;
             if (GetWindowFunc != null)
-                return GetWindowFunc();
+                window = GetWindowFunc();
 
-            var windows = (Avalonia.Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.Windows;
-            return windows?.FirstOrDefault();
+            if (window == null)
+            {
+                var windows = (Avalonia.Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.Windows;
+                return windows?.FirstOrDefault();
+            }
+
+            return window;
         }
 
         public async Task<bool> ShowConfirmDialogAsync(Window? parent, string title, string text)
