@@ -4,12 +4,18 @@ using System.Linq;
 using Tyler.Models;
 using Tyler.Services;
 using Net.Essentials;
+using Avalonia.Media.Imaging;
 
 namespace Tyler.ViewModels
 {
     public class SpriteViewModel : ViewModel
     {
-        readonly BitmapCache _bitmapCache;
+        static readonly BitmapCache _bitmapCache;
+
+        static SpriteViewModel()
+        {
+            _bitmapCache = ContainerService.Instance.GetOrCreate<BitmapCache>();
+        }
 
         public string DisplayName => ToString();
 
@@ -28,28 +34,44 @@ namespace Tyler.ViewModels
         public int X
         {
             get => _x;
-            set => SetProperty(ref _x, value);
+            set
+            {
+                SetProperty(ref _x, value);
+                RaisePropertyChanged(nameof(Bitmap));
+            }
         }
 
         int _y;
         public int Y
         {
             get => _y;
-            set => SetProperty(ref _y, value);
+            set
+            {
+                SetProperty(ref _y, value);
+                RaisePropertyChanged(nameof(Bitmap));
+            }
         }
 
         int _width;
         public int Width
         {
             get => _width;
-            set => SetProperty(ref _width, value);
+            set
+            {
+                SetProperty(ref _width, value);
+                RaisePropertyChanged(nameof(Bitmap));
+            }
         }
 
         int _height;
         public int Height
         {
             get => _height;
-            set => SetProperty(ref _height, value);
+            set
+            {
+                SetProperty(ref _height, value);
+                RaisePropertyChanged(nameof(Bitmap));
+            }
         }
 
         char _char = Vars.UnassignedChar;
@@ -70,15 +92,18 @@ namespace Tyler.ViewModels
         public string? Path
         {
             get => _path;
-            set => SetProperty(ref _path, value);
+            set
+            {
+                SetProperty(ref _path, value);
+                RaisePropertyChanged(nameof(Bitmap));
+            }
         }
 
-        public SpriteViewModel()
-        {
-            _bitmapCache = ContainerService.Instance.GetOrCreate<BitmapCache>();
-        }
+        public CroppedBitmap? Bitmap => _bitmapCache.Get(Path, X, Y, Width, Height);
 
-        public SpriteViewModel(string path, Sprite sprite) : this()
+        public SpriteViewModel() { }
+
+        public SpriteViewModel(string path, Sprite sprite)
         {
             Path = path;
             sprite.Inject(this);
@@ -97,11 +122,15 @@ namespace Tyler.ViewModels
             return $"[{Char}] {Id}";
         }
 
-        public Size? GetImageSize()
+        public Size? GetSpriteSheetSize()
         {
-            if (!File.Exists(Path)) return default;
             var bmp = _bitmapCache.Get(Path);
             return bmp?.Size;
+        }
+
+        public Size GetSpriteSize()
+        {
+            return new Size(Width, Height);
         }
     }
 }

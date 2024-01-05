@@ -1,4 +1,6 @@
-﻿using Net.Essentials;
+﻿using Avalonia.Media.Imaging;
+
+using Net.Essentials;
 
 using Newtonsoft.Json;
 
@@ -17,6 +19,7 @@ namespace Tyler.ViewModels
 {
     public class SpriteSheetViewModel : ViewModel
     {
+        readonly BitmapCache _bitmapCache;
         readonly RoutingService _routingService;
         readonly SettingsService _settingsService;
 
@@ -35,13 +38,17 @@ namespace Tyler.ViewModels
             {
                 SetProperty(ref _path, value);
                 RaisePropertyChanged(nameof(FileName));
+                RaisePropertyChanged(nameof(Bitmap));
             }
         }
 
         public string FileName => File.Exists(Path) ? System.IO.Path.GetFileNameWithoutExtension(Path) : $"[FNF] {Path}";
 
+        public Bitmap? Bitmap => _bitmapCache.Get(Path);
+
         public SpriteSheetViewModel()
         {
+            _bitmapCache = ContainerService.Instance.GetOrCreate<BitmapCache>();
             _routingService = ContainerService.Instance.GetOrCreate<RoutingService>();
             _settingsService = ContainerService.Instance.GetOrCreate<SettingsService>();
         }

@@ -42,9 +42,9 @@
 						</ItemsPanelTemplate>
 					</ListBox.ItemsPanel>
 					<ListBox.ItemTemplate>
-						<DataTemplate>
+						<DataTemplate x:DataType="vm:SpriteSheetViewModel">
 							<StackPanel Width="100">
-								<Image Source="{Binding Path}" Width="75" Height="75" />
+								<Image Source="{Binding Bitmap}" Width="75" Height="75" />
 								<TextBlock Text="{Binding FileName}" HorizontalAlignment="Center" />
 							</StackPanel>
 						</DataTemplate>

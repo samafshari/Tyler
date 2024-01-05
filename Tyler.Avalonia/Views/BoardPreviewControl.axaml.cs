@@ -192,10 +192,8 @@ namespace Tyler.Views
                     spriteControl.PointerMoved += SpriteControl_PointerMoved;
                     spriteControl.PointerPressed += SpriteControl_PointerPressed;
 
-                    var img = new Image
-                    { };
-                    //    Style = (Style)FindResource("ScriptIcon")
-                    //};
+                    var img = new Image();
+                    img.Classes.Add("ScriptIcon");
                     grd.Children.Add(img);
                     img.Margin = new Thickness(
                         (c + 0.6) * World.TileWidth,

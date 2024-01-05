@@ -43,18 +43,8 @@ namespace Tyler.Views
         public SpriteSheetControl()
         {
             InitializeComponent();
-            Update();
-            this.GetObservable(SpriteSheetProperty).Subscribe(new AnonymousObserver<SpriteSheetViewModel?>(s => Update()));
-            this.GetObservable(SpriteProperty).Subscribe(new AnonymousObserver<SpriteViewModel?>(s => Update()));
-        }
-
-        void Update()
-        {
-            var vm = SpriteSheet;
-            if (vm == null) return;
-            if (vm.Sprites == null) return;
-            var bmp = _cache.Get(vm.Path);
-            img.Source = bmp;
+            img.Bind(Image.SourceProperty, new Binding("SpriteSheet.Bitmap") { Source = this });
+            rect.Bind(RelativeRect.SpriteProperty, new Binding("Sprite") { Source = this });
         }
     }
 }

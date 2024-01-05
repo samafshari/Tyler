@@ -9,6 +9,7 @@ namespace Tyler.Views
 {
     public partial class RelativeRect : UserControl
     {
+        SpriteViewModel? _oldSprite;
         public SpriteViewModel? Sprite
         {
             get => (SpriteViewModel?)GetValue(SpriteProperty);
@@ -31,10 +32,13 @@ namespace Tyler.Views
 
         void RegisterCallbacks()
         {
+            if (_oldSprite != null)
+                _oldSprite.PropertyChanged -= Sprite_PropertyChanged;
             if (Sprite != null)
             {
                 Sprite.PropertyChanged -= Sprite_PropertyChanged;
                 Sprite.PropertyChanged += Sprite_PropertyChanged;
+                _oldSprite = Sprite;
             }
         }
 
@@ -54,16 +58,18 @@ namespace Tyler.Views
             if (Sprite == null) return;
             else
             {
-                var sz = Sprite.GetImageSize();
+                var sz = Sprite.GetSpriteSheetSize();
                 if (sz == null) return;
                 if (sz.Value.Width <= 0 || sz.Value.Height <= 0) return;
+                if (double.IsNaN(sz.Value.Width) || double.IsNaN(sz.Value.Height)) return;
+                if (Bounds.Width <= 0 || Bounds.Height <= 0) return;
+                if (double.IsNaN(Bounds.Width) || double.IsNaN(Bounds.Height)) return;
 
-                rect.Width = (double)Sprite.Width * Width / sz.Value.Width;
-                rect.Height = (double)Sprite.Height * Height / sz.Value.Height;
+                rect.Width = (double)Sprite.Width * Bounds.Width / sz.Value.Width;
+                rect.Height = (double)Sprite.Height * Bounds.Height / sz.Value.Height;
                 rect.Margin = new Thickness(
-                    (double)Sprite.X * Width / sz.Value.Width,
-                    (double)Sprite.Y * Height / sz.Value.Height
-                    , 0, 0);
+                    (double)Sprite.X * Bounds.Width / sz.Value.Width,
+                    (double)Sprite.Y * Bounds.Height / sz.Value.Height, 0, 0);
                 rect.HorizontalAlignment = HorizontalAlignment.Left;
                 rect.VerticalAlignment = VerticalAlignment.Top;
             }

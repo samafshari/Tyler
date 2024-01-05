@@ -6,5 +6,26 @@
 
     <Application.Styles>
         <FluentTheme />
+		<StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml"/>
+		<Style Selector="GridSplitter.h">
+			<Setter Property="Height" Value="2" />
+			<Setter Property="HorizontalAlignment" Value="Stretch" />
+			<Setter Property="VerticalAlignment" Value="Bottom" />
+			<Setter Property="Background" Value="#AAAAAA" />
+		</Style>
+		<Style Selector="GridSplitter.v">
+			<Setter Property="Width" Value="2" />
+			<Setter Property="HorizontalAlignment" Value="Right" />
+			<Setter Property="VerticalAlignment" Value="Stretch" />
+			<Setter Property="Background" Value="#AAAAAA" />
+		</Style>
+		<Style Selector="Image.ScriptIcon">
+			<Setter Property="Width" Value="16" />
+			<Setter Property="Height" Value="16" />
+			<Setter Property="VerticalAlignment" Value="Bottom" />
+			<Setter Property="HorizontalAlignment" Value="Right" />
+			<Setter Property="Margin" Value="1" />
+			<Setter Property="Source" Value="/Assets/setting.png" />
+		</Style>
     </Application.Styles>
 </Application>

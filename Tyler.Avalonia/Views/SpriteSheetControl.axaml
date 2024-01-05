@@ -15,13 +15,12 @@
             Stretch="Uniform"
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
+			RenderOptions.BitmapInterpolationMode="None"
             />
 		<local:RelativeRect
             x:Name="rect"
-			x:DataType="local:SpriteSheetControl"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
-            Sprite="{Binding Sprite}"
             />
 	</Grid>
 </UserControl>

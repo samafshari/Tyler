@@ -9,28 +9,19 @@
     x:Class="Tyler.Views.SpriteSheetExplorerControl">
 	<Grid x:Name="grd" x:DataType="local:SpriteSheetExplorerControl">
 		<ListBox x:Name="lst" ItemsSource="{Binding Sprites}" SelectedItem="{Binding SelectedSprite}">
-			<!--<ListView.ItemsPanel>
+			<ListBox.ItemsPanel>
 				<ItemsPanelTemplate>
 					<WrapPanel />
 				</ItemsPanelTemplate>
-			</ListView.ItemsPanel>-->
+			</ListBox.ItemsPanel>
 			<ListBox.ItemTemplate>
-				<DataTemplate>
+				<DataTemplate x:DataType="vm:SpriteViewModel">
 					<StackPanel>
-						<local:SpriteControl Sprite="{Binding}" Source="{Binding Path}" Width="50" Height="50" />
+						<local:SpriteControl Sprite="{Binding}" Width="50" Height="50" />
 						<TextBlock Text="{Binding DisplayName}" HorizontalAlignment="Center" />
 					</StackPanel>
 				</DataTemplate>
 			</ListBox.ItemTemplate>
-			<!--<ListView.Template>
-				<ControlTemplate TargetType="ListView">
-					<Border>
-						<ScrollViewer HorizontalScrollBarVisibility="Disabled">
-							<ItemsPresenter />
-						</ScrollViewer>
-					</Border>
-				</ControlTemplate>
-			</ListView.Template>-->
 		</ListBox>
 	</Grid>
 </UserControl>

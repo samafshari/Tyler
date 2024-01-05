@@ -11,11 +11,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Avalonia.Desktop" Version="$(AvaloniaVersion)" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Tyler.Avalonia\Tyler.csproj" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.0.6" />
   </ItemGroup>
 
   <ItemGroup>

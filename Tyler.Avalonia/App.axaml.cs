@@ -38,14 +38,14 @@ public partial class App : Application
             routingService.GetWindowFunc = () => desktop.MainWindow;
             routingService.ShowWorldEditor();
         }
-        else throw new NotSupportedException("Unsupported application lifetime.");
-        //else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform)
-        //{
-        //    singleViewPlatform.MainView = new MainView
-        //    {
-        //        DataContext = new MainViewModel()
-        //    };
-        //}
+        //else throw new NotSupportedException("Unsupported application lifetime.");
+        else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform)
+        {
+            singleViewPlatform.MainView = new MainView
+            {
+                DataContext = new MainViewModel()
+            };
+        }
 
         base.OnFrameworkInitializationCompleted();
     }

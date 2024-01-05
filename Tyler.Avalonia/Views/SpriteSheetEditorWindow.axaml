@@ -7,7 +7,7 @@
     x:Class="Tyler.Views.SpriteSheetEditorWindow"
 	xmlns:local="clr-namespace:Tyler.Views"
 	xmlns:vm="clr-namespace:Tyler.ViewModels"
-    Title="SpriteSheetEditorWindow"
+    Title="Sprite Sheet Editor"
 	x:DataType="vm:SpriteSheetEditorViewModel">
 	<Grid>
 		<Grid.RowDefinitions>
@@ -42,30 +42,29 @@
 					<RowDefinition Height="*" />
 				</Grid.RowDefinitions>
 
-				<!--<ListView Grid.Row="1" ItemsSource="{Binding SpriteSheet.Sprites}" SelectedItem="{Binding SelectedSprite}">
-					<ListView.View>
-						<GridView>
-							<GridViewColumn Header="Sprite" Width="32">
-								<GridViewColumn.CellTemplate>
-									<DataTemplate>
-										<local:SpriteControl Sprite="{Binding}" />
-									</DataTemplate>
-								</GridViewColumn.CellTemplate>
-							</GridViewColumn>
-							<GridViewColumn Header="Id" DisplayMemberBinding="{Binding Id}" Width="40" />
-							<GridViewColumn Header="Char" DisplayMemberBinding="{Binding Char}" Width="40" />
-							<GridViewColumn Header="X" DisplayMemberBinding="{Binding X}" Width="30"/>
-							<GridViewColumn Header="Y" DisplayMemberBinding="{Binding Y}" Width="30"/>
-							<GridViewColumn Header="Width" DisplayMemberBinding="{Binding Width}" Width="40"/>
-							<GridViewColumn Header="Height" DisplayMemberBinding="{Binding Height}" Width="40"/>
-						</GridView>
-					</ListView.View>
-					<ListView.ContextMenu>
+				<DataGrid
+					Grid.Row="1"
+					ItemsSource="{Binding SpriteSheet.Sprites}" 
+					SelectedItem="{Binding SelectedSprite}">
+					<DataGrid.Columns>
+						<DataGridTemplateColumn Header="Sprite" Width="32">
+							<DataTemplate>
+								<local:SpriteControl Sprite="{Binding}" />
+							</DataTemplate>
+						</DataGridTemplateColumn>
+						<DataGridTextColumn Header="Id" Binding="{Binding Id}" Width="40" />
+						<DataGridTextColumn Header="Char" Binding="{Binding Char}" Width="40" />
+						<DataGridTextColumn Header="X" Binding="{Binding X}" Width="30"/>
+						<DataGridTextColumn Header="Y" Binding="{Binding Y}" Width="30"/>
+						<DataGridTextColumn Header="Width" Binding="{Binding Width}" Width="40"/>
+						<DataGridTextColumn Header="Height" Binding="{Binding Height}" Width="40"/>
+					</DataGrid.Columns>
+					<DataGrid.ContextMenu>
 						<ContextMenu>
 							<MenuItem Header="Remove" Command="{Binding RemoveSpriteCommand}" />
 						</ContextMenu>
-					</ListView.ContextMenu>
-				</ListView>-->
+					</DataGrid.ContextMenu>
+				</DataGrid>
 			</Grid>
 
 			<Grid x:Name="MiddlePane" Grid.Column="1" Margin="5, 0, 0, 0">
@@ -74,14 +73,13 @@
 					<RowDefinition Height="*" />
 				</Grid.RowDefinitions>
 				<Grid>
-					<!--<local:SpriteSheetControl
+					<local:SpriteSheetControl
                         SpriteSheet="{Binding SpriteSheet}"
                         Sprite="{Binding SelectedSprite}"
-                        />-->
-
+                        />
 				</Grid>
 				<Grid Grid.Row="1">
-					<!--<local:SpriteSheetExplorerControl Sprites="{Binding SpriteSheet.Sprites}" SelectedSprite="{Binding SelectedSprite, Mode=TwoWay}" />-->
+					<local:SpriteSheetExplorerControl Sprites="{Binding SpriteSheet.Sprites}" SelectedSprite="{Binding SelectedSprite, Mode=TwoWay}" />
 				</Grid>
 				<GridSplitter Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Height="5" />
 			</Grid>

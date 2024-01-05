@@ -5,19 +5,22 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Tyler.Views.SelectionRect">
 	<Rectangle Stroke="Magenta" StrokeThickness="2" x:Name="rect">
-		<!--<Rectangle.Triggers>
-			<EventTrigger RoutedEvent="Rectangle.Loaded">
-				<BeginStoryboard>
-					<Storyboard RepeatBehavior="Forever" AutoReverse="True">
-						<ColorAnimation
-                            Storyboard.TargetName="rect"
-                            Storyboard.TargetProperty="(Rectangle.Stroke).(SolidColorBrush.Color)"
-                            To="White"
-                            Duration="0:0:2"
-                            From="#FFA300FF" />
-					</Storyboard>
-				</BeginStoryboard>
-			</EventTrigger>
-		</Rectangle.Triggers>-->
+		<Rectangle.Styles>
+			<Style Selector="Rectangle">
+				<Style.Animations>
+					<Animation Duration="0:0:3">
+						<KeyFrame Cue="0%">
+							<Setter Property="Rectangle.Stroke" Value="Magenta" />
+						</KeyFrame>
+						<KeyFrame Cue="50%">
+							<Setter Property="Rectangle.Stroke" Value="White" />
+						</KeyFrame>
+						<KeyFrame Cue="100%">
+							<Setter Property="Rectangle.Stroke" Value="Magenta" />
+						</KeyFrame>
+					</Animation>
+				</Style.Animations>
+			</Style>
+		</Rectangle.Styles>
 	</Rectangle>
 </UserControl>
