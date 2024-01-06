@@ -92,7 +92,7 @@ namespace Tyler.ViewModels
             _spriteSheet = editor.SpriteSheet;
         }
 
-        public async Task SliceByRowsColumnAsync()
+        public void SliceByRowsColumn()
         {
             var bmp = _spriteSheet.Bitmap;
             if (bmp == null) return;
@@ -100,10 +100,10 @@ namespace Tyler.ViewModels
             var h = bmp.PixelSize.Height - OffsetTop - OffsetBottom - ((Rows - 1) * YGap);
             Width = w / Columns;
             Height = h / Rows;
-            await SliceBySizeAsync();
+            SliceBySize();
         }
 
-        public async Task SliceBySizeAsync()
+        public void  SliceBySize()
         {
             var bmp = _spriteSheet.Bitmap;
             if (bmp == null) return;
@@ -125,11 +125,11 @@ namespace Tyler.ViewModels
                 }
                 x = OffsetLeft;
             }
-            await _routingService.ShowDialogAsync(default, "Slice Complete", "Slicing completed.");
+            _routingService.ShowDialog(default, "Slice Complete", "Slicing completed.");
         }
 
-        public CommandModel SliceByRowsColumnCommand => new CommandModel(SliceByRowsColumnAsync);
-        public CommandModel SliceBySizeCommand => new CommandModel(SliceBySizeAsync);
+        public CommandModel SliceByRowsColumnCommand => new CommandModel(SliceByRowsColumn);
+        public CommandModel SliceBySizeCommand => new CommandModel(SliceBySize);
         public CommandModel ClearSpritesCommand => _editor.ClearSpritesCommand;
     }
 }

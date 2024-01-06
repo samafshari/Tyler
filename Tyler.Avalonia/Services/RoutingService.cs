@@ -23,6 +23,9 @@ namespace Tyler.Services
             _settingsService = ContainerService.Instance.GetOrCreate<SettingsService>();
         }
 
+        void RunOnUI(Action a) => ViewModel.RunOnUIAction(a);
+        Task RunOnUIAsync(Func<Task> a) => ViewModel.RunOnUITask(a);
+
         public Window? GetMainWindow()
         {
             Window? window = null;
@@ -56,6 +59,11 @@ namespace Tyler.Services
 
             var result = await MessageBoxWindow.ShowConfirmDialogAsync(parent, title, text, ["OK"]);
             return result == "OK";
+        }
+        
+        public void ShowDialog(Window? parent, string title, string text)
+        {
+            RunOnUIAsync(() => ShowDialogAsync(parent, title, text));
         }
 
         static IReadOnlyList<FilePickerFileType> GetFileFilter(string extension, string typeName)
