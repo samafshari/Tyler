@@ -5,26 +5,17 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:local="clr-namespace:Tyler.Views"
 	xmlns:vm="clr-namespace:Tyler.ViewModels"
-	mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+	mc:Ignorable="d"
     x:Class="Tyler.Views.AutoSliceWindow"
 	x:DataType="vm:AutoSliceViewModel"
-    Title="Auto Slice Window">
-	<Grid>
+    Title="Auto Slice Window"
+	SizeToContent="WidthAndHeight"
+	WindowStartupLocation="CenterOwner"
+	WindowState="Normal"
+	CanResize="False">
+	<Grid Margin="10">
 		<StackPanel>
-			<Grid>
-				<Grid.ColumnDefinitions>
-					<ColumnDefinition Width="Auto"/>
-					<ColumnDefinition Width="*"/>
-					<ColumnDefinition Width="Auto"/>
-					<ColumnDefinition Width="*"/>
-				</Grid.ColumnDefinitions>
-				<Grid.RowDefinitions>
-					<RowDefinition Height="Auto" />
-					<RowDefinition Height="Auto" />
-					<RowDefinition Height="Auto" />
-					<RowDefinition Height="Auto" />
-					<RowDefinition Height="Auto" />
-				</Grid.RowDefinitions>
+			<Grid ColumnDefinitions="Auto, *, Auto, *" RowDefinitions="Auto, Auto, Auto, Auto, Auto">
 				<Label Grid.Row="0" Grid.Column="0" Content="X Gap:" />
 				<TextBox Grid.Row="0" Grid.Column="1" Text="{Binding XGap}" />
 				<Label Grid.Row="0" Grid.Column="2" Content="Y Gap:" />
@@ -46,18 +37,11 @@
 				<Label Grid.Row="4" Grid.Column="2" Content="Rows:" />
 				<TextBox Grid.Row="4" Grid.Column="3" Text="{Binding Rows}" />
 			</Grid>
-			<Grid Margin="10">
-				<Grid.ColumnDefinitions>
-					<ColumnDefinition Width="*" />
-					<ColumnDefinition Width="10" />
-					<ColumnDefinition Width="*" />
-					<ColumnDefinition Width="10" />
-					<ColumnDefinition Width="*" />
-				</Grid.ColumnDefinitions>
+			<StackPanel Orientation="Horizontal" Margin="10" Spacing="10">
 				<Button Content="Slice by Row/Column" Command="{Binding SliceByRowsColumnCommand}" />
-				<Button Grid.Column="2" Content="Slice by Size" Command="{Binding SliceBySizeCommand}" />
-				<Button Grid.Column="4" Content="Delete Existing Slices" Command="{Binding ClearSpritesCommand}" />
-			</Grid>
+				<Button Content="Slice by Size" Command="{Binding SliceBySizeCommand}" />
+				<Button Content="Delete Existing Slices" Command="{Binding ClearSpritesCommand}" />
+			</StackPanel>
 		</StackPanel>
 	</Grid>
 </Window>

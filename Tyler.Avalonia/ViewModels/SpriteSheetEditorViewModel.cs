@@ -59,7 +59,7 @@ namespace Tyler.ViewModels
 
         public CommandModel AutoSliceCommand => new CommandModel(() =>
         {
-            _routingService.ShowAutoSlice(this);
+            _routingService.ShowAutoSlice(default, this);
         });
     }
 }

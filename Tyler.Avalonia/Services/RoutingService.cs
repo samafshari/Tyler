@@ -35,7 +35,7 @@ namespace Tyler.Services
             if (window == null)
             {
                 var windows = (Avalonia.Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.Windows;
-                return windows?.FirstOrDefault();
+                return windows?.LastOrDefault();
             }
 
             return window;
@@ -138,12 +138,16 @@ namespace Tyler.Services
             return null;
         }
 
-        public void ShowAutoSlice(SpriteSheetEditorViewModel editor)
+        public void ShowAutoSlice(Window? parent, SpriteSheetEditorViewModel editor)
         {
+            parent ??= GetMainWindow();
+            if (parent == null)
+                throw new InvalidOperationException("Cannot show open file dialog without a parent window.");
+
             var window = new AutoSliceWindow();
             var vm = new AutoSliceViewModel(editor);
             window.DataContext = vm;
-            window.Show();
+            window.ShowDialog(parent);
         }
 
         public void ShowWorldEditor(bool loadRecent)

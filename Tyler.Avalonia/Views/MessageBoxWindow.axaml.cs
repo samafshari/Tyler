@@ -36,6 +36,7 @@ namespace Tyler.Views
 
             Content = new StackPanel
             {
+                Margin = new Thickness(10),
                 Children =
                 {
                     message,
