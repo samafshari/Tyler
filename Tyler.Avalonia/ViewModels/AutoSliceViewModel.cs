@@ -11,10 +11,9 @@ namespace Tyler.ViewModels
     public class AutoSliceViewModel : ViewModel
     {
         readonly RoutingService _routingService;
-        readonly BitmapCache _cache;
 
         readonly SpriteSheetEditorViewModel _editor;
-        public SpriteSheetEditorViewModel Editor => _editor;
+        readonly SpriteSheetViewModel _spriteSheet;
 
         int _columns = 1;
         public int Columns
@@ -86,21 +85,16 @@ namespace Tyler.ViewModels
             set => SetProperty(ref _offsetBottom, value);
         }
 
-        public AutoSliceViewModel()
+        public AutoSliceViewModel(SpriteSheetEditorViewModel editor)
         {
-            _cache = ContainerService.Instance.GetOrCreate<BitmapCache>();
             _routingService = ContainerService.Instance.GetOrCreate<RoutingService>();
-            _editor = new SpriteSheetEditorViewModel();
-        }
-
-        public AutoSliceViewModel(SpriteSheetEditorViewModel editor) : this()
-        {
             _editor = editor;
+            _spriteSheet = editor.SpriteSheet;
         }
 
         public async Task SliceByRowsColumnAsync()
         {
-            var bmp = _cache.Get(_editor.SpriteSheet?.Path);
+            var bmp = _spriteSheet.Bitmap;
             if (bmp == null) return;
             var w = bmp.PixelSize.Width - OffsetLeft - OffsetRight - ((Columns - 1) * XGap);
             var h = bmp.PixelSize.Height - OffsetTop - OffsetBottom - ((Rows - 1) * YGap);
@@ -111,7 +105,7 @@ namespace Tyler.ViewModels
 
         public async Task SliceBySizeAsync()
         {
-            var bmp = _cache.Get(_editor.SpriteSheet?.Path);
+            var bmp = _spriteSheet.Bitmap;
             if (bmp == null) return;
             var w = bmp.PixelSize.Width;
             var h = bmp.PixelSize.Height;
@@ -122,7 +116,7 @@ namespace Tyler.ViewModels
             {
                 for (; x + Width <= w; x += Width + XGap)
                 {
-                    var sprite = _editor.AddSprite();
+                    var sprite = _spriteSheet.AddSprite();
                     if (sprite == null) return;
                     sprite.X = x;
                     sprite.Y = y;
@@ -136,6 +130,6 @@ namespace Tyler.ViewModels
 
         public CommandModel SliceByRowsColumnCommand => new CommandModel(SliceByRowsColumnAsync);
         public CommandModel SliceBySizeCommand => new CommandModel(SliceBySizeAsync);
-        public CommandModel ClearSpritesCommand => Editor.ClearSpritesCommand;
+        public CommandModel ClearSpritesCommand => _editor.ClearSpritesCommand;
     }
 }

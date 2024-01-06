@@ -36,7 +36,7 @@ public partial class App : Application
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             routingService.GetWindowFunc = () => desktop.MainWindow;
-            routingService.ShowWorldEditor();
+            routingService.ShowWorldEditor(true);
         }
         //else throw new NotSupportedException("Unsupported application lifetime.");
         else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform)

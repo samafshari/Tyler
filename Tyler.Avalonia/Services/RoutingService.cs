@@ -130,32 +130,6 @@ namespace Tyler.Services
             return null;
         }
 
-        public void ShowSpriteSheetEditor()
-        {
-            var lastPngPath = _settingsService.Data.LastOpenedPNGPath;
-            if (!File.Exists(lastPngPath)) lastPngPath = null;
-            ShowSpriteSheetEditor(lastPngPath);
-        }
-
-        public void ShowSpriteSheetEditor(string? path)
-        {
-            var window = new SpriteSheetEditorWindow();
-            var vm = new SpriteSheetEditorViewModel();
-            if (File.Exists(path)) vm.LoadPNG(path);
-            window.DataContext = vm;
-            window.Show();
-        }
-
-        public void ShowSpriteSheetEditor(SpriteSheetViewModel spriteSheet, SpriteViewModel? selectedSprite)
-        {
-            var window = new SpriteSheetEditorWindow();
-            var vm = new SpriteSheetEditorViewModel();
-            vm.SpriteSheet = spriteSheet;
-            vm.SelectedSprite = selectedSprite;
-            window.DataContext = vm;
-            window.Show();
-        }
-
         public void ShowAutoSlice(SpriteSheetEditorViewModel editor)
         {
             var window = new AutoSliceWindow();
@@ -164,11 +138,11 @@ namespace Tyler.Services
             window.Show();
         }
 
-        public void ShowWorldEditor()
+        public void ShowWorldEditor(bool loadRecent)
         {
             var window = new WorldEditorWindow();
             var vm = new WorldViewModel();
-            if (File.Exists(_settingsService.Data.LastWorldPath))
+            if (loadRecent && File.Exists(_settingsService.Data.LastWorldPath))
             {
                 vm.Path = _settingsService.Data.LastWorldPath;
                 vm.Load();

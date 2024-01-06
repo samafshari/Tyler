@@ -5,12 +5,14 @@ using Tyler.Models;
 using Tyler.Services;
 using Net.Essentials;
 using Avalonia.Media.Imaging;
+using System;
 
 namespace Tyler.ViewModels
 {
     public class SpriteViewModel : ViewModel
     {
         static readonly BitmapCache _bitmapCache;
+        public event EventHandler<NameChangeEventArgs>? IdChanged;
 
         static SpriteViewModel()
         {
@@ -19,14 +21,17 @@ namespace Tyler.ViewModels
 
         public string DisplayName => ToString();
 
-        string? _id;
-        public string? Id
+        string _id;
+        public string Id
         {
             get => _id;
             set
             {
+                var oldId = _id;
                 SetProperty(ref _id, value);
                 RaisePropertyChanged(nameof(DisplayName));
+                if (oldId != value)
+                    IdChanged?.Invoke(this, new NameChangeEventArgs(oldId, value));
             }
         }
 
@@ -101,19 +106,28 @@ namespace Tyler.ViewModels
 
         public CroppedBitmap? Bitmap => _bitmapCache.Get(Path, X, Y, Width, Height);
 
-        public SpriteViewModel() { }
-
-        public SpriteViewModel(string? path, Sprite sprite)
+        public SpriteViewModel(string path, Sprite sprite)
         {
-            Path = path;
-            sprite.Inject(this);
+            _id = sprite.Id ?? Guid.NewGuid().ToString();
+            X = sprite.X;
+            Y = sprite.Y;
+            Width = sprite.Width;
+            Height = sprite.Height;
             Char = sprite.Char.ToString();
+            Path = path;
         }
 
         public Sprite Serialize()
         {
-            var sprite = this.ReturnAs<Sprite>();
-            sprite.Char = RealChar;
+            var sprite = new Sprite
+            {
+                Id = Id, 
+                X = X, 
+                Y = Y, 
+                Width = Width, 
+                Height = Height,
+                Char = RealChar,
+            };
             return sprite;
         }
 

@@ -1,0 +1,138 @@
+<UserControl
+	xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+    x:Class="Tyler.Views.BoardsEditorControl"
+	xmlns:local="clr-namespace:Tyler.Views"
+	xmlns:vm="clr-namespace:Tyler.ViewModels"
+	x:DataType="vm:WorldViewModel">
+	<Grid RowDefinitions="*, 200">
+		<Grid ColumnDefinitions="200, *, 300">
+			<Grid Grid.Column="0" x:Name="LeftGrid">
+				<ListBox
+					ItemsSource="{Binding Boards}"
+					DisplayMemberBinding="{Binding DisplayName}"
+					SelectedItem="{Binding SelectedBoard, Mode=TwoWay}">
+					<ListBox.ContextMenu>
+						<ContextMenu>
+							<MenuItem Header="Board Settings..." Command="{Binding BoardSettingsCommand}" />
+							<MenuItem Header="Duplicate Board..." Command="{Binding DuplicateBoardCommand}" />
+							<MenuItem Header="Delete Board..." Command="{Binding RemoveBoardCommand}" />
+							<Separator />
+							<MenuItem Header="Move Board Up" Command="{Binding MoveBoardUpCommand}" />
+							<MenuItem Header="Move Board Down" Command="{Binding MoveBoardDownCommand}" />
+						</ContextMenu>
+					</ListBox.ContextMenu>
+				</ListBox>
+			</Grid>
+
+			<Grid Grid.Column="1" x:Name="MiddleGrid">
+				<ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+					<local:BoardPreviewControl
+						x:Name="boardPreviewControl"
+						TileWidth="{Binding TileWidth}"
+						TileHeight="{Binding TileHeight}"
+						World="{Binding}"
+						Board="{Binding SelectedBoard}"
+						State="{Binding SelectedBoard.State}"
+						SelectedTile="{Binding SelectedTile}"
+								/>
+				</ScrollViewer>
+			</Grid>
+
+			<Grid Grid.Column="2" x:Name="RightGrid" IsVisible="{Binding IsSelectedBoardVisible}">
+				<TabControl>
+					<TabItem Header="Board" IsVisible="{Binding IsSelectedBoardVisible}">
+						<local:BoardSettingsControl DataContext="{Binding SelectedBoard}"/>
+					</TabItem>
+					<TabItem Header="Scripts" IsVisible="{Binding IsSelectedBoardVisible}">
+						<Grid RowDefinitions="Auto, *, Auto, *">
+							<TextBlock
+								Grid.Row="0"
+								Text="Before:" />
+							<TextBox
+								Grid.Row="1"
+								DataContext="{Binding SelectedBoard}"
+								Text="{Binding BeforeScript}"
+								FontFamily="Consolas"
+								FontSize="10"
+								AcceptsReturn="True"
+								AcceptsTab="True" />
+							<TextBlock
+								Grid.Row="2"
+								Text="After:" />
+							<TextBox
+								Grid.Row="3"
+								DataContext="{Binding SelectedBoard}"
+								Text="{Binding AfterScript}"
+								FontFamily="Consolas"
+								FontSize="10"
+								AcceptsReturn="True"
+								AcceptsTab="True" />
+						</Grid>
+					</TabItem>
+					<TabItem Header="Tile" IsVisible="{Binding IsSelectedTileVisible}">
+						<Grid RowDefinitions="Auto, *, Auto">
+							<TextBlock
+								Grid.Row="0"
+								Text="Tile Script:" />
+							<TextBox
+								Grid.Row="1"
+								DataContext="{Binding SelectedTile}"
+								Text="{Binding Script}"
+								FontFamily="Consolas"
+								FontSize="10"
+								AcceptsReturn="True"
+								AcceptsTab="True"
+								TextChanged="TextBox_TextChanged" />
+							<local:TilePreviewControl
+								Grid.Row="2"
+								Width="64"
+								Height="64"
+								Margin="10"
+								HorizontalAlignment="Center"
+								World="{Binding}"
+								Tile="{Binding SelectedTile}" />
+						</Grid>
+					</TabItem>
+					<TabItem Header="Compile"  IsVisible="{Binding IsSelectedBoardVisible}">
+						<Grid RowDefinitions="Auto, *, Auto">
+							<TextBlock
+								Grid.Row="0"
+								Text="Compiled Script:" />
+							<TextBox
+								Grid.Row="1"
+								DataContext="{Binding SelectedBoard}"
+								Text="{Binding Script}" FontFamily="Consolas" FontSize="10" AcceptsReturn="True" AcceptsTab="True" />
+							<Grid Grid.Row="2" Margin="1" ColumnDefinitions="*, 1, *">
+								<Button
+									Content="Script -> Board"
+									Command="{Binding SelectedBoard.ReadScriptCommand}" />
+								<Button
+									Grid.Column="2"
+									Content="Board -> Script"
+									Command="{Binding SelectedBoard.WriteScriptCommand}" />
+							</Grid>
+						</Grid>
+					</TabItem>
+				</TabControl>
+			</Grid>
+			<GridSplitter Classes="v" />
+			<GridSplitter Classes="v" Grid.Column="1" />
+		</Grid>
+		<local:SpriteSheetExplorerControl
+			Grid.Row="1"
+			Sprites="{Binding SpriteMapList}"
+			SelectedSprite="{Binding SelectedSprite, Mode=TwoWay}">
+			<local:SpriteSheetExplorerControl.ContextMenu>
+				<ContextMenu>
+					<MenuItem Header="Edit..." Command="{Binding EditTileDefCommand}" />
+				</ContextMenu>
+			</local:SpriteSheetExplorerControl.ContextMenu>
+		</local:SpriteSheetExplorerControl>
+
+		<GridSplitter Classes="h" />
+	</Grid>
+</UserControl>

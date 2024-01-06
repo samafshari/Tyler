@@ -22,33 +22,45 @@ namespace Tyler.ViewModels
         readonly SettingsService _settingsService;
         readonly ScriptingService _scriptingService;
 
-        ObservableCollection<BoardViewModel> _boards = new ObservableCollection<BoardViewModel>();
-        public ObservableCollection<BoardViewModel> Boards
+        Dictionary<string, SpriteSheetViewModel> spriteSheetsMap = new Dictionary<string, SpriteSheetViewModel>();
+        Dictionary<string, SpriteViewModel> spritesMap = new Dictionary<string, SpriteViewModel>();
+        Dictionary<string, BoardViewModel> boardMap = new Dictionary<string, BoardViewModel>();
+
+        public enum Tabs
         {
-            get => _boards;
-            set => SetProperty(ref _boards, value);
+            Boards,
+            Sprites
         }
 
-        ObservableCollection<TileDefViewModel> _tileDefs = new ObservableCollection<TileDefViewModel>();
-        public ObservableCollection<TileDefViewModel> TileDefs
+        public Tabs SelectedTab
         {
-            get => _tileDefs;
-            set => SetProperty(ref _tileDefs, value);
+            get => (Tabs)SelectedTabIndex;
+            set => SelectedTabIndex = (int)value;
         }
 
-        ObservableCollection<SpriteSheetViewModel> _spriteSheets = new ObservableCollection<SpriteSheetViewModel>();
-        public ObservableCollection<SpriteSheetViewModel> SpriteSheets
+        int _selectedTabIndex;
+        public int SelectedTabIndex
         {
-            get => _spriteSheets;
-            set => SetProperty(ref _spriteSheets, value);
+            get => _selectedTabIndex;
+            set
+            {
+                SetProperty(ref _selectedTabIndex, value);
+                RaisePropertyChanged(nameof(SelectedTab));
+            }
         }
 
         string? _path;
         public string? Path
         {
             get => _path;
-            set => SetProperty(ref _path, value);
+            set
+            {
+                SetProperty(ref _path, value);
+                RaisePropertyChanged(nameof(DisplayName));
+            }
         }
+
+        public string DisplayName => ToString();
 
         int _width;
         public int Width
@@ -78,6 +90,28 @@ namespace Tyler.ViewModels
             set => SetProperty(ref _tileHeight, value);
         }
 
+        ObservableCollection<BoardViewModel> _boards = new ObservableCollection<BoardViewModel>();
+        public ObservableCollection<BoardViewModel> Boards
+        {
+            get => _boards;
+            set => SetProperty(ref _boards, value);
+        }
+
+        ObservableCollection<TileDefViewModel> _tileDefs = new ObservableCollection<TileDefViewModel>();
+        public ObservableCollection<TileDefViewModel> TileDefs
+        {
+            get => _tileDefs;
+            set => SetProperty(ref _tileDefs, value);
+        }
+
+        ObservableCollection<SpriteSheetViewModel> _spriteSheets = new ObservableCollection<SpriteSheetViewModel>();
+        public ObservableCollection<SpriteSheetViewModel> SpriteSheets
+        {
+            get => _spriteSheets;
+            set => SetProperty(ref _spriteSheets, value);
+        }
+
+        public bool IsSelectedBoardVisible => SelectedBoard != null;
         BoardViewModel? _selectedBoard;
         public BoardViewModel? SelectedBoard
         {
@@ -87,6 +121,7 @@ namespace Tyler.ViewModels
                 var isDirty = value != SelectedBoard;
                 SetProperty(ref _selectedBoard, value);
                 if (isDirty) SelectedTile = null;
+                RaisePropertyChanged(nameof(IsSelectedBoardVisible));
             }
         }
 
@@ -111,16 +146,13 @@ namespace Tyler.ViewModels
             set => SetProperty(ref _selectedSprite, value);
         }
 
-        public Dictionary<char, SpriteViewModel> SpriteMap = new Dictionary<char, SpriteViewModel>();
-
+        public Dictionary<char, SpriteViewModel> SpriteCharMap = new Dictionary<char, SpriteViewModel>();
         List<SpriteViewModel> _spriteMapList = new List<SpriteViewModel>();
         public List<SpriteViewModel> SpriteMapList
         {
             get => _spriteMapList;
             set => SetProperty(ref _spriteMapList, value);
         }
-
-        public bool IsSelectedTileVisible => SelectedTile != null;
 
         TileViewModel? _selectedTile;
         public TileViewModel? SelectedTile
@@ -132,6 +164,7 @@ namespace Tyler.ViewModels
                 RaisePropertyChanged(nameof(IsSelectedTileVisible));
             }
         }
+        public bool IsSelectedTileVisible => SelectedTile != null;
 
         public WorldViewModel()
         {
@@ -149,11 +182,11 @@ namespace Tyler.ViewModels
         {
             var newFile = await _routingService.ShowOpenFileDialogAsync(
                 _routingService.GetMainWindow(),
-                "Open World", 
-                Vars.WorldExtension, 
+                "Open World",
+                Vars.WorldExtension,
                 Vars.FileDialogTypeWorld);
             var newPath = await _routingService.ShowOpenFileDialogAsync(default, "Open World", Vars.WorldExtension, Vars.FileDialogTypeWorld);
-            if (newPath != null)
+            if (File.Exists(newPath?.Path.LocalPath))
             {
                 Path = newPath.Path.LocalPath;
                 Load();
@@ -183,26 +216,31 @@ namespace Tyler.ViewModels
             }
         }
 
-        public async Task NewAsync()
+        public void New()
         {
-            var confirm = await _routingService.ShowConfirmDialogAsync(default, "Warning", "Your unsaved changes will be lost. Are you sure?");
-            if (confirm)
-            {
-                Path = null;
-                Load(new World());
-            }
+            //var confirm = await _routingService.ShowConfirmDialogAsync(default, "Warning", "Your unsaved changes will be lost. Are you sure?");
+            //if (confirm)
+            //{
+            //    Path = null;
+            //    Load(new World());
+            //}
+            _routingService.ShowWorldEditor(false);
         }
+
         public void Load(World worldDef)
         {
             if (worldDef == null) return;
             Boards = new ObservableCollection<BoardViewModel>(worldDef.Boards.Select(x => new BoardViewModel(this, x)));
             TileDefs = new ObservableCollection<TileDefViewModel>(worldDef.TileDefs.Select(x => new TileDefViewModel(this, x)));
-            SpriteSheets = new ObservableCollection<SpriteSheetViewModel>(worldDef.SpriteSheets.Select(x => new SpriteSheetViewModel(x.Key, x.Value)));
+            SpriteSheets = new ObservableCollection<SpriteSheetViewModel>(worldDef.SpriteSheets.Select(x => new SpriteSheetViewModel(x)));
             Width = worldDef.Width;
             Height = worldDef.Height;
             TileWidth = worldDef.TileWidth;
             TileHeight = worldDef.TileHeight;
             ReinitializeSpriteMap();
+            UpdateBoardMap();
+            UpdateSpriteSheetsMap();
+            UpdateSpritesMap();
         }
 
         public World Serialize()
@@ -212,7 +250,7 @@ namespace Tyler.ViewModels
             worldDef.Height = Height;
             worldDef.Boards = Boards.Select(x => x.Serialize()).ToList();
             worldDef.TileDefs = TileDefs.Select(x => x.Serialize()).ToList();
-            worldDef.SpriteSheets = SpriteSheets.ToDictionary(x => x.Id, x => x.Path!);
+            worldDef.SpriteSheets = SpriteSheets.Select(x => x.Serialize()).ToList();
             return worldDef;
         }
 
@@ -295,13 +333,22 @@ namespace Tyler.ViewModels
         {
             if (path != null)
             {
-                var spriteSheet = new SpriteSheetViewModel { Path = path };
-                spriteSheet.LoadFromFile();
+                var spriteSheet = new SpriteSheetViewModel(path);
                 SpriteSheets.Add(spriteSheet);
                 SelectedSpriteSheet = spriteSheet;
                 ReinitializeSpriteMap();
+                spriteSheet.IdChanged += SpriteSheet_IdChanged;
+                spriteSheet.SpriteIdChanged += SpriteSheet_SpriteIdChanged;
+                spriteSheet.SpriteListChanged += SpriteSheet_SpriteListChanged;
+                SelectedTab = Tabs.Sprites;
             }
         }
+
+        public void RemoveSpriteSheet()
+        {
+            RemoveSpriteSheet(SelectedSpriteSheet);
+        }
+
 
         public void RemoveSpriteSheet(SpriteSheetViewModel? spriteSheet)
         {
@@ -311,22 +358,43 @@ namespace Tyler.ViewModels
                 if (SelectedSpriteSheet == spriteSheet)
                     SelectedSpriteSheet = null;
                 SpriteSheets.Remove(spriteSheet);
+                spriteSheet.IdChanged -= SpriteSheet_IdChanged;
+                spriteSheet.SpriteIdChanged -= SpriteSheet_SpriteIdChanged;
+                spriteSheet.SpriteListChanged -= SpriteSheet_SpriteListChanged;
                 ReinitializeSpriteMap();
             }
         }
 
-        public void RemoveSpriteSheet()
+        private void SpriteSheet_SpriteListChanged(object? sender, ObservableCollection<SpriteViewModel> e)
         {
-            RemoveSpriteSheet(SelectedSpriteSheet);
+            ReinitializeSpriteMap();
+        }
+
+        private void SpriteSheet_IdChanged(object? sender, NameChangeEventArgs e)
+        {
+            if (spriteSheetsMap.ContainsKey(e.OldName) && spriteSheetsMap[e.OldName] == sender!)
+                spriteSheetsMap.Remove(e.OldName);
+            spriteSheetsMap[e.NewName] = (SpriteSheetViewModel)sender!;
+        }
+
+        private void SpriteSheet_SpriteIdChanged(object? sender, NameChangeEventArgs e)
+        {
+            if (spritesMap.ContainsKey(e.OldName) && spritesMap[e.OldName] == sender!)
+                spritesMap.Remove(e.OldName);
+            spritesMap[e.NewName] = (SpriteViewModel)sender!;
         }
 
         public void ReinitializeSpriteMap()
         {
-            SpriteMap.Clear();
+            SpriteCharMap.Clear();
+            spritesMap.Clear();
             foreach (var spriteSheet in SpriteSheets)
                 foreach (var sprite in spriteSheet.Sprites)
-                    SpriteMap[sprite.RealChar] = sprite;
-            SpriteMapList = SpriteMap.Values.ToList();
+                {
+                    SpriteCharMap[sprite.RealChar] = sprite;
+                    spritesMap[sprite.Id] = sprite;
+                }
+            SpriteMapList = SpriteCharMap.Values.ToList();
         }
 
         public void DuplicateBoard()
@@ -364,19 +432,16 @@ namespace Tyler.ViewModels
         public void EditSpriteSheet()
         {
             if (SelectedSpriteSheet == null) return;
-            _routingService.ShowSpriteSheetEditor(SelectedSpriteSheet, SelectedSprite);
+            SelectedTab = Tabs.Sprites;
         }
 
         public void EditTileDef()
         {
             if (SelectedSprite == null) return;
-            try
-            {
-                var sprite = SpriteMap[SelectedSprite.RealChar];
-                var spritesheet = SpriteSheets.First(x => x.Sprites.Contains(sprite));
-                _routingService.ShowSpriteSheetEditor(spritesheet, sprite);
-            }
-            catch { }
+            var sprite = SpriteCharMap[SelectedSprite.RealChar];
+            var spritesheet = SpriteSheets.First(x => x.Sprites.Contains(sprite));
+            SelectedSpriteSheet = spritesheet;
+            EditSpriteSheet();
         }
 
         public void SelectTile(int x, int y)
@@ -384,11 +449,38 @@ namespace Tyler.ViewModels
             if (SelectedBoard == null) return;
             SelectedBoard.TileGrid.TryGetValue((x, y), out var tile);
             SelectedTile = tile;
-            if (SelectedTile != null && SpriteMap.TryGetValue(SelectedTile.Char, out var sprite))
+            if (SelectedTile != null && SpriteCharMap.TryGetValue(SelectedTile.Char, out var sprite))
                 SelectedSprite = sprite;
         }
 
-        public CommandModel NewCommand => new CommandModel(NewAsync);
+        void UpdateBoardMap()
+        {
+            boardMap.Clear();
+            foreach (var board in Boards.Where(x => x.Id != null))
+                boardMap[board.Id!] = board;
+        }
+
+        void UpdateSpriteSheetsMap()
+        {
+            spriteSheetsMap.Clear();
+            foreach (var spriteSheet in SpriteSheets.Where(x => x.Id != null))
+                spriteSheetsMap[spriteSheet.Id!] = spriteSheet;
+        }
+
+        void UpdateSpritesMap()
+        {
+            spritesMap.Clear();
+            foreach (var spriteSheet in SpriteSheets)
+                foreach (var sprite in spriteSheet.Sprites.Where(x => x.Id != null))
+                    spritesMap[sprite.Id!] = sprite;
+        }
+
+        public override string ToString()
+        {
+            return Path ?? "Untitled";
+        }
+
+        public CommandModel NewCommand => new CommandModel(New);
         public CommandModel OpenCommand => new CommandModel(LoadAsAsync);
         public CommandModel RevertCommand => new CommandModel(RevertAsync);
         public CommandModel SaveCommand => new CommandModel(SaveAsync);
@@ -401,7 +493,13 @@ namespace Tyler.ViewModels
         public CommandModel ShowTileDefsEditorCommand => new CommandModel(() => _routingService.ShowTileDefsEditor(this));
         public CommandModel ShowSpriteSheetManagerCommand => new CommandModel(() => _routingService.ShowWorldSpriteSheetManager(this));
         public CommandModel ShowSettingsCommand => new CommandModel(() => _routingService.ShowWorldSettings(this));
-        public CommandModel ReinitializeSpriteMapCommand => new CommandModel(ReinitializeSpriteMap);
+        public CommandModel ReinitializeSpriteMapCommand => new CommandModel(() =>
+        {
+            ReinitializeSpriteMap();
+            UpdateBoardMap();
+            UpdateSpriteSheetsMap();
+            UpdateSpritesMap();
+        });
         public CommandModel MoveBoardUpCommand => new CommandModel(() => MoveBoard(SelectedBoard, -1));
         public CommandModel MoveBoardDownCommand => new CommandModel(() => MoveBoard(SelectedBoard, 1));
         public CommandModel ExportLevelsCommand => new CommandModel(ExportLevelsAsync);

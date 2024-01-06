@@ -136,7 +136,7 @@ namespace Tyler.Views
                     scriptIcons[sc.Key].IsVisible = tile.IsScriptIconVisible;
                     if (tile == null)
                         sc.Value.Sprite = null;
-                    else if (World.SpriteMap.TryGetValue(tile.Char, out var sprite))
+                    else if (World.SpriteCharMap.TryGetValue(tile.Char, out var sprite))
                         sc.Value.Sprite = sprite;
                     found = true;
                 }

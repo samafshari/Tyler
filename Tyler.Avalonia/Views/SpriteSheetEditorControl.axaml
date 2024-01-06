@@ -1,0 +1,103 @@
+<UserControl 
+	xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:local="clr-namespace:Tyler.Views"
+	xmlns:vm="clr-namespace:Tyler.ViewModels"
+    mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+    x:Class="Tyler.Views.SpriteSheetEditorControl"
+	x:DataType="vm:WorldViewModel">
+	<Grid ColumnDefinitions="200, *">
+		<ListBox
+			ItemsSource="{Binding SpriteSheets}"
+			SelectedItem="{Binding SelectedSpriteSheet, Mode=TwoWay}">
+			<ListBox.ContextMenu>
+				<ContextMenu>
+					<MenuItem Header="Auto Slice..." Command="{Binding SelectedSpriteSheet.Editor.AutoSliceCommand}" />
+					<MenuItem Header="Unload..." Command="{Binding RemoveSpriteSheetCommand}" />
+				</ContextMenu>
+			</ListBox.ContextMenu>
+			<ListBox.ItemTemplate>
+				<DataTemplate x:DataType="vm:SpriteSheetViewModel">
+					<StackPanel Orientation="Horizontal">
+						<Image Width="32" Height="32" Source="{Binding Bitmap}" Margin="0, 0, 3, 0" />
+						<TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center" />
+					</StackPanel>
+				</DataTemplate>
+			</ListBox.ItemTemplate>
+		</ListBox>
+		
+		<Grid Grid.Column="1" DataContext="{Binding SelectedSpriteSheet.Editor}">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto" />
+				<RowDefinition Height="*" />
+			</Grid.RowDefinitions>
+			<Grid Grid.Row="1" ColumnDefinitions="200, *, 200">
+				<Grid x:Name="LeftPane" Grid.Column="0">
+					<DataGrid
+						ItemsSource="{Binding SpriteSheet.Sprites}"
+						SelectedItem="{Binding SelectedSprite}"
+						HeadersVisibility="None">
+						<DataGrid.Columns>
+							<DataGridTemplateColumn Header="Sprite" Width="32">
+								<DataTemplate>
+									<local:SpriteControl Sprite="{Binding}" />
+								</DataTemplate>
+							</DataGridTemplateColumn>
+							<DataGridTextColumn Header="Id" Binding="{Binding Id}" Width="40" />
+							<DataGridTextColumn Header="Char" Binding="{Binding Char}" Width="40" />
+							<DataGridTextColumn Header="X" Binding="{Binding X}" Width="30"/>
+							<DataGridTextColumn Header="Y" Binding="{Binding Y}" Width="30"/>
+							<DataGridTextColumn Header="Width" Binding="{Binding Width}" Width="40"/>
+							<DataGridTextColumn Header="Height" Binding="{Binding Height}" Width="40"/>
+						</DataGrid.Columns>
+						<DataGrid.ContextMenu>
+							<ContextMenu>
+								<MenuItem Header="Remove" Command="{Binding RemoveSpriteCommand}" />
+							</ContextMenu>
+						</DataGrid.ContextMenu>
+					</DataGrid>
+				</Grid>
+
+				<Grid x:Name="MiddlePane" Grid.Column="1" Margin="5, 0, 0, 0" RowDefinitions="2*, *">
+					<Grid>
+						<local:SpriteSheetControl
+							SpriteSheet="{Binding SpriteSheet}"
+							Sprite="{Binding SelectedSprite}"
+                        />
+					</Grid>
+					<Grid Grid.Row="1">
+						<local:SpriteSheetExplorerControl Sprites="{Binding SpriteSheet.Sprites}" SelectedSprite="{Binding SelectedSprite, Mode=TwoWay}" />
+					</Grid>
+					<GridSplitter Classes="h" />
+				</Grid>
+
+				<Grid x:Name="RightPane" Grid.Column="2">
+					<StackPanel Margin="5, 0, 0, 0" IsVisible="{Binding IsSelectedSpriteVisible}">
+						<Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto, Auto" ColumnDefinitions="Auto, *">
+							<TextBlock Grid.Row="0" Text="Id" />
+							<TextBlock Grid.Row="1" Text="X" />
+							<TextBlock Grid.Row="2" Text="Y" />
+							<TextBlock Grid.Row="3" Text="W" />
+							<TextBlock Grid.Row="4" Text="H" />
+							<TextBlock Grid.Row="5" Text="C" />
+							<TextBox Grid.Row="0" Grid.Column="1" Text="{Binding SelectedSprite.Id}" />
+							<TextBox Grid.Row="1" Grid.Column="1" Text="{Binding SelectedSprite.X}" />
+							<TextBox Grid.Row="2" Grid.Column="1" Text="{Binding SelectedSprite.Y}" />
+							<TextBox Grid.Row="3" Grid.Column="1" Text="{Binding SelectedSprite.Width}" />
+							<TextBox Grid.Row="4" Grid.Column="1" Text="{Binding SelectedSprite.Height}" />
+							<TextBox Grid.Row="5" Grid.Column="1" Text="{Binding SelectedSprite.Char}" />
+						</Grid>
+						<Button Content="Delete" Command="{Binding RemoveSpriteCommand}" />
+					</StackPanel>
+				</Grid>
+
+				<GridSplitter Classes="v" />
+				<GridSplitter Classes="v" Grid.Column="1" />
+			</Grid>
+		</Grid>		
+		
+		<GridSplitter Classes="v" />
+	</Grid>
+</UserControl>

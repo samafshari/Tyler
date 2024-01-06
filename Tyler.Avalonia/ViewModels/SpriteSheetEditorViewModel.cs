@@ -1,10 +1,4 @@
 ﻿using Net.Essentials;
-
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-
-using Tyler.Models;
 using Tyler.Services;
 
 namespace Tyler.ViewModels
@@ -12,14 +6,7 @@ namespace Tyler.ViewModels
     public class SpriteSheetEditorViewModel : ViewModel
     {
         readonly RoutingService _routingService;
-        readonly SettingsService _settingsService;
-
-        SpriteSheetViewModel? _spriteSheet = new SpriteSheetViewModel();
-        public SpriteSheetViewModel? SpriteSheet
-        {
-            get => _spriteSheet;
-            set => SetProperty(ref _spriteSheet, value);
-        }
+        public SpriteSheetViewModel SpriteSheet { get; }
 
         SpriteViewModel? _selectedSprite;
         public SpriteViewModel? SelectedSprite
@@ -31,13 +18,12 @@ namespace Tyler.ViewModels
                 RaisePropertyChanged(nameof(IsSelectedSpriteVisible));
             }
         }
-
         public bool IsSelectedSpriteVisible => SelectedSprite != null;
 
-        public SpriteSheetEditorViewModel()
+        public SpriteSheetEditorViewModel(SpriteSheetViewModel spriteSheet)
         {
+            SpriteSheet = spriteSheet;
             _routingService = ContainerService.Instance.GetOrCreate<RoutingService>();
-            _settingsService = ContainerService.Instance.GetOrCreate<SettingsService>();
         }
 
         public CommandModel AddSpriteCommand => new CommandModel(() =>
@@ -59,43 +45,16 @@ namespace Tyler.ViewModels
         {
             if (await _routingService.ShowConfirmDialogAsync(default, "Warning", "Your unsaved changes will be lost. Are you sure?"))
             {
-                SpriteSheet?.Sprites.Clear();
                 SelectedSprite = null;
+                SpriteSheet?.ClearSprites();
             }
         });
         
-        public CommandModel OpenPNGCommand => new CommandModel(async () =>
-        {
-            var file = await _routingService.ShowOpenFileDialogAsync(default, "Open Sprite Sheet PNG", ".png", Vars.FileDialogTypePNG);
-            var fileName = file?.Path?.LocalPath;
-            if (File.Exists(fileName))
-                if (await _routingService.ShowConfirmDialogAsync(default, "Warning", "Your unsaved changes will be lost. Are you sure?"))
-                    LoadPNG(fileName);
-        });
-
         public SpriteViewModel? AddSprite()
         {
             if (SpriteSheet == null) return default;
-
-            var id = SpriteSheet.Sprites.Count.ToString();
-            
-            if (SpriteSheet.Sprites.Any())
-                id = SpriteSheet.Sprites.Select(x => int.TryParse(x.Id, out var _i) ? _i : 0).Max() + 1 + "";
-
-            SpriteSheet.Sprites.Add(new SpriteViewModel { Path = SpriteSheet.Path, Id = id });
-            SelectedSprite = SpriteSheet.Sprites.Last();
+            SelectedSprite = SpriteSheet.AddSprite();
             return SelectedSprite;
-        }
-
-        public void LoadPNG(string pngPath)
-        {
-            var model = new SpriteSheet
-            {
-                Path = pngPath,
-                Id = Path.GetFileNameWithoutExtension(pngPath),
-                Sprites = new List<Sprite>()
-            };
-            SpriteSheet = new SpriteSheetViewModel(model);
         }
 
         public CommandModel AutoSliceCommand => new CommandModel(() =>
