@@ -8,9 +8,9 @@ namespace Tyler.Models
 {
     public class World
     {
+        public Dictionary<string, SpriteSheet> SpriteSheets { get; set; } = new Dictionary<string, SpriteSheet>();
         public List<Board> Boards { get; set; } = new List<Board>();
         public List<TileDef> TileDefs { get; set; } = new List<TileDef>();
-        public List<string> SpriteSheets { get; set; } = new List<string>();
         public int Width { get; set; } = 100;
         public int Height { get; set; } = 100;
         public int TileWidth { get; set; } = 32;

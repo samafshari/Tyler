@@ -103,7 +103,7 @@ namespace Tyler.ViewModels
 
         public SpriteViewModel() { }
 
-        public SpriteViewModel(string path, Sprite sprite)
+        public SpriteViewModel(string? path, Sprite sprite)
         {
             Path = path;
             sprite.Inject(this);

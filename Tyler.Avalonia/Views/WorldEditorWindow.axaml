@@ -97,7 +97,7 @@
 								<DataTemplate x:DataType="vm:SpriteSheetViewModel">
 									<StackPanel Orientation="Horizontal">
 										<Image Width="32" Height="32" Source="{Binding Bitmap}" Margin="0, 0, 3, 0" />
-										<TextBlock Text="{Binding FileName}" VerticalAlignment="Center" />
+										<TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center" />
 									</StackPanel>
 								</DataTemplate>
 							</ListBox.ItemTemplate>

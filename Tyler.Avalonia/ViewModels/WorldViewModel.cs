@@ -197,7 +197,7 @@ namespace Tyler.ViewModels
             if (worldDef == null) return;
             Boards = new ObservableCollection<BoardViewModel>(worldDef.Boards.Select(x => new BoardViewModel(this, x)));
             TileDefs = new ObservableCollection<TileDefViewModel>(worldDef.TileDefs.Select(x => new TileDefViewModel(this, x)));
-            SpriteSheets = new ObservableCollection<SpriteSheetViewModel>(worldDef.SpriteSheets.Select(x => new SpriteSheetViewModel(x)));
+            SpriteSheets = new ObservableCollection<SpriteSheetViewModel>(worldDef.SpriteSheets.Select(x => new SpriteSheetViewModel(x.Key, x.Value)));
             Width = worldDef.Width;
             Height = worldDef.Height;
             TileWidth = worldDef.TileWidth;
@@ -212,7 +212,7 @@ namespace Tyler.ViewModels
             worldDef.Height = Height;
             worldDef.Boards = Boards.Select(x => x.Serialize()).ToList();
             worldDef.TileDefs = TileDefs.Select(x => x.Serialize()).ToList();
-            worldDef.SpriteSheets = SpriteSheets.Where(x => x.Path != null).Select(x => x.Path!).ToList();
+            worldDef.SpriteSheets = SpriteSheets.ToDictionary(x => x.Id, x => x.Path!);
             return worldDef;
         }
 

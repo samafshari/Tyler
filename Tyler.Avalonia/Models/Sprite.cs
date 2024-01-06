@@ -14,5 +14,6 @@ namespace Tyler.Models
         public int Width { get; set; }
         public int Height { get; set; }
         public char Char { get; set; } = Vars.UnassignedChar;
+        public string? SpriteSheetId { get; set; }
     }
 }

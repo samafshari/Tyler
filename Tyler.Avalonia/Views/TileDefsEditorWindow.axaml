@@ -39,7 +39,7 @@
 					<Label Content="Sprite Sheet" />
 					<ComboBox
 						Grid.Column="1"
-						DisplayMemberBinding="{Binding FileName}"
+						DisplayMemberBinding="{Binding DisplayName}"
 						ItemsSource="{Binding World.SpriteSheets}"
 						SelectedItem="{Binding SpriteSheet}" />
 				</Grid>

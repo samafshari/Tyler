@@ -1,6 +1,10 @@
 ﻿using Net.Essentials;
+
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+
+using Tyler.Models;
 using Tyler.Services;
 
 namespace Tyler.ViewModels
@@ -85,8 +89,13 @@ namespace Tyler.ViewModels
 
         public void LoadPNG(string pngPath)
         {
-            SpriteSheet = new SpriteSheetViewModel { Path = pngPath };
-            SpriteSheet.LoadFromFile();
+            var model = new SpriteSheet
+            {
+                Path = pngPath,
+                Id = Path.GetFileNameWithoutExtension(pngPath),
+                Sprites = new List<Sprite>()
+            };
+            SpriteSheet = new SpriteSheetViewModel(model);
         }
 
         public CommandModel AutoSliceCommand => new CommandModel(() =>

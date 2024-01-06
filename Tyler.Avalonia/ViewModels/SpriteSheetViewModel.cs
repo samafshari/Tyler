@@ -19,9 +19,12 @@ namespace Tyler.ViewModels
 {
     public class SpriteSheetViewModel : ViewModel
     {
-        readonly BitmapCache _bitmapCache;
-        readonly RoutingService _routingService;
-        readonly SettingsService _settingsService;
+        static readonly BitmapCache _bitmapCache;
+
+        static SpriteSheetViewModel()
+        {
+            _bitmapCache = ContainerService.Instance.GetOrCreate<BitmapCache>();
+        }
 
         ObservableCollection<SpriteViewModel> _sprites = new ObservableCollection<SpriteViewModel>();
         public ObservableCollection<SpriteViewModel> Sprites
@@ -37,62 +40,52 @@ namespace Tyler.ViewModels
             set
             {
                 SetProperty(ref _path, value);
-                RaisePropertyChanged(nameof(FileName));
+                RaisePropertyChanged(nameof(DisplayName));
                 RaisePropertyChanged(nameof(Bitmap));
             }
         }
 
-        public string FileName => File.Exists(Path) ? System.IO.Path.GetFileNameWithoutExtension(Path) : $"[FNF] {Path}";
+        string _id;
+        public string Id
+        {
+            get => _id;
+            set
+            {
+                SetProperty(ref _id, value);
+                RaisePropertyChanged(nameof(DisplayName));
+            }
+        }
+
+        public string DisplayName => ToString();
 
         public Bitmap? Bitmap => _bitmapCache.Get(Path);
 
         public SpriteSheetViewModel()
         {
-            _bitmapCache = ContainerService.Instance.GetOrCreate<BitmapCache>();
-            _routingService = ContainerService.Instance.GetOrCreate<RoutingService>();
-            _settingsService = ContainerService.Instance.GetOrCreate<SettingsService>();
+            _id = Guid.NewGuid().ToString();
         }
 
-        public SpriteSheetViewModel(string path) : this()
+        public SpriteSheetViewModel(SpriteSheet model) : this()
         {
-            Path = path;
-            LoadFromFile();
+            Path = model.Path;
+            Id = model.Id ?? Guid.NewGuid().ToString();
+            Sprites = new ObservableCollection<SpriteViewModel>(model.Sprites.Select(x => new SpriteViewModel(Path, x)));
         }
 
-        public async Task SaveToFileAsync()
+        public SpriteSheet Serialize()
         {
-            var json = JsonConvert.SerializeObject(Sprites.Select(x => x.Serialize()), Formatting.Indented);
-            var jsonPath = System.IO.Path.ChangeExtension(Path, Vars.SpriteSheetExtension);
-            if (File.Exists(jsonPath) && 
-                !await _routingService.ShowConfirmDialogAsync(default, "Confirm Overwrite", $"File {jsonPath} already exists. Are you sure you want to overwrite it?"))
-                return;
-            File.WriteAllText(jsonPath!, json);
-        }
-
-        public void LoadFromFile()
-        {
-            if (File.Exists(Path))
+            var model = new SpriteSheet
             {
-                _settingsService.Data.LastOpenedPNGPath = Path;
-                _settingsService.SaveWithLock();
-
-                var jsonPath = System.IO.Path.ChangeExtension(Path, Vars.SpriteSheetExtension);
-                if (File.Exists(jsonPath))
-                {
-                    var json = File.ReadAllText(jsonPath);
-                    Sprites = new ObservableCollection<SpriteViewModel>(
-                        JsonConvert.DeserializeObject<List<Sprite>>(json)!
-                        .Select(x => new SpriteViewModel(Path, x)));
-                }
-                else
-                {
-                    Sprites = new ObservableCollection<SpriteViewModel>();
-                }
-                UpdateProperties();
-            }
+                Id = Id,
+                Path = Path,
+                Sprites = Sprites.Select(x => x.Serialize()).ToList()
+            };
+            return model;
         }
 
-        public CommandModel SaveCommand => new CommandModel(SaveToFileAsync);
-        public CommandModel LoadCommand => new CommandModel(LoadFromFile);
+        public override string ToString()
+        {
+            return File.Exists(Path) ? Id : $"[FNF] {Id}";
+        }
     }
 }

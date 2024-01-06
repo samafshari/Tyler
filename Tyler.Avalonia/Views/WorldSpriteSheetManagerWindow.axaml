@@ -45,7 +45,7 @@
 						<DataTemplate x:DataType="vm:SpriteSheetViewModel">
 							<StackPanel Width="100">
 								<Image Source="{Binding Bitmap}" Width="75" Height="75" />
-								<TextBlock Text="{Binding FileName}" HorizontalAlignment="Center" />
+								<TextBlock Text="{Binding DisplayName}" HorizontalAlignment="Center" />
 							</StackPanel>
 						</DataTemplate>
 					</ListBox.ItemTemplate>
@@ -61,7 +61,6 @@
 				</ListBox>
 			</Grid>
 			<Grid Grid.Column="1">
-				<!--<Image Source="{Binding SpriteSheet.Path}" />-->
 				<local:SpriteSheetExplorerControl Sprites="{Binding SpriteSheet.Sprites}" />
 			</Grid>
 			<GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Left" />
