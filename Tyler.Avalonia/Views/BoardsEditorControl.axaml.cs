@@ -10,7 +10,6 @@ namespace Tyler.Views
         {
             InitializeComponent();
         }
-
         void TextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (sender is TextBox t && t.DataContext is TileViewModel tile)

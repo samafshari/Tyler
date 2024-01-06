@@ -68,13 +68,7 @@ namespace Tyler.ViewModels
             }
         }
 
-        List<TileViewModel> _tiles = new List<TileViewModel>();
-        public List<TileViewModel> Tiles
-        {
-            get => _tiles;
-            set => SetProperty(ref _tiles, value);
-        }
-
+        public List<TileViewModel?> Tiles = new List<TileViewModel?>();
         public TileViewModel?[,] TileGrid = new TileViewModel?[10, 10];
 
         string? _beforeScript;
@@ -105,10 +99,6 @@ namespace Tyler.ViewModels
             set => SetProperty(ref _state, value);
         }
 
-        public BoardViewModel() : this(null, new Board())
-        {
-        }
-
         public BoardViewModel(WorldViewModel? world, Board board)
         {
             using var _ = BenchmarkService.Instance.StartBenchmark();
@@ -126,7 +116,7 @@ namespace Tyler.ViewModels
             Name = board.Name;
             Width = board.Width;
             Height = board.Height;
-            var viewModels = new TileViewModel[board.Tiles.Count];
+            var viewModels = new TileViewModel?[board.Tiles.Count];
             using (BenchmarkService.Instance.StartBenchmark("Create ViewModels"))
             {
                 Parallel.For(0, board.Tiles.Count, i =>
@@ -180,7 +170,21 @@ namespace Tyler.ViewModels
             {
                 if (TileGrid.GetLength(0) != Width || TileGrid.GetLength(1) != Height)
                     TileGrid = new TileViewModel[Width, Height];
-                Parallel.ForEach(Tiles, tile => TileGrid[tile.X, tile.Y] = tile);
+                bool hasGarbage = false;
+                Parallel.For(0, Tiles.Count, i =>
+                {
+                    var tile = Tiles[i];
+                    if (tile.X >= Width || tile.Y >= Height)
+                    {
+                        hasGarbage = true;
+                        Tiles[i] = null;
+                        return;
+                    }
+
+                    TileGrid[tile.X, tile.Y] = tile;
+                });
+                if (hasGarbage)
+                    Tiles = Tiles.Where(x => x != null).ToList();
             }
             BumpState();
         }

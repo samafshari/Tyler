@@ -447,6 +447,7 @@ namespace Tyler.ViewModels
         public void SelectTile(int x, int y)
         {
             if (SelectedBoard == null) return;
+            if (x < 0 || y < 0 || x >= SelectedBoard.Width || y >= SelectedBoard.Height) return;
             var tile = SelectedBoard.TileGrid[x, y];
             SelectedTile = tile;
             if (SelectedTile != null && SpriteCharMap.TryGetValue(SelectedTile.Char, out var sprite))

@@ -29,17 +29,17 @@
 			</Grid>
 
 			<Grid Grid.Column="1" x:Name="MiddleGrid">
-				<ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-					<local:BoardPreviewControl
-						x:Name="boardPreviewControl"
-						TileWidth="{Binding TileWidth}"
-						TileHeight="{Binding TileHeight}"
-						World="{Binding}"
-						Board="{Binding SelectedBoard}"
-						State="{Binding SelectedBoard.State}"
-						SelectedTile="{Binding SelectedTile}"
-								/>
-				</ScrollViewer>
+				<local:BoardPreviewControl
+					x:Name="boardPreviewControl"
+					TileWidth="{Binding TileWidth}"
+					TileHeight="{Binding TileHeight}"
+					World="{Binding}"
+					Board="{Binding SelectedBoard}"
+					State="{Binding SelectedBoard.State}"
+					SelectedTile="{Binding SelectedTile}"
+					HorizontalAlignment="Stretch"
+					VerticalAlignment="Stretch"
+					/>
 			</Grid>
 
 			<Grid Grid.Column="2" x:Name="RightGrid" IsVisible="{Binding IsSelectedBoardVisible}">
