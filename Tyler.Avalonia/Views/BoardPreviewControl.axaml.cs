@@ -5,6 +5,7 @@ using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.Reactive;
 using Avalonia.Rendering.SceneGraph;
+using Avalonia.Threading;
 
 using Net.Essentials;
 
@@ -17,15 +18,11 @@ namespace Tyler.Views
 {
     public partial class BoardPreviewControl : Control
     {
-        static readonly BitmapCache _bitmapCache;
+        static readonly SettingsService _settingsService = ContainerService.Instance.GetOrCreate<SettingsService>();
+        static readonly BitmapCache _bitmapCache = ContainerService.Instance.GetOrCreate<BitmapCache>();
 
         int w;
         int h;
-
-        static BoardPreviewControl()
-        {
-            _bitmapCache = ContainerService.Instance.GetOrCreate<BitmapCache>();
-        }
 
         public BoardViewModel? Board
         {
@@ -117,6 +114,10 @@ namespace Tyler.Views
         public void Update()
         {
             if (Board == null || World == null) return;
+            w = Board.Width * TileWidth;
+            h = Board.Height * TileHeight;
+            if (Width != w) Width = w;
+            if (Height != h) Height = h;
             InvalidateVisual();
         }
 
@@ -154,11 +155,15 @@ namespace Tyler.Views
         {
             if (World == null || Board == null) return;
 
-            context.Custom(new CustomDrawOp(this, Bounds));
+            Dispatcher.UIThread.Invoke(() => context.Custom(new CustomDrawOp(this, Bounds)));
         }
 
         public void Render(ImmediateDrawingContext context)
         {
+            //if (!Color.TryParse(_settingsService.Data.BackgroundColor, out var bg))
+            //    bg = Color.Parse("#000000");
+            //var bgBrush = new SolidColorBrush(bg).ToImmutable();
+            //context.FillRectangle(bgBrush, new Rect(0, 0, Bounds.Width, Bounds.Height));
             context.FillRectangle(Brushes.CornflowerBlue, new Rect(0, 0, Bounds.Width, Bounds.Height));
             if (World == null || Board == null) return;
             foreach (var tile in Board.Tiles)

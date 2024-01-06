@@ -38,5 +38,8 @@
 			<Setter Property="Margin" Value="1" />
 			<Setter Property="Source" Value="/Assets/setting.png" />
 		</Style>
+		<Style Selector="TextBlock">
+			<Setter Property="VerticalAlignment" Value="Center" />
+		</Style>
     </Application.Styles>
 </Application>
