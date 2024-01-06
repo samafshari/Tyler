@@ -96,14 +96,10 @@ namespace Tyler.ViewModels
             Sprites.CollectionChanged += (s, e) =>
             {
                 SpriteListChanged?.Invoke(this, Sprites);
-                if (e.OldItems != null) foreach (SpriteViewModel sprite in e.OldItems)
-                    sprite.IdChanged -= Sprite_IdChanged;
-                if (e.NewItems != null) foreach (SpriteViewModel sprite in e.NewItems)
-                    sprite.IdChanged += Sprite_IdChanged;
+                if (e.OldItems != null) Parallel.ForEach(e.OldItems.Cast<SpriteViewModel>(), sprite => sprite.IdChanged -= Sprite_IdChanged);
+                if (e.NewItems != null) Parallel.ForEach(e.NewItems.Cast<SpriteViewModel>(), sprite => sprite.IdChanged += Sprite_IdChanged);
             };
-
-            foreach (var sprite in Sprites)
-                sprite.IdChanged += Sprite_IdChanged;
+            Parallel.ForEach(Sprites, sprite => sprite.IdChanged += Sprite_IdChanged);
         }
 
         private void Sprite_IdChanged(object? sender, NameChangeEventArgs e)

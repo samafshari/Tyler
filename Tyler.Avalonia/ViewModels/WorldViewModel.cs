@@ -391,6 +391,8 @@ namespace Tyler.ViewModels
             foreach (var spriteSheet in SpriteSheets)
                 foreach (var sprite in spriteSheet.Sprites)
                 {
+                    if (sprite.RealChar == Vars.DefaultChar) continue;
+
                     SpriteCharMap[sprite.RealChar] = sprite;
                     spritesMap[sprite.Id] = sprite;
                 }
