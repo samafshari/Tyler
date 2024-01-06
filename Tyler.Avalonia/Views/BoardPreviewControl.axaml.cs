@@ -1,32 +1,31 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Media.Imaging;
 using Avalonia.Media;
+using Avalonia.Media.Imaging;
 using Avalonia.Platform;
-using Avalonia.Styling;
-using Avalonia.Layout;
 using Avalonia.Reactive;
+using Avalonia.Rendering.SceneGraph;
+
 using Net.Essentials;
-using System.Collections.Generic;
+
+using System.Diagnostics;
+
 using Tyler.Services;
 using Tyler.ViewModels;
-using System;
 
 namespace Tyler.Views
 {
-    public partial class BoardPreviewControl : UserControl
+    public partial class BoardPreviewControl : Control
     {
         static readonly BitmapCache _bitmapCache;
+
+        int w;
+        int h;
 
         static BoardPreviewControl()
         {
             _bitmapCache = ContainerService.Instance.GetOrCreate<BitmapCache>();
         }
-
-        readonly Dictionary<(int, int), SpriteControl> spriteControls = new Dictionary<(int, int), SpriteControl>();
-        readonly Dictionary<(int, int), Image> scriptIcons = new Dictionary<(int, int), Image>();
-        SelectionRect? selectionRectangle;
-        Image previewImg;
 
         public BoardViewModel? Board
         {
@@ -86,13 +85,8 @@ namespace Tyler.Views
         public BoardPreviewControl()
         {
             InitializeComponent();
-            previewImg = new Image
-            {
-                HorizontalAlignment = HorizontalAlignment.Left,
-                VerticalAlignment = VerticalAlignment.Top,
-            };
-            grd.Children.Add(previewImg);
-            grd.DataContext = this;
+            ClipToBounds = true; 
+            RenderOptions.SetBitmapInterpolationMode(this, BitmapInterpolationMode.None);
             this.GetObservable(BoardProperty).Subscribe(new AnonymousObserver<BoardViewModel?>(s => OnBoardChanged()));
             this.GetObservable(WorldProperty).Subscribe(new AnonymousObserver<WorldViewModel?>(s => OnBoardChanged()));
             this.GetObservable(SelectedTileProperty).Subscribe(new AnonymousObserver<TileViewModel?>(s => OnSelectionChanged()));
@@ -120,133 +114,86 @@ namespace Tyler.Views
             Update();
         }
 
-        int w;
-        int h;
         public void Update()
         {
             if (Board == null || World == null) return;
-            if (Board.Width != w || Board.Height != h || selectionRectangle == null)
-                RebuildGrid();
-
-            foreach (var sc in spriteControls)
-            {
-                bool found = false;
-                if (Board.TileGrid.TryGetValue(sc.Key, out var tile))
-                {
-                    scriptIcons[sc.Key].IsVisible = tile.IsScriptIconVisible;
-                    if (tile == null)
-                        sc.Value.Sprite = null;
-                    else if (World.SpriteCharMap.TryGetValue(tile.Char, out var sprite))
-                        sc.Value.Sprite = sprite;
-                    found = true;
-                }
-                if (!found) sc.Value.Sprite = null;
-            }
-
-            if (selectionRectangle == null)
-                throw new Exception("selectionRectangle is null");
-
-            if (SelectedTile == null)
-                selectionRectangle.IsVisible = false;
-            else
-            {
-                selectionRectangle.IsVisible = true;
-                selectionRectangle.Margin = new Thickness(
-                    SelectedTile.X * World.TileWidth,
-                    SelectedTile.Y * World.TileHeight,
-                    0,
-                    0);
-            }
+            InvalidateVisual();
         }
 
-        void RebuildGrid()
+        //private void SpriteControl_PointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
+        //{
+        //    if (World != null && e.Source is SpriteControl spriteControl && spriteControl.Tag is Point p)
+        //    {
+        //        if (e.GetCurrentPoint(spriteControl).Properties.IsLeftButtonPressed)
+        //            World.SelectTile((int)p.X, (int)p.Y);
+        //        else if (e.GetCurrentPoint(spriteControl).Properties.IsRightButtonPressed)
+        //            Draw(p);
+        //    }
+        //}
+
+        //private void SpriteControl_PointerMoved(object? sender, Avalonia.Input.PointerEventArgs e)
+        //{
+        //    if (e.Source is SpriteControl spriteControl && spriteControl.Tag is Point p)
+        //    {
+        //        if (e.GetCurrentPoint(spriteControl).Properties.IsLeftButtonPressed)
+        //            World?.SelectTile((int)p.X, (int)p.Y);
+        //        else if (e.GetCurrentPoint(spriteControl).Properties.IsRightButtonPressed)
+        //            Draw(p);
+        //    }
+        //}
+
+        //void Draw(Point p)
+        //{
+        //    if (World != null && Board != null && World.SelectedSprite != null)
+        //    {
+        //        Board.SetTile((int)p.X, (int)p.Y, 0, World.SelectedSprite.RealChar);
+        //    }
+        //}
+
+        public override void Render(DrawingContext context)
         {
-            if (Board == null || World == null) return;
+            if (World == null || Board == null) return;
 
-            w = Board.Width;
-            h = Board.Height;
-            grd.Children.Clear();
-            grd.ColumnDefinitions.Clear();
-            grd.RowDefinitions.Clear();
+            context.Custom(new CustomDrawOp(this, Bounds));
+        }
 
-            spriteControls.Clear();
-            scriptIcons.Clear();
-            for (int r = 0; r < Board.Height; r++)
+        public void Render(ImmediateDrawingContext context)
+        {
+            context.FillRectangle(Brushes.CornflowerBlue, new Rect(0, 0, Bounds.Width, Bounds.Height));
+            if (World == null || Board == null) return;
+            foreach (var tile in Board.Tiles)
             {
-                for (int c = 0; c < Board.Width; c++)
+                if (World.SpriteCharMap.TryGetValue(tile.Char, out var sprite))
                 {
-                    var spriteControl = new SpriteControl();
-                    grd.Children.Add(spriteControl);
-                    spriteControls[(c, r)] = spriteControl;
-                    spriteControl.Margin = new Thickness(
-                        c * World.TileWidth,
-                        r * World.TileHeight,
-                        0,
-                        0);
-                    spriteControl.Width = World.TileWidth;
-                    spriteControl.Height = World.TileHeight;
-                    spriteControl.HorizontalAlignment = HorizontalAlignment.Left;
-                    spriteControl.VerticalAlignment = VerticalAlignment.Top;
-
-                    spriteControl.Tag = new Point(c, r);
-                    spriteControl.PointerMoved += SpriteControl_PointerMoved;
-                    spriteControl.PointerPressed += SpriteControl_PointerPressed;
-
-                    var img = new Image();
-                    img.Classes.Add("ScriptIcon");
-                    grd.Children.Add(img);
-                    img.Margin = new Thickness(
-                        (c + 0.6) * World.TileWidth,
-                        (r + 0.6) * World.TileHeight,
-                        0,
-                        0);
-                    img.Width = World.TileWidth / 2.5;
-                    img.Height = World.TileHeight / 2.5;
-                    img.HorizontalAlignment = HorizontalAlignment.Left;
-                    img.VerticalAlignment = VerticalAlignment.Top;
-                    img.Tag = spriteControl.Tag;
-                    scriptIcons[(c, r)] = img;
+                    if (sprite != null)
+                    {
+                        var bmpSpriteSheet = _bitmapCache.Get(sprite.Path);
+                        var destRect = new Rect(tile.X * TileWidth, tile.Y * TileHeight, TileWidth, TileHeight);
+                        var srcRect = new Rect(sprite.X, sprite.Y, sprite.Width, sprite.Height);
+                        context.DrawBitmap(bmpSpriteSheet, srcRect, destRect);
+                    }
                 }
             }
-
-            if (selectionRectangle == null)
-            {
-                selectionRectangle = new SelectionRect();
-                selectionRectangle.Width = World.TileWidth;
-                selectionRectangle.Height = World.TileHeight;
-                selectionRectangle.HorizontalAlignment = HorizontalAlignment.Left;
-                selectionRectangle.VerticalAlignment = VerticalAlignment.Top;
-                grd.Children.Add(selectionRectangle);
-            }
         }
 
-        private void SpriteControl_PointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
+        class CustomDrawOp : ICustomDrawOperation
         {
-            if (World != null && e.Source is SpriteControl spriteControl && spriteControl.Tag is Point p)
-            {
-                if (e.GetCurrentPoint(spriteControl).Properties.IsLeftButtonPressed)
-                    World.SelectTile((int)p.X, (int)p.Y);
-                else if (e.GetCurrentPoint(spriteControl).Properties.IsRightButtonPressed)
-                    Draw(p);
-            }
-        }
+            readonly BoardPreviewControl _control;
 
-        private void SpriteControl_PointerMoved(object? sender, Avalonia.Input.PointerEventArgs e)
-        {
-            if (e.Source is SpriteControl spriteControl && spriteControl.Tag is Point p)
+            public Rect Bounds { get; }
+            public CustomDrawOp(BoardPreviewControl control, Rect rect)
             {
-                if (e.GetCurrentPoint(spriteControl).Properties.IsLeftButtonPressed)
-                    World?.SelectTile((int)p.X, (int)p.Y);
-                else if (e.GetCurrentPoint(spriteControl).Properties.IsRightButtonPressed)
-                    Draw(p);
+                _control = control;
+                Bounds = rect;
             }
-        }
 
-        void Draw(Point p)
-        {
-            if (World != null && Board != null && World.SelectedSprite != null)
+            public void Dispose() { }
+            public bool Equals(ICustomDrawOperation? other) => false;
+            public bool HitTest(Point p) => false;
+
+            public void Render(ImmediateDrawingContext context)
             {
-                Board.SetTile((int)p.X, (int)p.Y, 0, World.SelectedSprite.RealChar);
+                _control.Render(context);
             }
         }
     }
