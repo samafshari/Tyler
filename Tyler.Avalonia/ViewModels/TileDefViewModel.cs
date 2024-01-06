@@ -6,7 +6,7 @@ using Tyler.Models;
 
 namespace Tyler.ViewModels
 {
-    public class TileDefViewModel : ViewModel
+    public class TileDefViewModel : TinyViewModel
     {
         public WorldViewModel World { get; }
 

@@ -7,6 +7,7 @@ using Avalonia.Threading;
 using Net.Essentials;
 
 using System;
+using System.Diagnostics;
 
 using Tyler.Services;
 using Tyler.ViewModels;
@@ -21,6 +22,11 @@ public partial class App : Application
     public App()
     {
         routingService = ContainerService.Instance.GetOrCreate<RoutingService>();
+        BenchmarkService.Instance.IsEnabled = true;
+        BenchmarkService.Instance.IsDebug = true;
+        BenchmarkService.Instance.Echo = true;
+        BenchmarkService.Instance.ShouldPrintAfterStops = true;
+        BenchmarkService.Instance.AutoPrintInterval = 2000;
     }
 
     public override void Initialize()
@@ -39,6 +45,7 @@ public partial class App : Application
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             routingService.GetWindowFunc = () => desktop.MainWindow;
+            routingService.ShowBenchmarks();
             routingService.ShowWorldEditor(true);
         }
         //else throw new NotSupportedException("Unsupported application lifetime.");

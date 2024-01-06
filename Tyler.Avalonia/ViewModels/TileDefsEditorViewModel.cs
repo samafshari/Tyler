@@ -11,7 +11,7 @@ using Tyler.Services;
 
 namespace Tyler.ViewModels
 {
-    public class TileDefsEditorViewModel : ViewModel
+    public class TileDefsEditorViewModel : TinyViewModel
     {
         public RoutingService _routingService;
         public WorldViewModel World { get; } = new WorldViewModel();

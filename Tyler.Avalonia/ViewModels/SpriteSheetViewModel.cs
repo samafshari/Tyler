@@ -17,7 +17,7 @@ using Tyler.Services;
 
 namespace Tyler.ViewModels
 {
-    public class SpriteSheetViewModel : ViewModel
+    public class SpriteSheetViewModel : TinyViewModel
     {
         static readonly BitmapCache _bitmapCache;
         public event EventHandler<NameChangeEventArgs>? IdChanged;

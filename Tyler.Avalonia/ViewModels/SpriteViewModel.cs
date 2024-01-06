@@ -9,7 +9,7 @@ using System;
 
 namespace Tyler.ViewModels
 {
-    public class SpriteViewModel : ViewModel
+    public class SpriteViewModel : TinyViewModel
     {
         static readonly BitmapCache _bitmapCache;
         public event EventHandler<NameChangeEventArgs>? IdChanged;

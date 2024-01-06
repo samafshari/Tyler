@@ -447,7 +447,7 @@ namespace Tyler.ViewModels
         public void SelectTile(int x, int y)
         {
             if (SelectedBoard == null) return;
-            SelectedBoard.TileGrid.TryGetValue((x, y), out var tile);
+            var tile = SelectedBoard.TileGrid[x, y];
             SelectedTile = tile;
             if (SelectedTile != null && SpriteCharMap.TryGetValue(SelectedTile.Char, out var sprite))
                 SelectedSprite = sprite;
@@ -507,5 +507,6 @@ namespace Tyler.ViewModels
         public CommandModel DuplicateBoardCommand => new CommandModel(DuplicateBoard);
         public CommandModel EditSpriteSheetCommand => new CommandModel(EditSpriteSheet);
         public CommandModel EditTileDefCommand => new CommandModel(EditTileDef);
+        public CommandModel ShowBenchmarksCommand => new CommandModel(_routingService.ShowBenchmarks);
     }
 }

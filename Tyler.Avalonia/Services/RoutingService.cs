@@ -198,5 +198,13 @@ namespace Tyler.Services
             window.DataContext = world;
             window.ShowDialog(owner);
         }
+
+        public void ShowBenchmarks()
+        {
+            var window = new BenchmarksWindow();
+            var vm = ContainerService.Instance.GetOrCreate<BenchmarksViewModel>();
+            window.DataContext = vm;
+            window.Show();
+        }
     }
 }

@@ -11,7 +11,7 @@ using Tyler.Models;
 
 namespace Tyler.ViewModels
 {
-    public class TileViewModel : ViewModel
+    public class TileViewModel : TinyViewModel
     {
         int _x, _y, _z;
         char _char;
@@ -55,11 +55,11 @@ namespace Tyler.ViewModels
 
         public TileViewModel(Tile model)
         {
-            X = model.X;
-            Y = model.Y;
-            Z = model.Z;
-            Char = model.Char;
-            Script = model.Script;
+            _x = model.X;
+            _y = model.Y;
+            _z = model.Z;
+            _char = model.Char;
+            _script = model.Script;
         }
 
         public Tile Serialize()

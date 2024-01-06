@@ -21,6 +21,8 @@
 					<Separator />
 					<MenuItem Header="Save" Command="{Binding SaveCommand}" />
 					<MenuItem Header="Save As..." Command="{Binding SaveAsCommand}" />
+					<Separator />
+					<MenuItem Header="Benchmark" Command="{Binding ShowBenchmarksCommand}" />
 				</MenuItem>
 				<MenuItem Header="Tile">
 					<MenuItem Header="Load Sprite Sheet..." Command="{Binding AddSpriteSheetCommand}" />

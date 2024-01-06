@@ -1,6 +1,7 @@
 ﻿using Net.Essentials;
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -12,7 +13,7 @@ using Tyler.Services;
 
 namespace Tyler.ViewModels
 {
-    public class BoardViewModel : ViewModel
+    public class BoardViewModel : TinyViewModel
     {
         readonly RoutingService _routingService;
         readonly ScriptingService _scriptingService;
@@ -67,14 +68,14 @@ namespace Tyler.ViewModels
             }
         }
 
-        ObservableCollection<TileViewModel> _tiles = new ObservableCollection<TileViewModel>();
-        public ObservableCollection<TileViewModel> Tiles
+        List<TileViewModel> _tiles = new List<TileViewModel>();
+        public List<TileViewModel> Tiles
         {
             get => _tiles;
             set => SetProperty(ref _tiles, value);
         }
 
-        public readonly Dictionary<(int, int), TileViewModel> TileGrid = new Dictionary<(int, int), TileViewModel>();
+        public TileViewModel?[,] TileGrid = new TileViewModel?[10, 10];
 
         string? _beforeScript;
         public string? BeforeScript
@@ -110,6 +111,7 @@ namespace Tyler.ViewModels
 
         public BoardViewModel(WorldViewModel? world, Board board)
         {
+            using var _ = BenchmarkService.Instance.StartBenchmark();
             _routingService = ContainerService.Instance.GetOrCreate<RoutingService>();
             _scriptingService = ContainerService.Instance.GetOrCreate<ScriptingService>();
 
@@ -119,27 +121,43 @@ namespace Tyler.ViewModels
 
         public void Load(Board board)
         {
+            using var _ = BenchmarkService.Instance.StartBenchmark();
             Id = board.Id;
             Name = board.Name;
             Width = board.Width;
             Height = board.Height;
-            Tiles = new ObservableCollection<TileViewModel>(board.Tiles.Select(x => new TileViewModel(x)));
+            var viewModels = new TileViewModel[board.Tiles.Count];
+            using (BenchmarkService.Instance.StartBenchmark("Create ViewModels"))
+            {
+                Parallel.For(0, board.Tiles.Count, i =>
+                {
+                    var tile = board.Tiles[i];
+                    var vm = new TileViewModel(tile);
+                    viewModels[i] = vm;
+                });
+            }
+            using (BenchmarkService.Instance.StartBenchmark("Tiles To List"))
+                Tiles = viewModels.ToList();
+
             BeforeScript = board.BeforeScript;
             AfterScript = board.AfterScript;
             Script = _scriptingService.BoardToScript(board);
-            BuildTileGrid();
         }
 
         public void SetTile(Tile tile)
         {
             var vm = new TileViewModel(tile);
-            if (TileGrid.TryGetValue((tile.X, tile.Y), out var oldTile))
+            if (TileGrid.GetLength(0) <= tile.X || TileGrid.GetLength(1) <= tile.Y)
+                BuildTileGrid();
+
+            var oldTile = TileGrid[tile.X, tile.Y];
+            if (oldTile != null)
             {
                 Tiles.Remove(oldTile);
-                TileGrid.Remove((tile.X, tile.Y));
+                TileGrid[tile.X, tile.Y] = null;
             }
             Tiles.Add(vm);
-            TileGrid[(tile.X, tile.Y)] = vm;
+            TileGrid[tile.X, tile.Y] = vm;
             BumpState();
         }
 
@@ -158,31 +176,18 @@ namespace Tyler.ViewModels
 
         public void BuildTileGrid()
         {
-            TileGrid.Clear();
-            foreach (var tile in Tiles)
-                TileGrid[(tile.X, tile.Y)] = tile;
-            for (int x = 0; x < Width; x++)
-                for (int y = 0; y < Height; y++)
-                {
-                    if (!TileGrid.ContainsKey((x, y)))
-                    {
-                        var tile = new Tile
-                        {
-                            X = x,
-                            Y = y,
-                            Z = 0,
-                            Char = Vars.DefaultChar,
-                            Script = ""
-                        };
-                        var vm = new TileViewModel(tile);
-                        TileGrid[(x, y)] = vm;
-                    }
-                }
+            using (BenchmarkService.Instance.StartBenchmark())
+            {
+                if (TileGrid.GetLength(0) != Width || TileGrid.GetLength(1) != Height)
+                    TileGrid = new TileViewModel[Width, Height];
+                Parallel.ForEach(Tiles, tile => TileGrid[tile.X, tile.Y] = tile);
+            }
             BumpState();
         }
 
         void BumpState()
         {
+            using var _ = BenchmarkService.Instance.StartBenchmark();
             Vars.BumpState(ref _state);
             RaisePropertyChanged(nameof(State));
         }

@@ -18,7 +18,7 @@
     <PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.6" />
     <PackageReference Include="Avalonia.Fonts.Inter" Version="11.0.6" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
-	  <PackageReference Include="Net.Essentials" Version="1.0.24" />
+	  <PackageReference Include="Net.Essentials" Version="1.0.25" />
 	  <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 
     <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
