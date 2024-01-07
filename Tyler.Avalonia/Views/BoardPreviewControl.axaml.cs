@@ -13,6 +13,7 @@ using Net.Essentials;
 
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 
 using Tyler.Services;
@@ -26,13 +27,14 @@ namespace Tyler.Views
         static readonly BitmapCache _bitmapCache = ContainerService.Instance.GetOrCreate<BitmapCache>();
 
         IImmutableBrush? bBoard, bScrollBar, bScrollCursor, bBackground, bRulerBackground, bRulerMinor, bRulerMajor;
-        ImmutablePen? pGrid, pGridMajor;
+        ImmutablePen? pGrid, pGridMajor, pRulerMinor, pRulerMajor;
         bool wasLeftPressed = false, wasRightPressed = false, wasMiddlePressed = false;
         bool isVerticalGrabbed = false, isHorizontalGrabbed = false, isPanGrabbed = false;
         bool isCursorOnViewport = false;
         Point cursorRelViewport = new(0, 0);
         Point grabPoint = new(0, 0);
         Vector grabValue = Vector.Zero;
+        const int RulerSteps = 10;
 
         public int ScrollBarWidth { get; } = 32;
         public int ScrollCursorMinLength { get; } = 32;
@@ -43,7 +45,7 @@ namespace Tyler.Views
         public Color GridColor { get; } = Colors.DarkGray;
         public int RulerWidth { get; } = 32;
         public Color RulerBackgroundColor { get; } = Colors.Black;
-        public Color RulerMinorColor { get; } = Colors.DarkGray;
+        public Color RulerMinorColor { get; } = Color.Parse("#222222");
         public Color RulerMajorColor { get; } = Colors.White;
         public Vector VisualTileSize { get; private set; } = new Vector(16, 16);
 
@@ -178,8 +180,8 @@ namespace Tyler.Views
         {
             //return new Rect(100, 100, 200, 200);
             return new Rect(
-                RulerWidth, RulerWidth, 
-                Bounds.Width - ScrollBarWidth - RulerWidth, 
+                RulerWidth, RulerWidth,
+                Bounds.Width - ScrollBarWidth - RulerWidth,
                 Bounds.Height - ScrollBarWidth - RulerWidth);
         }
 
@@ -266,7 +268,7 @@ namespace Tyler.Views
             try
             {
                 // If cursor is working with scroll bars
-                if ((properties.IsLeftButtonPressed || properties.IsRightButtonPressed) && 
+                if ((properties.IsLeftButtonPressed || properties.IsRightButtonPressed) &&
                     (rctScrollH.Contains(position) || rctScrollV.Contains(position)))
                 {
                     if (!wasLeftPressed && properties.IsLeftButtonPressed)
@@ -383,9 +385,11 @@ namespace Tyler.Views
             }
         }
 
+        IImmutableGlyphRunReference?[] glyphRuns = new IImmutableGlyphRunReference[0];
         public override void Render(DrawingContext context)
         {
             if (World == null || Board == null) return;
+
             bBoard = new SolidColorBrush(BoardColor).ToImmutable();
             bScrollBar = new SolidColorBrush(ScrollBarColor).ToImmutable();
             bScrollCursor = new SolidColorBrush(ScrollCursorColor).ToImmutable();
@@ -397,6 +401,21 @@ namespace Tyler.Views
             bRulerBackground = new SolidColorBrush(RulerBackgroundColor).ToImmutable();
             bRulerMinor = new SolidColorBrush(RulerMinorColor).ToImmutable();
             bRulerMajor = new SolidColorBrush(RulerMajorColor).ToImmutable();
+            pRulerMinor = new Pen(bRulerMinor).ToImmutable();
+            pRulerMajor = new Pen(bRulerMajor).ToImmutable();
+
+            glyphRuns = new IImmutableGlyphRunReference?[Math.Max(Board.Width, Board.Height) / RulerSteps + 1];
+            for (int i = 0; i < glyphRuns.Length; i++)
+            {
+                var text = i.ToString();
+                var glyphs = text.Select(ch => Typeface.Default.GlyphTypeface.GetGlyph(ch)).ToArray();
+                glyphRuns[i] = new GlyphRun(
+                    Typeface.Default.GlyphTypeface,
+                    12,
+                    text.AsMemory(),
+                    glyphs)
+                    .TryCreateImmutableGlyphRunReference();
+            }
 
             Dispatcher.UIThread.Invoke(() => context.Custom(new CustomDrawOp(this, Bounds)));
         }
@@ -410,15 +429,17 @@ namespace Tyler.Views
 
             // Draw board
             var rctBoard = new Rect(0, 0, Board.Width * VisualTileSize.X, Board.Height * VisualTileSize.Y);
+
+            var xOffset = -(ScrollX * (rctBoard.Width - viewportBounds.Width));
+            var yOffset = -(ScrollY * (rctBoard.Height - viewportBounds.Height));
+            if (rctBoard.Width < viewportBounds.Width) xOffset = 0;
+            if (rctBoard.Height < viewportBounds.Height) yOffset = 0;
+
             using (context.PushPreTransform(Matrix.CreateTranslation(viewportBounds.X, viewportBounds.Y)))
             {
                 using (context.PushClip(new Rect(0, 0, viewportBounds.Width, viewportBounds.Height)))
                 {
                     context.FillRectangle(bBackground!, rctBoard);
-                    var xOffset = -(ScrollX * (rctBoard.Width - viewportBounds.Width));
-                    var yOffset = -(ScrollY * (rctBoard.Height - viewportBounds.Height));
-                    if (rctBoard.Width < viewportBounds.Width) xOffset = 0;
-                    if (rctBoard.Height < viewportBounds.Height) yOffset = 0;
                     using (context.PushPreTransform(Matrix.CreateTranslation(xOffset, yOffset)))
                     {
                         // Draw grid
@@ -448,10 +469,33 @@ namespace Tyler.Views
                 }
 
                 // Draw rulers: horizontal
-                using (context.PushPreTransform(Matrix.CreateTranslation(0, -RulerWidth))) {
+                double rulerStepHeight = RulerWidth / (double)(RulerSteps + 1);
+                using (context.PushPreTransform(Matrix.CreateTranslation(0, -RulerWidth)))
+                {
                     using (context.PushClip(new Rect(0, 0, rctBoard.Width, RulerWidth)))
                     {
                         context.FillRectangle(bRulerBackground!, new Rect(0, 0, rctBoard.Width, RulerWidth));
+                        using (context.PushPreTransform(Matrix.CreateTranslation(xOffset, 0)))
+                        {
+                            for (int x = 0; x < Board.Width; x++)
+                            {
+                                var isMajor = x % RulerSteps == 0;
+                                var h = (1 + (x % RulerSteps)) * rulerStepHeight;
+                                if (isMajor) h = RulerWidth;
+                                var y = RulerWidth - h;
+                                context.DrawLine(isMajor ? pRulerMajor! : pRulerMinor!,
+                                    new Point(x * VisualTileSize.X, y),
+                                    new Point(x * VisualTileSize.X, RulerWidth));
+                                if (isMajor)
+                                {
+                                    var glyphRun = glyphRuns[x / RulerSteps];
+                                    if (glyphRun != null)
+                                        using (context.PushPreTransform(Matrix.CreateTranslation(x * VisualTileSize.X + 8, 0)))
+                                            context.DrawGlyphRun(bRulerMajor!, glyphRun);
+                                }
+                            }
+                        }
+                        context.DrawLine(pRulerMajor!, new Point(0, RulerWidth), new Point(rctBoard.Width, RulerWidth));
                     }
                 }
 
@@ -461,6 +505,27 @@ namespace Tyler.Views
                     using (context.PushClip(new Rect(0, 0, RulerWidth, rctBoard.Height)))
                     {
                         context.FillRectangle(bRulerBackground!, new Rect(0, 0, RulerWidth, rctBoard.Height));
+                        using (context.PushPreTransform(Matrix.CreateTranslation(0, yOffset)))
+                        {
+                            for (int y = 0; y < Board.Height; y++)
+                            {
+                                var isMajor = y % RulerSteps == 0;
+                                var w = (1 + (y % RulerSteps)) * rulerStepHeight;
+                                if (isMajor) w = RulerWidth;
+                                var x = RulerWidth - w;
+                                context.DrawLine(isMajor ? pRulerMajor! : pRulerMinor!,
+                                    new Point(x, y * VisualTileSize.Y),
+                                    new Point(RulerWidth, y * VisualTileSize.Y));
+                                if (isMajor)
+                                {
+                                    var glyphRun = glyphRuns[y / RulerSteps];
+                                    if (glyphRun != null)
+                                        using (context.PushPreTransform(Matrix.CreateTranslation(0, y * VisualTileSize.Y + 8)))
+                                            context.DrawGlyphRun(bRulerMajor!, glyphRun);
+                                }
+                            }
+                        }
+                        context.DrawLine(pRulerMajor!, new Point(RulerWidth, 0), new Point(RulerWidth, rctBoard.Height));
                     }
                 }
             }
