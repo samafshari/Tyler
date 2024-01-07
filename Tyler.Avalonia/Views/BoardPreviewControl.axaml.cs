@@ -27,6 +27,7 @@ namespace Tyler.Views
         static readonly BitmapCache _bitmapCache = ContainerService.Instance.GetOrCreate<BitmapCache>();
 
         IImmutableBrush? bBoard, bScrollBar, bScrollCursor, bBackground, bRulerBackground, bRulerMinor, bRulerMajor;
+        IImmutableGlyphRunReference?[] glyphRuns = Array.Empty<IImmutableGlyphRunReference>();
         ImmutablePen? pGrid, pGridMajor, pRulerMinor, pRulerMajor;
         bool wasLeftPressed = false, wasRightPressed = false, wasMiddlePressed = false;
         bool isVerticalGrabbed = false, isHorizontalGrabbed = false, isPanGrabbed = false;
@@ -385,7 +386,6 @@ namespace Tyler.Views
             }
         }
 
-        IImmutableGlyphRunReference?[] glyphRuns = new IImmutableGlyphRunReference[0];
         public override void Render(DrawingContext context)
         {
             if (World == null || Board == null) return;
