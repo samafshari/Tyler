@@ -274,10 +274,12 @@ namespace Tyler.Views
                 // Handle interaction with viewport
                 if (viewportBounds.Contains(position))
                 {
-                    var xOffset = ScrollX * (double)(Board.Width * TileWidth - viewportBounds.Width) - viewportBounds.X;
-                    var yOffset = ScrollY * (double)(Board.Height * TileHeight - viewportBounds.Height) - viewportBounds.Y;
+                    var xOffset = ScrollX * (double)(Board.Width * TileWidth - viewportBounds.Width);
+                    var yOffset = ScrollY * (double)(Board.Height * TileHeight - viewportBounds.Height);
                     if (viewportBounds.Width > Board.Width * TileWidth) xOffset = 0;
                     if (viewportBounds.Height > Board.Height * TileHeight) yOffset = 0;
+                    xOffset -= viewportBounds.X;
+                    yOffset -= viewportBounds.Y;
                     var tilePoint = new Point((xOffset + position.X) / TileWidth, (yOffset + position.Y) / TileHeight);
                     if (properties.IsLeftButtonPressed)
                     {
