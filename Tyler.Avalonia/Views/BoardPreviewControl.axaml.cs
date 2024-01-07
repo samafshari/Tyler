@@ -27,12 +27,12 @@ namespace Tyler.Views
 
         IImmutableBrush? bBoard, bScrollBar, bScrollCursor, bBackground;
         ImmutablePen? pGrid, pGridMajor;
-        bool wasLeftPressed = false, wasRightPressed = false;
-        bool isVerticalGrabbed = false, isHorizontalGrabbed = false;
+        bool wasLeftPressed = false, wasRightPressed = false, wasMiddlePressed = false;
+        bool isVerticalGrabbed = false, isHorizontalGrabbed = false, isPanGrabbed = false;
         bool isCursorOnViewport = false;
         Point cursorRelViewport = new(0, 0);
         Point grabPoint = new(0, 0);
-        double grabValue = 0;
+        Vector grabValue = Vector.Zero;
 
         public int ScrollBarWidth { get; } = 32;
         public int ScrollCursorMinLength { get; } = 32;
@@ -41,6 +41,7 @@ namespace Tyler.Views
         public Color ScrollBarColor { get; } = Colors.DarkSlateGray;
         public Color BoardColor { get; } = Colors.DarkSlateBlue;
         public Color GridColor { get; } = Colors.DarkGray;
+        public Vector VisualTileSize { get; private set; } = new Vector(16, 16);
 
         double _scrollX = 0, _scrollY = 0;
         public double ScrollX
@@ -110,6 +111,15 @@ namespace Tyler.Views
         public static readonly AvaloniaProperty<int> TileHeightProperty =
             AvaloniaProperty.Register<BoardPreviewControl, int>(nameof(TileHeight));
 
+        public double Zoom
+        {
+            get => (double)GetValue(ZoomProperty)!;
+            set => SetValue(ZoomProperty, value);
+        }
+
+        public static readonly AvaloniaProperty<double> ZoomProperty =
+            AvaloniaProperty.Register<BoardPreviewControl, double>(nameof(Zoom), 1);
+
         int _oldState;
         public int State
         {
@@ -130,6 +140,7 @@ namespace Tyler.Views
             this.GetObservable(SelectedTileProperty).Subscribe(new AnonymousObserver<TileViewModel?>(s => OnSelectionChanged()));
             this.GetObservable(TileWidthProperty).Subscribe(new AnonymousObserver<int>(s => OnBoardChanged()));
             this.GetObservable(TileHeightProperty).Subscribe(new AnonymousObserver<int>(s => OnBoardChanged()));
+            this.GetObservable(ZoomProperty).Subscribe(new AnonymousObserver<double>(s => OnBoardChanged()));
             this.GetObservable(StateProperty).Subscribe(new AnonymousObserver<int>(s => OnStateChanged()));
         }
 
@@ -144,6 +155,7 @@ namespace Tyler.Views
 
         void OnBoardChanged()
         {
+            VisualTileSize = new Vector(TileWidth, TileHeight) * Zoom;
             Update();
         }
 
@@ -169,7 +181,7 @@ namespace Tyler.Views
             var rctScrollH = new Rect(0, Bounds.Height - ScrollBarWidth, Bounds.Width - ScrollBarWidth, ScrollBarWidth);
 
             var viewportBounds = GetViewportBounds();
-            var boardWidth = Board != null ? (Board.Width * TileWidth) : viewportBounds.Width;
+            var boardWidth = Board != null ? (Board.Width * VisualTileSize.X) : viewportBounds.Width;
             var inflated = rctScrollH.Inflate(-ScrollCursorMargin);
             var lScrollCursorHLength = Math.Min(inflated.Width, Math.Max(ScrollCursorMinLength, inflated.Width * viewportBounds.Width / boardWidth));
             var rctScrollCursorH = new Rect(
@@ -188,7 +200,7 @@ namespace Tyler.Views
             var rctScrollV = new Rect(Bounds.Width - ScrollBarWidth, 0, ScrollBarWidth, Bounds.Height - ScrollBarWidth);
 
             var viewportBounds = GetViewportBounds();
-            var boardHeight = Board != null ? (Board.Height * TileHeight) : viewportBounds.Height;
+            var boardHeight = Board != null ? (Board.Height * VisualTileSize.Y) : viewportBounds.Height;
             var inflated = rctScrollV.Inflate(-ScrollCursorMargin);
             var lScrollCursorVLength = Math.Min(inflated.Height, Math.Max(ScrollCursorMinLength, inflated.Height * viewportBounds.Height / boardHeight));
             var rctScrollCursorV = new Rect(
@@ -235,13 +247,13 @@ namespace Tyler.Views
                         {
                             isHorizontalGrabbed = true;
                             grabPoint = position;
-                            grabValue = ScrollX;
+                            grabValue = new Vector(ScrollX, ScrollY);
                         }
                         else if (rctScrollCursorV.Contains(position))
                         {
                             isVerticalGrabbed = true;
                             grabPoint = position;
-                            grabValue = ScrollY;
+                            grabValue = new Vector(ScrollX, ScrollY);
                         }
                         else if (rctScrollH.Contains(position))
                         {
@@ -259,28 +271,43 @@ namespace Tyler.Views
                 }
                 if (isHorizontalGrabbed)
                 {
-                    ScrollX = grabValue + (position.X - grabPoint.X) / wiggleRoomH;
+                    ScrollX = grabValue.X + (position.X - grabPoint.X) / wiggleRoomH;
                     InvalidateMeasure();
                     return true;
                 }
                 if (isVerticalGrabbed)
                 {
-                    ScrollY = grabValue + (position.Y - grabPoint.Y) / wiggleRoomV;
+                    ScrollY = grabValue.Y + (position.Y - grabPoint.Y) / wiggleRoomV;
                     InvalidateMeasure();
                     return true;
                 }
 
                 if (Board == null) return false;
                 // Handle interaction with viewport
+                if (isPanGrabbed)
+                {
+                    ScrollX = grabValue.X + (grabPoint.X - position.X) / (Board.Width * VisualTileSize.X - viewportBounds.Width);
+                    ScrollY = grabValue.Y + (grabPoint.Y - position.Y) / (Board.Height * VisualTileSize.Y - viewportBounds.Height);
+                    InvalidateMeasure();
+                    return true;
+                }
+
                 if (viewportBounds.Contains(position))
                 {
-                    var xOffset = ScrollX * (double)(Board.Width * TileWidth - viewportBounds.Width);
-                    var yOffset = ScrollY * (double)(Board.Height * TileHeight - viewportBounds.Height);
-                    if (viewportBounds.Width > Board.Width * TileWidth) xOffset = 0;
-                    if (viewportBounds.Height > Board.Height * TileHeight) yOffset = 0;
+                    if (!isPanGrabbed && properties.IsMiddleButtonPressed)
+                    {
+                        isPanGrabbed = true;
+                        grabPoint = position;
+                        grabValue = new Vector(ScrollX, ScrollY);
+                        return true;
+                    }
+                    var xOffset = ScrollX * (double)(Board.Width * VisualTileSize.X - viewportBounds.Width);
+                    var yOffset = ScrollY * (double)(Board.Height * VisualTileSize.Y - viewportBounds.Height);
+                    if (viewportBounds.Width > Board.Width * VisualTileSize.X) xOffset = 0;
+                    if (viewportBounds.Height > Board.Height * VisualTileSize.Y) yOffset = 0;
                     xOffset -= viewportBounds.X;
                     yOffset -= viewportBounds.Y;
-                    var tilePoint = new Point((xOffset + position.X) / TileWidth, (yOffset + position.Y) / TileHeight);
+                    var tilePoint = new Point((xOffset + position.X) / VisualTileSize.X, (yOffset + position.Y) / VisualTileSize.Y);
                     if (properties.IsLeftButtonPressed)
                     {
                         Select(tilePoint);
@@ -302,11 +329,14 @@ namespace Tyler.Views
             {
                 wasLeftPressed = properties.IsLeftButtonPressed;
                 wasRightPressed = properties.IsRightButtonPressed;
+                wasMiddlePressed = properties.IsMiddleButtonPressed;
                 if (!wasLeftPressed)
                 {
                     isHorizontalGrabbed = false;
                     isVerticalGrabbed = false;
                 }
+                if (!wasMiddlePressed)
+                    isPanGrabbed = false;
             }
         }
 
@@ -347,7 +377,7 @@ namespace Tyler.Views
             if (World == null || Board == null) return;
 
             // Draw board
-            var rctBoard = new Rect(0, 0, Board.Width * TileWidth, Board.Height * TileHeight);
+            var rctBoard = new Rect(0, 0, Board.Width * VisualTileSize.X, Board.Height * VisualTileSize.Y);
             using (context.PushPreTransform(Matrix.CreateTranslation(viewportBounds.X, viewportBounds.Y)))
             {
                 using (context.PushClip(new Rect(0, 0, viewportBounds.Width, viewportBounds.Height)))
@@ -361,9 +391,9 @@ namespace Tyler.Views
                     {
                         // Draw grid
                         for (int x = 0; x < Board.Width; x++)
-                            context.DrawLine(x % 10 == 0 ? pGridMajor! : pGrid!, new Point(x * TileWidth, 0), new Point(x * TileWidth, Board.Height * TileHeight));
+                            context.DrawLine(x % 10 == 0 ? pGridMajor! : pGrid!, new Point(x * VisualTileSize.X, 0), new Point(x * VisualTileSize.X, Board.Height * VisualTileSize.Y));
                         for (int y = 0; y < Board.Height; y++)
-                            context.DrawLine(y % 10 == 0 ? pGridMajor! : pGrid!, new Point(0, y * TileHeight), new Point(Board.Width * TileWidth, y * TileHeight));
+                            context.DrawLine(y % 10 == 0 ? pGridMajor! : pGrid!, new Point(0, y * VisualTileSize.Y), new Point(Board.Width * VisualTileSize.X, y * VisualTileSize.Y));
 
                         // Draw tiles
                         void DrawTile(TileViewModel? tile)
@@ -374,7 +404,7 @@ namespace Tyler.Views
                                 if (sprite != null)
                                 {
                                     var bmpSpriteSheet = _bitmapCache.Get(sprite.Path);
-                                    var destRect = new Rect(tile.X * TileWidth, tile.Y * TileHeight, TileWidth, TileHeight);
+                                    var destRect = new Rect(tile.X * VisualTileSize.X, tile.Y * VisualTileSize.Y, VisualTileSize.X, VisualTileSize.Y);
                                     var srcRect = new Rect(sprite.X, sprite.Y, sprite.Width, sprite.Height);
                                     context.DrawBitmap(bmpSpriteSheet, srcRect, destRect);
                                 }
