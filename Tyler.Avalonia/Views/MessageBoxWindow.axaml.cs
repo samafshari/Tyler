@@ -24,6 +24,7 @@ namespace Tyler.Views
             {
                 TextWrapping = TextWrapping.Wrap,
                 Margin = new Thickness(10),
+                MaxWidth = 700,
             };
 
             buttonsStack = new StackPanel

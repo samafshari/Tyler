@@ -214,6 +214,8 @@ namespace Tyler.ViewModels
                     _settingsService.SaveWithLock();
                 }
             }
+            if (SelectedBoard == null)
+                SelectedBoard = Boards.FirstOrDefault();
         }
 
         public void New()

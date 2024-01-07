@@ -24,12 +24,9 @@
 					<Separator />
 					<MenuItem Header="Benchmark" Command="{Binding ShowBenchmarksCommand}" />
 				</MenuItem>
-				<MenuItem Header="Tile">
+				<MenuItem Header="Sprite">
 					<MenuItem Header="Load Sprite Sheet..." Command="{Binding AddSpriteSheetCommand}" />
-					<MenuItem Header="Sprite Sheet Manager" Command="{Binding ShowSpriteSheetManagerCommand}" />
 					<MenuItem Header="Reinitialize Sprite Map" Command="{Binding ReinitializeSpriteMapCommand}" />
-					<Separator />
-					<MenuItem Header="TileDefs Editor" Command="{Binding ShowTileDefsEditorCommand}" />
 				</MenuItem>
 				<MenuItem Header="Board">
 					<MenuItem Header="New Board" Command="{Binding AddBoardCommand}" />

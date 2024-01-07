@@ -29,6 +29,8 @@ namespace Tyler.Views
         ImmutablePen? pGrid, pGridMajor;
         bool wasLeftPressed = false, wasRightPressed = false;
         bool isVerticalGrabbed = false, isHorizontalGrabbed = false;
+        bool isCursorOnViewport = false;
+        Point cursorRelViewport = new(0, 0);
         Point grabPoint = new(0, 0);
         double grabValue = 0;
 
@@ -158,16 +160,18 @@ namespace Tyler.Views
 
         Rect GetViewportBounds()
         {
-            return new Rect(0, 0, Bounds.Width - ScrollBarWidth, Bounds.Height - ScrollBarWidth);
+            //return new Rect(100, 100, 200, 200);
+            return new Rect(ScrollBarWidth, ScrollBarWidth, Bounds.Width - ScrollBarWidth * 2, Bounds.Height - ScrollBarWidth * 2);
         }
 
         (Rect Box, Rect Cursor, double WiggleRoom) GetHorizontalScrollBarBounds()
         {
-            var viewportBounds = GetViewportBounds();
-            var boardWidth = Board != null ? (Board.Width * TileWidth) : Bounds.Width;
             var rctScrollH = new Rect(0, Bounds.Height - ScrollBarWidth, Bounds.Width - ScrollBarWidth, ScrollBarWidth);
+
+            var viewportBounds = GetViewportBounds();
+            var boardWidth = Board != null ? (Board.Width * TileWidth) : viewportBounds.Width;
             var inflated = rctScrollH.Inflate(-ScrollCursorMargin);
-            var lScrollCursorHLength = Math.Min(inflated.Width, Math.Max(ScrollCursorMinLength, inflated.Width * Bounds.Width / boardWidth));
+            var lScrollCursorHLength = Math.Min(inflated.Width, Math.Max(ScrollCursorMinLength, inflated.Width * viewportBounds.Width / boardWidth));
             var rctScrollCursorH = new Rect(
                 inflated.Left,
                 inflated.Top,
@@ -181,11 +185,12 @@ namespace Tyler.Views
 
         (Rect Box, Rect Cursor, double WiggleRoom) GetVerticalScrollBarBounds()
         {
-            var viewportBounds = GetViewportBounds();
-            var boardHeight = Board != null ? (Board.Height * TileHeight) : Bounds.Height;
             var rctScrollV = new Rect(Bounds.Width - ScrollBarWidth, 0, ScrollBarWidth, Bounds.Height - ScrollBarWidth);
+
+            var viewportBounds = GetViewportBounds();
+            var boardHeight = Board != null ? (Board.Height * TileHeight) : viewportBounds.Height;
             var inflated = rctScrollV.Inflate(-ScrollCursorMargin);
-            var lScrollCursorVLength = Math.Min(inflated.Height, Math.Max(ScrollCursorMinLength, inflated.Height * Bounds.Height / boardHeight));
+            var lScrollCursorVLength = Math.Min(inflated.Height, Math.Max(ScrollCursorMinLength, inflated.Height * viewportBounds.Height / boardHeight));
             var rctScrollCursorV = new Rect(
                 inflated.Left,
                 inflated.Top,
@@ -199,27 +204,31 @@ namespace Tyler.Views
 
         protected override void OnPointerMoved(PointerEventArgs e)
         {
-            if (HandlePointerInput(e.GetCurrentPoint(this).Position, e.GetCurrentPoint(this).Properties))
+            if (HandlePointerInput(e.GetCurrentPoint(this).Position, e.GetCurrentPoint(this).Properties, e.Pointer.Type))
                 e.Handled = true;
         }
 
         protected override void OnPointerPressed(PointerPressedEventArgs e)
         {
-            if (HandlePointerInput(e.GetCurrentPoint(this).Position, e.GetCurrentPoint(this).Properties))
+            if (HandlePointerInput(e.GetCurrentPoint(this).Position, e.GetCurrentPoint(this).Properties, e.Pointer.Type))
                 e.Handled = true;
         }
 
-        bool HandlePointerInput(Point position, PointerPointProperties properties)
+        bool HandlePointerInput(Point position, PointerPointProperties properties, PointerType pointerType)
         {
-            var tilePoint = position;
+            bool hasPressure = pointerType == PointerType.Pen && properties.Pressure > 0.1f;
+            var viewportBounds = GetViewportBounds();
+            var (rctScrollH, rctScrollCursorH, wiggleRoomH) = GetHorizontalScrollBarBounds();
+            var (rctScrollV, rctScrollCursorV, wiggleRoomV) = GetVerticalScrollBarBounds();
+            isCursorOnViewport = viewportBounds.Contains(position);
+            cursorRelViewport = position - viewportBounds.Position;
+
             try
             {
-                if ((properties.IsLeftButtonPressed || properties.IsRightButtonPressed) &&
-                    !(position.X > Bounds.Width - ScrollBarWidth && position.Y > Bounds.Height - ScrollBarWidth))
+                // If cursor is working with scroll bars
+                if ((properties.IsLeftButtonPressed || properties.IsRightButtonPressed) && 
+                    (rctScrollH.Contains(position) || rctScrollV.Contains(position)))
                 {
-                    var (rctScrollH, rctScrollCursorH, wiggleRoomH) = GetHorizontalScrollBarBounds();
-                    var (rctScrollV, rctScrollCursorV, wiggleRoomV) = GetVerticalScrollBarBounds();
-
                     if (!wasLeftPressed && properties.IsLeftButtonPressed)
                     {
                         if (rctScrollCursorH.Contains(position))
@@ -236,47 +245,50 @@ namespace Tyler.Views
                         }
                         else if (rctScrollH.Contains(position))
                         {
-                            ScrollX = Math.Max(0, Math.Min(1, (position.X - rctScrollCursorH.Width / 2) / wiggleRoomH));
+                            ScrollX = (position.X - rctScrollCursorH.Width / 2) / wiggleRoomH;
                             InvalidateMeasure();
                             return true;
                         }
                         else if (rctScrollV.Contains(position))
                         {
-                            ScrollY = Math.Max(0, Math.Min(1, (position.Y - rctScrollCursorV.Height / 2) / wiggleRoomV));
+                            ScrollY = (position.Y - rctScrollCursorV.Height / 2) / wiggleRoomV;
                             InvalidateMeasure();
                             return true;
                         }
                     }
-                    if (isHorizontalGrabbed)
-                    {
-                        ScrollX = Math.Max(0, Math.Min(1, grabValue + (position.X - grabPoint.X) / wiggleRoomH));
-                        InvalidateMeasure();
-                        return true;
-                    }
-                    if (isVerticalGrabbed)
-                    {
-                        ScrollY = Math.Max(0, Math.Min(1, grabValue + (position.Y - grabPoint.Y) / wiggleRoomV));
-                        InvalidateMeasure();
-                        return true;
-                    }
+                }
+                if (isHorizontalGrabbed)
+                {
+                    ScrollX = grabValue + (position.X - grabPoint.X) / wiggleRoomH;
+                    InvalidateMeasure();
+                    return true;
+                }
+                if (isVerticalGrabbed)
+                {
+                    ScrollY = grabValue + (position.Y - grabPoint.Y) / wiggleRoomV;
+                    InvalidateMeasure();
+                    return true;
                 }
 
                 if (Board == null) return false;
-                var viewportBounds = GetViewportBounds();
-                var xOffset = (ScrollX * (double)(Board.Width * TileWidth - viewportBounds.Width));
-                var yOffset = (ScrollY * (double)(Board.Height * TileHeight - viewportBounds.Height));
-                if (viewportBounds.Width > Board.Width * TileWidth) xOffset = 0;
-                if (viewportBounds.Height > Board.Height * TileHeight) yOffset = 0;
-                tilePoint = new Point((xOffset + tilePoint.X) / TileWidth, (yOffset + tilePoint.Y) / TileHeight);
-                if (properties.IsLeftButtonPressed)
+                // Handle interaction with viewport
+                if (viewportBounds.Contains(position))
                 {
-                    Select(tilePoint);
-                    return true;
-                }
-                else if (properties.IsRightButtonPressed)
-                {
-                    Draw(tilePoint);
-                    return true;
+                    var xOffset = ScrollX * (double)(Board.Width * TileWidth - viewportBounds.Width) - viewportBounds.X;
+                    var yOffset = ScrollY * (double)(Board.Height * TileHeight - viewportBounds.Height) - viewportBounds.Y;
+                    if (viewportBounds.Width > Board.Width * TileWidth) xOffset = 0;
+                    if (viewportBounds.Height > Board.Height * TileHeight) yOffset = 0;
+                    var tilePoint = new Point((xOffset + position.X) / TileWidth, (yOffset + position.Y) / TileHeight);
+                    if (properties.IsLeftButtonPressed)
+                    {
+                        Select(tilePoint);
+                        return true;
+                    }
+                    else if (properties.IsRightButtonPressed || (hasPressure && !properties.IsEraser))
+                    {
+                        Draw(tilePoint);
+                        return true;
+                    }
                 }
                 return false;
             }
@@ -328,42 +340,49 @@ namespace Tyler.Views
         public void Render(ImmediateDrawingContext context)
         {
             context.FillRectangle(bBoard!, new Rect(0, 0, Bounds.Width, Bounds.Height));
+            var viewportBounds = GetViewportBounds();
 
             if (World == null || Board == null) return;
 
             // Draw board
             var rctBoard = new Rect(0, 0, Board.Width * TileWidth, Board.Height * TileHeight);
-            context.FillRectangle(bBackground!, rctBoard);
-
-            var viewportBounds = GetViewportBounds();
-            var xOffset = -(ScrollX * (rctBoard.Width - Bounds.Width));
-            var yOffset = -(ScrollY * (rctBoard.Height - Bounds.Height));
-            if (rctBoard.Width < viewportBounds.Width) xOffset = 0;
-            if (rctBoard.Height < viewportBounds.Height) yOffset = 0;
-
-            // Draw grid
-            for (int x = 0; x < Board.Width; x++)
-                context.DrawLine(x % 10 == 0 ? pGridMajor! : pGrid!, new Point(xOffset + x * TileWidth, 0), new Point(xOffset + x * TileWidth, Board.Height * TileHeight));
-            for (int y = 0; y < Board.Height; y++)
-                context.DrawLine(y % 10 == 0 ? pGridMajor! : pGrid!, new Point(0, yOffset + y * TileHeight), new Point(Board.Width * TileWidth, yOffset + y * TileHeight));
-
-            // Draw tiles
-            void DrawTile(TileViewModel? tile)
+            using (context.PushPreTransform(Matrix.CreateTranslation(viewportBounds.X, viewportBounds.Y)))
             {
-                if (tile == null) return;
-                if (World!.SpriteCharMap.TryGetValue(tile.Char, out var sprite))
+                using (context.PushClip(new Rect(0, 0, viewportBounds.Width, viewportBounds.Height)))
                 {
-                    if (sprite != null)
+                    context.FillRectangle(bBackground!, rctBoard);
+                    var xOffset = -(ScrollX * (rctBoard.Width - viewportBounds.Width));
+                    var yOffset = -(ScrollY * (rctBoard.Height - viewportBounds.Height));
+                    if (rctBoard.Width < viewportBounds.Width) xOffset = 0;
+                    if (rctBoard.Height < viewportBounds.Height) yOffset = 0;
+                    using (context.PushPreTransform(Matrix.CreateTranslation(xOffset, yOffset)))
                     {
-                        var bmpSpriteSheet = _bitmapCache.Get(sprite.Path);
-                        var destRect = new Rect(xOffset + tile.X * TileWidth, yOffset + tile.Y * TileHeight, TileWidth, TileHeight);
-                        var srcRect = new Rect(sprite.X, sprite.Y, sprite.Width, sprite.Height);
-                        context.DrawBitmap(bmpSpriteSheet, srcRect, destRect);
+                        // Draw grid
+                        for (int x = 0; x < Board.Width; x++)
+                            context.DrawLine(x % 10 == 0 ? pGridMajor! : pGrid!, new Point(x * TileWidth, 0), new Point(x * TileWidth, Board.Height * TileHeight));
+                        for (int y = 0; y < Board.Height; y++)
+                            context.DrawLine(y % 10 == 0 ? pGridMajor! : pGrid!, new Point(0, y * TileHeight), new Point(Board.Width * TileWidth, y * TileHeight));
+
+                        // Draw tiles
+                        void DrawTile(TileViewModel? tile)
+                        {
+                            if (tile == null) return;
+                            if (World!.SpriteCharMap.TryGetValue(tile.Char, out var sprite))
+                            {
+                                if (sprite != null)
+                                {
+                                    var bmpSpriteSheet = _bitmapCache.Get(sprite.Path);
+                                    var destRect = new Rect(tile.X * TileWidth, tile.Y * TileHeight, TileWidth, TileHeight);
+                                    var srcRect = new Rect(sprite.X, sprite.Y, sprite.Width, sprite.Height);
+                                    context.DrawBitmap(bmpSpriteSheet, srcRect, destRect);
+                                }
+                            }
+                        }
+                        //    Parallel.ForEach(Board.Tiles.ToArray(), DrawTile);
+                        foreach (var tile in Board.Tiles.ToArray()) DrawTile(tile);
                     }
                 }
             }
-            //    Parallel.ForEach(Board.Tiles.ToArray(), DrawTile);
-            foreach (var tile in Board.Tiles.ToArray()) DrawTile(tile);
 
             // Draw scroll bars
             var (rctScrollH, rctScrollCursorH, _) = GetHorizontalScrollBarBounds();

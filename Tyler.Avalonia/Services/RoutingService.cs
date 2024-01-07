@@ -47,8 +47,12 @@ namespace Tyler.Services
             if (parent == null)
                 throw new InvalidOperationException("Cannot show open file dialog without a parent window.");
 
-            var result = await MessageBoxWindow.ShowConfirmDialogAsync(parent, title, text, ["Yes", "No"]);
-            return result == "Yes";
+            bool result = false;
+            await ViewModel.RunOnUITask(async () =>
+            {
+                result = "Yes" == await MessageBoxWindow.ShowConfirmDialogAsync(parent, title, text, ["Yes", "No"]);
+            });
+            return result;
         }
 
         public async Task<bool> ShowDialogAsync(Window? parent, string title, string text)
@@ -57,10 +61,14 @@ namespace Tyler.Services
             if (parent == null)
                 throw new InvalidOperationException("Cannot show open file dialog without a parent window.");
 
-            var result = await MessageBoxWindow.ShowConfirmDialogAsync(parent, title, text, ["OK"]);
-            return result == "OK";
+            bool result = false;
+            await ViewModel.RunOnUITask(async () =>
+            {
+                result = "OK" == await MessageBoxWindow.ShowConfirmDialogAsync(parent, title, text, ["OK"]);
+            });
+            return result;
         }
-        
+
         public void ShowDialog(Window? parent, string title, string text)
         {
             RunOnUIAsync(() => ShowDialogAsync(parent, title, text));
@@ -71,7 +79,7 @@ namespace Tyler.Services
             return new[]
             {
                 new FilePickerFileType(typeName) {
-                    Patterns = new[]{ $"*{extension}" } 
+                    Patterns = new[]{ $"*{extension}" }
                 }
             };
         }
@@ -88,8 +96,12 @@ namespace Tyler.Services
                 Title = title,
                 FileTypeFilter = GetFileFilter(extension, typeName),
             };
-            
-            var result = await parent.StorageProvider.OpenFilePickerAsync(options);
+
+            IReadOnlyList<IStorageFile>? result = null;
+            await RunOnUIAsync(async () =>
+            {
+                result = await parent.StorageProvider.OpenFilePickerAsync(options);
+            });
             var file = result?.FirstOrDefault();
             if (file != null)
                 return file;
@@ -98,7 +110,7 @@ namespace Tyler.Services
 
         public async Task<IStorageFile?> ShowSaveFileDialogAsync(Window? parent, string title, string extension, string typeName)
         {
-            parent ??= GetMainWindow(); 
+            parent ??= GetMainWindow();
             if (parent == null)
                 throw new InvalidOperationException("Cannot show open file dialog without a parent window.");
 
@@ -111,7 +123,11 @@ namespace Tyler.Services
                 ShowOverwritePrompt = true
             };
 
-            var result = await parent.StorageProvider.SaveFilePickerAsync(options);
+            IStorageFile? result = null;
+            await RunOnUIAsync(async () =>
+            {
+                result = await parent.StorageProvider.SaveFilePickerAsync(options);
+            });
             if (result != null)
                 return result;
             return null;
@@ -119,17 +135,21 @@ namespace Tyler.Services
 
         public async Task<IStorageFolder?> ShowOpenFolderDialogAsync(Window? parent, string title)
         {
-            parent ??= GetMainWindow(); 
+            parent ??= GetMainWindow();
             if (parent == null)
                 throw new InvalidOperationException("Cannot show open file dialog without a parent window.");
 
             if (!parent.StorageProvider.CanPickFolder)
                 throw new NotSupportedException("Storage provider does not support picking folders.");
 
-            var result = await parent.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+            IReadOnlyList<IStorageFolder>? result = null;
+            await RunOnUIAsync(async () =>
             {
-                Title = title,
-                AllowMultiple = false
+                result = await parent.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+                {
+                    Title = title,
+                    AllowMultiple = false
+                });
             });
 
             var directory = result?.FirstOrDefault();
@@ -144,39 +164,60 @@ namespace Tyler.Services
             if (parent == null)
                 throw new InvalidOperationException("Cannot show open file dialog without a parent window.");
 
-            var window = new AutoSliceWindow();
             var vm = new AutoSliceViewModel(editor);
-            window.DataContext = vm;
-            window.ShowDialog(parent);
+            RunOnUI(() =>
+            {
+                var window = new AutoSliceWindow();
+                window.DataContext = vm;
+                window.ShowDialog(parent);
+            });
         }
 
         public void ShowWorldEditor(bool loadRecent)
         {
-            var window = new WorldEditorWindow();
             var vm = new WorldViewModel();
             if (loadRecent && File.Exists(_settingsService.Data.LastWorldPath))
             {
-                vm.Path = _settingsService.Data.LastWorldPath;
-                vm.Load();
+                try
+                {
+                    vm.Path = _settingsService.Data.LastWorldPath;
+                    vm.Load();
+                }
+                catch
+                {
+                    _settingsService.Data.LastWorldPath = null;
+                    _settingsService.SaveWithLock();
+                    vm = new WorldViewModel();
+                }
             }
-            window.DataContext = vm;
-            window.Show();
+            RunOnUI(() =>
+            {
+                var window = new WorldEditorWindow();
+                window.DataContext = vm;
+                window.Show();
+            });
         }
 
         public void ShowTileDefsEditor(WorldViewModel world)
         {
-            var window = new TileDefsEditorWindow();
             var vm = new TileDefsEditorViewModel(world);
-            window.DataContext = vm;
-            window.Show();
+            RunOnUI(() =>
+            {
+                var window = new TileDefsEditorWindow();
+                window.DataContext = vm;
+                window.Show();
+            });
         }
 
         public void ShowWorldSpriteSheetManager(WorldViewModel world)
         {
-            var window = new WorldSpriteSheetManagerWindow();
             var vm = new WorldSpriteSheetManagerViewModel(world);
-            window.DataContext = vm;
-            window.Show();
+            RunOnUI(() =>
+            {
+                var window = new WorldSpriteSheetManagerWindow();
+                window.DataContext = vm;
+                window.Show();
+            });
         }
 
         public void ShowBoardSettings(BoardViewModel board)
@@ -184,9 +225,12 @@ namespace Tyler.Services
             var owner = GetMainWindow();
             if (owner == null)
                 throw new InvalidOperationException("Cannot show board settings without a parent window.");
-            var window = new BoardSettingsWindow();
-            window.DataContext = board;
-            window.ShowDialog(owner);
+            RunOnUI(() =>
+            {
+                var window = new BoardSettingsWindow();
+                window.DataContext = board;
+                window.ShowDialog(owner);
+            });
         }
 
         public void ShowWorldSettings(WorldViewModel world)
@@ -194,17 +238,23 @@ namespace Tyler.Services
             var owner = GetMainWindow();
             if (owner == null)
                 throw new InvalidOperationException("Cannot show world settings without a parent window.");
-            var window = new WorldSettingsWindow();
-            window.DataContext = world;
-            window.ShowDialog(owner);
+            RunOnUI(() =>
+            {
+                var window = new WorldSettingsWindow();
+                window.DataContext = world;
+                window.ShowDialog(owner);
+            });
         }
 
         public void ShowBenchmarks()
         {
-            var window = new BenchmarksWindow();
             var vm = ContainerService.Instance.GetOrCreate<BenchmarksViewModel>();
-            window.DataContext = vm;
-            window.Show();
+            RunOnUI(() =>
+            {
+                var window = new BenchmarksWindow();
+                window.DataContext = vm;
+                window.Show();
+            });
         }
     }
 }
