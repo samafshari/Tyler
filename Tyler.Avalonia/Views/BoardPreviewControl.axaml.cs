@@ -25,7 +25,7 @@ namespace Tyler.Views
         static readonly SettingsService _settingsService = ContainerService.Instance.GetOrCreate<SettingsService>();
         static readonly BitmapCache _bitmapCache = ContainerService.Instance.GetOrCreate<BitmapCache>();
 
-        IImmutableBrush? bBoard, bScrollBar, bScrollCursor, bBackground;
+        IImmutableBrush? bBoard, bScrollBar, bScrollCursor, bBackground, bRulerBackground, bRulerMinor, bRulerMajor;
         ImmutablePen? pGrid, pGridMajor;
         bool wasLeftPressed = false, wasRightPressed = false, wasMiddlePressed = false;
         bool isVerticalGrabbed = false, isHorizontalGrabbed = false, isPanGrabbed = false;
@@ -41,6 +41,10 @@ namespace Tyler.Views
         public Color ScrollBarColor { get; } = Colors.DarkSlateGray;
         public Color BoardColor { get; } = Colors.DarkSlateBlue;
         public Color GridColor { get; } = Colors.DarkGray;
+        public int RulerWidth { get; } = 32;
+        public Color RulerBackgroundColor { get; } = Colors.Black;
+        public Color RulerMinorColor { get; } = Colors.DarkGray;
+        public Color RulerMajorColor { get; } = Colors.White;
         public Vector VisualTileSize { get; private set; } = new Vector(16, 16);
 
         double _scrollX = 0, _scrollY = 0;
@@ -173,7 +177,10 @@ namespace Tyler.Views
         Rect GetViewportBounds()
         {
             //return new Rect(100, 100, 200, 200);
-            return new Rect(ScrollBarWidth, ScrollBarWidth, Bounds.Width - ScrollBarWidth * 2, Bounds.Height - ScrollBarWidth * 2);
+            return new Rect(
+                RulerWidth, RulerWidth, 
+                Bounds.Width - ScrollBarWidth - RulerWidth, 
+                Bounds.Height - ScrollBarWidth - RulerWidth);
         }
 
         (Rect Box, Rect Cursor, double WiggleRoom) GetHorizontalScrollBarBounds()
@@ -224,6 +231,27 @@ namespace Tyler.Views
         {
             if (HandlePointerInput(e.GetCurrentPoint(this).Position, e.GetCurrentPoint(this).Properties, e.Pointer.Type))
                 e.Handled = true;
+        }
+
+        protected override void OnPointerWheelChanged(PointerWheelEventArgs e)
+        {
+            base.OnPointerWheelChanged(e);
+            var viewportBounds = GetViewportBounds();
+            if (viewportBounds.Contains(e.GetPosition(this)))
+            {
+                var delta = e.Delta.Y / 120;
+                if (delta > 0)
+                {
+                    Zoom *= 1.1;
+                }
+                else if (delta < 0)
+                {
+                    Zoom /= 1.1;
+                }
+                if (Zoom < 0.25) Zoom = 0.25;
+                if (Zoom > 3) Zoom = 3;
+                e.Handled = true;
+            }
         }
 
         bool HandlePointerInput(Point position, PointerPointProperties properties, PointerType pointerType)
@@ -366,6 +394,10 @@ namespace Tyler.Views
             if (!Color.TryParse(_settingsService.Data.BackgroundColor, out var cBackground))
                 cBackground = Colors.Black;
             bBackground = new SolidColorBrush(cBackground).ToImmutable();
+            bRulerBackground = new SolidColorBrush(RulerBackgroundColor).ToImmutable();
+            bRulerMinor = new SolidColorBrush(RulerMinorColor).ToImmutable();
+            bRulerMajor = new SolidColorBrush(RulerMajorColor).ToImmutable();
+
             Dispatcher.UIThread.Invoke(() => context.Custom(new CustomDrawOp(this, Bounds)));
         }
 
@@ -412,6 +444,23 @@ namespace Tyler.Views
                         }
                         //    Parallel.ForEach(Board.Tiles.ToArray(), DrawTile);
                         foreach (var tile in Board.Tiles.ToArray()) DrawTile(tile);
+                    }
+                }
+
+                // Draw rulers: horizontal
+                using (context.PushPreTransform(Matrix.CreateTranslation(0, -RulerWidth))) {
+                    using (context.PushClip(new Rect(0, 0, rctBoard.Width, RulerWidth)))
+                    {
+                        context.FillRectangle(bRulerBackground!, new Rect(0, 0, rctBoard.Width, RulerWidth));
+                    }
+                }
+
+                // Draw rulers: vertical
+                using (context.PushPreTransform(Matrix.CreateTranslation(-RulerWidth, 0)))
+                {
+                    using (context.PushClip(new Rect(0, 0, RulerWidth, rctBoard.Height)))
+                    {
+                        context.FillRectangle(bRulerBackground!, new Rect(0, 0, RulerWidth, rctBoard.Height));
                     }
                 }
             }
