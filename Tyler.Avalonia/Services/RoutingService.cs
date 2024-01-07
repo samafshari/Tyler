@@ -15,7 +15,6 @@ namespace Tyler.Services
     public class RoutingService : Singleton<RoutingService>
     {
         readonly SettingsService _settingsService;
-
         public Func<Window?>? GetWindowFunc;
 
         public RoutingService()
@@ -23,8 +22,8 @@ namespace Tyler.Services
             _settingsService = ContainerService.Instance.GetOrCreate<SettingsService>();
         }
 
-        void RunOnUI(Action a) => ViewModel.RunOnUIAction(a);
-        Task RunOnUIAsync(Func<Task> a) => ViewModel.RunOnUITask(a);
+        void RunOnUI(Action a) => TinyViewModel.RunOnUIAction(a);
+        Task RunOnUIAsync(Func<Task> a) => TinyViewModel.RunOnUITask(a);
 
         public Window? GetMainWindow()
         {
@@ -48,7 +47,7 @@ namespace Tyler.Services
                 throw new InvalidOperationException("Cannot show open file dialog without a parent window.");
 
             bool result = false;
-            await ViewModel.RunOnUITask(async () =>
+            await RunOnUIAsync(async () =>
             {
                 result = "Yes" == await MessageBoxWindow.ShowConfirmDialogAsync(parent, title, text, ["Yes", "No"]);
             });
@@ -62,7 +61,7 @@ namespace Tyler.Services
                 throw new InvalidOperationException("Cannot show open file dialog without a parent window.");
 
             bool result = false;
-            await ViewModel.RunOnUITask(async () =>
+            await RunOnUIAsync(async () =>
             {
                 result = "OK" == await MessageBoxWindow.ShowConfirmDialogAsync(parent, title, text, ["OK"]);
             });

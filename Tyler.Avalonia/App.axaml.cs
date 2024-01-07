@@ -39,13 +39,13 @@ public partial class App : Application
         // Line below is needed to remove Avalonia data validation.
         // Without this line you will get duplicate validations from both Avalonia and CT
         BindingPlugins.DataValidators.RemoveAt(0);
-        ViewModel.RunOnUIAction = Dispatcher.UIThread.Invoke;
-        ViewModel.RunOnUITask = Dispatcher.UIThread.InvokeAsync;
+        TinyViewModel.RunOnUIAction = Dispatcher.UIThread.Invoke;
+        TinyViewModel.RunOnUITask = Dispatcher.UIThread.InvokeAsync;
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             routingService.GetWindowFunc = () => desktop.MainWindow;
-            routingService.ShowBenchmarks();
+            //routingService.ShowBenchmarks();
             routingService.ShowWorldEditor(true);
         }
         //else throw new NotSupportedException("Unsupported application lifetime.");
