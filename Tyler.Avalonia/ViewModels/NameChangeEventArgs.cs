@@ -8,11 +8,13 @@ namespace Tyler.ViewModels
 {
     public struct NameChangeEventArgs
     {
-        public string OldName { get; }
-        public string NewName { get; }
+        public string? OldName { get; }
+        public string? NewName { get; }
+        public object Entity { get; }
 
-        public NameChangeEventArgs(string oldName, string newName)
+        public NameChangeEventArgs(Object e, string? oldName, string? newName)
         {
+            Entity = e;
             OldName = oldName;
             NewName = newName;
         }

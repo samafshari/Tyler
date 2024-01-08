@@ -5,6 +5,7 @@ using System.Linq;
 using Tyler.Services;
 using Tyler.Views;
 using System.Threading.Tasks;
+using Tyler.Models;
 
 namespace Tyler.ViewModels
 {
@@ -116,12 +117,14 @@ namespace Tyler.ViewModels
             {
                 for (; x + Width <= w; x += Width + XGap)
                 {
-                    var sprite = _spriteSheet.AddSprite();
-                    if (sprite == null) return;
-                    sprite.X = x;
-                    sprite.Y = y;
-                    sprite.Width = Width;
-                    sprite.Height = Height;
+                    var sprite = new Sprite
+                    {
+                        X = x,
+                        Y = y,
+                        Width = Width,
+                        Height = Height
+                    };
+                    _spriteSheet.AddSprite(sprite);
                 }
                 x = OffsetLeft;
             }

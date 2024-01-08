@@ -59,6 +59,12 @@
 				</Border>
 			</TabItem>
 
+			<TabItem Header="Brushes">
+				<Border BorderThickness="1" BorderBrush="#333">
+					<TextBlock Text="Nothing to see here yet."></TextBlock>
+				</Border>
+			</TabItem>
+			
 			<TabItem Header="Boards">
 				<Border BorderThickness="1" BorderBrush="#333">
 					<local:BoardsEditorControl />

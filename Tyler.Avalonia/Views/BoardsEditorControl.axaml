@@ -29,7 +29,7 @@
 			</Grid>
 
 			<Grid Grid.Column="1" x:Name="MiddleGrid" RowDefinitions="Auto, *">
-				<StackPanel Orientation="Horizontal" Spacing="10" Margin="10, 0">
+				<StackPanel Classes="ToolBar">
 					<TextBlock Text="Zoom:" />
 						
 					<Slider 

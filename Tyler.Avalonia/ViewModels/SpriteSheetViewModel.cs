@@ -60,7 +60,7 @@ namespace Tyler.ViewModels
                 SetProperty(ref _id, value);
                 RaisePropertyChanged(nameof(DisplayName));
                 if (oldId != value)
-                    IdChanged?.Invoke(this, new NameChangeEventArgs(oldId, value));
+                    IdChanged?.Invoke(this, new NameChangeEventArgs(this, oldId, value));
             }
         }
 
@@ -76,6 +76,7 @@ namespace Tyler.ViewModels
             RegisterEvents();
 
             Editor = new SpriteSheetEditorViewModel(this);
+            AddEntiretyAsSprite();
         }
 
         public SpriteSheetViewModel(SpriteSheet model)
@@ -118,25 +119,31 @@ namespace Tyler.ViewModels
             return model;
         }
 
+        public SpriteViewModel AddEntiretyAsSprite()
+        {
+            var sprite = AddSprite();
+            sprite.Id = Id;
+            return sprite;
+        }
+
         public SpriteViewModel AddSprite()
         {
-            var id = Sprites.Count.ToString();
-
-            if (Sprites.Any())
-                id = Sprites.Select(x => int.TryParse(x.Id, out var _i) ? _i : 0).Max() + 1 + "";
-
-            var sprite = new SpriteViewModel(Path, new Sprite
+            var sprite = new Sprite
             {
-                Id = id,
-                Char = Vars.DefaultChar,
                 X = 0,
                 Y = 0,
                 Width = Bitmap.PixelSize.Width,
                 Height = Bitmap.PixelSize.Height
-            });
-            Sprites.Add(sprite);
+            };
 
-            return sprite;
+            return AddSprite(sprite);
+        }
+
+        public SpriteViewModel AddSprite(Sprite sprite)
+        {
+            var spriteViewModel = new SpriteViewModel(Path, sprite);
+            Sprites.Add(spriteViewModel);
+            return spriteViewModel;
         }
 
         public void ClearSprites()

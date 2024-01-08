@@ -21,8 +21,8 @@ namespace Tyler.ViewModels
 
         public string DisplayName => ToString();
 
-        string _id;
-        public string Id
+        string? _id;
+        public string? Id
         {
             get => _id;
             set
@@ -31,7 +31,7 @@ namespace Tyler.ViewModels
                 SetProperty(ref _id, value);
                 RaisePropertyChanged(nameof(DisplayName));
                 if (oldId != value)
-                    IdChanged?.Invoke(this, new NameChangeEventArgs(oldId, value));
+                    IdChanged?.Invoke(this, new NameChangeEventArgs(this, oldId, value));
             }
         }
 
@@ -43,6 +43,7 @@ namespace Tyler.ViewModels
             {
                 SetProperty(ref _x, value);
                 RaisePropertyChanged(nameof(Bitmap));
+                RaisePropertyChanged(nameof(DisplayName));
             }
         }
 
@@ -54,6 +55,7 @@ namespace Tyler.ViewModels
             {
                 SetProperty(ref _y, value);
                 RaisePropertyChanged(nameof(Bitmap));
+                RaisePropertyChanged(nameof(DisplayName));
             }
         }
 
@@ -65,6 +67,7 @@ namespace Tyler.ViewModels
             {
                 SetProperty(ref _width, value);
                 RaisePropertyChanged(nameof(Bitmap));
+                RaisePropertyChanged(nameof(SizeString));
             }
         }
 
@@ -76,8 +79,11 @@ namespace Tyler.ViewModels
             {
                 SetProperty(ref _height, value);
                 RaisePropertyChanged(nameof(Bitmap));
+                RaisePropertyChanged(nameof(SizeString));
             }
         }
+
+        public string SizeString => Width == Height ? $"{Width}" : $"{Width}x{Height}";
 
         char _char = Vars.UnassignedChar;
         public string Char
@@ -108,7 +114,7 @@ namespace Tyler.ViewModels
 
         public SpriteViewModel(string path, Sprite sprite)
         {
-            _id = sprite.Id ?? Guid.NewGuid().ToString();
+            _id = sprite.Id;
             X = sprite.X;
             Y = sprite.Y;
             Width = sprite.Width;
@@ -121,10 +127,10 @@ namespace Tyler.ViewModels
         {
             var sprite = new Sprite
             {
-                Id = Id, 
-                X = X, 
-                Y = Y, 
-                Width = Width, 
+                Id = Id,
+                X = X,
+                Y = Y,
+                Width = Width,
                 Height = Height,
                 Char = RealChar,
             };
@@ -135,6 +141,8 @@ namespace Tyler.ViewModels
         {
             if (Bitmap == null)
                 return $"⚠ {Id}";
+            if (string.IsNullOrWhiteSpace(Id))
+                return $"[{X},{Y}]";
             return $"{Id}";
         }
 

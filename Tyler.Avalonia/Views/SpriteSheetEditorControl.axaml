@@ -33,20 +33,33 @@
 				<RowDefinition Height="Auto" />
 				<RowDefinition Height="*" />
 			</Grid.RowDefinitions>
-			<Grid Grid.Row="1" ColumnDefinitions="300, *, 200">
-				<Grid x:Name="LeftPane" Grid.Column="0">
+			<Grid Grid.Row="1" ColumnDefinitions="280, *, 200">
+				<Grid x:Name="LeftPane" Grid.Column="0" RowDefinitions="Auto, 30, *">
+					<StackPanel Classes="ToolBar">
+						<Button Command="{Binding AddSpriteCommand}">Add</Button>
+						<Button Command="{Binding AutoSliceCommand}">Auto Slice</Button>
+					</StackPanel>
+					<Grid 
+						Grid.Row="1"
+						Margin="12, 0, 0, 0" 
+						ColumnDefinitions="40, 5, 60, 5, 25, 5, 25, 5, *">
+						<TextBlock Grid.Column="2" Text="Size" />
+						<TextBlock Grid.Column="4" Text="X" />
+						<TextBlock Grid.Column="6" Text="Y" />
+						<TextBlock Grid.Column="8" Text="Id" />
+					</Grid>
 					<ListBox
+						Grid.Row="2"
 						ItemsSource="{Binding SpriteSheet.Sprites}"
 						SelectedItem="{Binding SelectedSprite}">
 						<ListBox.ItemTemplate>
 							<DataTemplate DataType="vm:SpriteViewModel">
-								<Grid ColumnDefinitions="32, 5, 40, 5, 40, 5, 40, 5, 40, 5, 40">
-									<local:SpriteControl Sprite="{Binding}" />
-									<TextBlock Grid.Column="2" Text="{Binding Id}" />
+								<Grid ColumnDefinitions="40, 5, 60, 5, 25, 5, 25, 5, *" Height="40">
+									<local:SpriteControl Sprite="{Binding}" Width="32" Height="32" Stretch="Uniform" />
+									<TextBlock Grid.Column="2" Text="{Binding SizeString}" />
 									<TextBlock Grid.Column="4" Text="{Binding X}" />
 									<TextBlock Grid.Column="6" Text="{Binding Y}" />
-									<TextBlock Grid.Column="8" Text="{Binding Width}" />
-									<TextBlock Grid.Column="10" Text="{Binding Height}" />
+									<TextBlock Grid.Column="8" Text="{Binding Id}" />
 								</Grid>
 							</DataTemplate>
 						</ListBox.ItemTemplate>

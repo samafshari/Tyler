@@ -29,8 +29,10 @@ namespace Tyler.ViewModels
 
         public enum Tabs
         {
+            Sprites,
+            Tiles,
+            Brushes,
             Boards,
-            Sprites
         }
 
         public Tabs SelectedTab
@@ -234,7 +236,9 @@ namespace Tyler.ViewModels
             if (worldDef == null) return;
             Boards = new ObservableCollection<BoardViewModel>(worldDef.Boards.Select(x => new BoardViewModel(this, x)));
             TileDefs = new ObservableCollection<TileDefViewModel>(worldDef.TileDefs.Select(x => new TileDefViewModel(this, x)));
-            SpriteSheets = new ObservableCollection<SpriteSheetViewModel>(worldDef.SpriteSheets.Select(x => new SpriteSheetViewModel(x)));
+            SpriteSheets.Clear();
+            foreach (var spriteSheet in worldDef.SpriteSheets.Select(x => new SpriteSheetViewModel(x)))
+                AddSpriteSheet(spriteSheet, true);
             Width = worldDef.Width;
             Height = worldDef.Height;
             TileWidth = worldDef.TileWidth;
@@ -336,12 +340,21 @@ namespace Tyler.ViewModels
             if (path != null)
             {
                 var spriteSheet = new SpriteSheetViewModel(path);
-                SpriteSheets.Add(spriteSheet);
-                SelectedSpriteSheet = spriteSheet;
+                AddSpriteSheet(spriteSheet);
+            }
+        }
+
+        public void AddSpriteSheet(SpriteSheetViewModel spriteSheet, bool silent = false)
+        {
+            SpriteSheets.Add(spriteSheet);
+            SelectedSpriteSheet = spriteSheet;
+            spriteSheet.IdChanged += SpriteSheet_IdChanged;
+            spriteSheet.SpriteIdChanged += SpriteSheet_SpriteIdChanged;
+            spriteSheet.SpriteListChanged += SpriteSheet_SpriteListChanged;
+
+            if (!silent)
+            {
                 ReinitializeSpriteMap();
-                spriteSheet.IdChanged += SpriteSheet_IdChanged;
-                spriteSheet.SpriteIdChanged += SpriteSheet_SpriteIdChanged;
-                spriteSheet.SpriteListChanged += SpriteSheet_SpriteListChanged;
                 SelectedTab = Tabs.Sprites;
             }
         }
@@ -374,31 +387,59 @@ namespace Tyler.ViewModels
 
         private void SpriteSheet_IdChanged(object? sender, NameChangeEventArgs e)
         {
-            if (spriteSheetsMap.ContainsKey(e.OldName) && spriteSheetsMap[e.OldName] == sender!)
-                spriteSheetsMap.Remove(e.OldName);
-            spriteSheetsMap[e.NewName] = (SpriteSheetViewModel)sender!;
+            if (e.Entity is not SpriteSheetViewModel spriteSheet) return;
+            if (spriteSheetsMap.ContainsValue(spriteSheet))
+            {
+                var key = spriteSheetsMap.First(x => x.Value == spriteSheet).Key;
+                spriteSheetsMap.Remove(key);
+            }
+            if (e.NewName != null)
+                spriteSheetsMap[e.NewName] = spriteSheet;
         }
 
         private void SpriteSheet_SpriteIdChanged(object? sender, NameChangeEventArgs e)
         {
-            if (spritesMap.ContainsKey(e.OldName) && spritesMap[e.OldName] == sender!)
-                spritesMap.Remove(e.OldName);
-            spritesMap[e.NewName] = (SpriteViewModel)sender!;
+            if (e.Entity is not SpriteViewModel sprite) return;
+            bool isDirty = false;
+            if (spritesMap.ContainsValue(sprite))
+            {
+                lock (spritesMap)
+                {
+                    var key = spritesMap.First(x => x.Value == sprite).Key;
+                    spritesMap.Remove(key);
+                    isDirty = true;
+                }
+            }
+            if (e.NewName != null)
+            {
+                lock (spritesMap)
+                {
+                    spritesMap[e.NewName] = sprite;
+                    isDirty = true;
+                }
+            }
+            if (isDirty)
+                lock (MappedSprites)
+                    MappedSprites = spritesMap.Values.ToList();
         }
 
         public void ReinitializeSpriteMap()
         {
-            spriteCharMap.Clear();
-            spritesMap.Clear();
-            foreach (var spriteSheet in SpriteSheets)
-                foreach (var sprite in spriteSheet.Sprites)
-                {
-                    if (sprite.RealChar == Vars.DefaultChar) continue;
-
-                    spriteCharMap[sprite.RealChar] = sprite;
-                    spritesMap[sprite.Id] = sprite;
-                }
-            MappedSprites = spriteCharMap.Values.ToList();
+            lock (spriteCharMap)
+                lock (spritesMap)
+                    lock (MappedSprites)
+                    {
+                        spriteCharMap.Clear();
+                        spritesMap.Clear();
+                        foreach (var spriteSheet in SpriteSheets)
+                            foreach (var sprite in spriteSheet.Sprites)
+                            {
+                                spriteCharMap[sprite.RealChar] = sprite;
+                                if (sprite.Id != null)
+                                    spritesMap[sprite.Id] = sprite;
+                            }
+                        MappedSprites = spritesMap.Values.ToList();
+                    }
         }
 
         public void DuplicateBoard()
@@ -474,24 +515,35 @@ namespace Tyler.ViewModels
 
         void UpdateBoardMap()
         {
-            boardMap.Clear();
-            foreach (var board in Boards.Where(x => x.Id != null))
-                boardMap[board.Id!] = board;
+            lock (boardMap)
+            {
+                boardMap.Clear();
+                foreach (var board in Boards.Where(x => x.Id != null))
+                    boardMap[board.Id!] = board;
+            }
         }
 
         void UpdateSpriteSheetsMap()
         {
-            spriteSheetsMap.Clear();
-            foreach (var spriteSheet in SpriteSheets.Where(x => x.Id != null))
-                spriteSheetsMap[spriteSheet.Id!] = spriteSheet;
+            lock (spriteSheetsMap)
+            {
+                spriteSheetsMap.Clear();
+                foreach (var spriteSheet in SpriteSheets.Where(x => x.Id != null))
+                    spriteSheetsMap[spriteSheet.Id!] = spriteSheet;
+            }
         }
 
         void UpdateSpritesMap()
         {
-            spritesMap.Clear();
-            foreach (var spriteSheet in SpriteSheets)
-                foreach (var sprite in spriteSheet.Sprites.Where(x => x.Id != null))
-                    spritesMap[sprite.Id!] = sprite;
+            lock (spritesMap)
+                lock (MappedSprites)
+                {
+                    spritesMap.Clear();
+                    foreach (var spriteSheet in SpriteSheets)
+                        foreach (var sprite in spriteSheet.Sprites.Where(x => x.Id != null))
+                            spritesMap[sprite.Id!] = sprite;
+                    MappedSprites = spritesMap.Values.ToList();
+                }
         }
 
         public override string ToString()
