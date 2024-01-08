@@ -53,7 +53,7 @@
 				</Border>
 			</TabItem>
 
-			<TabItem Header="TileDefs">
+			<TabItem Header="Tiles">
 				<Border BorderThickness="1" BorderBrush="#333">
 					<local:TileDefsEditorControl />
 				</Border>

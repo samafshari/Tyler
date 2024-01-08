@@ -133,7 +133,9 @@ namespace Tyler.ViewModels
 
         public override string ToString()
         {
-            return $"[{Char}] {Id}";
+            if (Bitmap == null)
+                return $"⚠ {Id}";
+            return $"{Id}";
         }
 
         public Size? GetSpriteSheetSize()
