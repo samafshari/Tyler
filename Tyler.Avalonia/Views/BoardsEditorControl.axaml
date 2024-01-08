@@ -145,7 +145,7 @@
 		</Grid>
 		<local:SpriteSheetExplorerControl
 			Grid.Row="1"
-			Sprites="{Binding SpriteMapList}"
+			Sprites="{Binding MappedSprites}"
 			SelectedSprite="{Binding SelectedSprite, Mode=TwoWay}">
 			<local:SpriteSheetExplorerControl.ContextMenu>
 				<ContextMenu>

@@ -452,15 +452,13 @@ namespace Tyler.Views
                         void DrawTile(TileViewModel? tile)
                         {
                             if (tile == null) return;
-                            if (World!.SpriteCharMap.TryGetValue(tile.Char, out var sprite))
+                            var sprite = World!.GetSprite(tile.Char);
+                            if (sprite != null)
                             {
-                                if (sprite != null)
-                                {
-                                    var bmpSpriteSheet = _bitmapCache.Get(sprite.Path);
-                                    var destRect = new Rect(tile.X * VisualTileSize.X, tile.Y * VisualTileSize.Y, VisualTileSize.X, VisualTileSize.Y);
-                                    var srcRect = new Rect(sprite.X, sprite.Y, sprite.Width, sprite.Height);
-                                    context.DrawBitmap(bmpSpriteSheet, srcRect, destRect);
-                                }
+                                var bmpSpriteSheet = _bitmapCache.Get(sprite.Path);
+                                var destRect = new Rect(tile.X * VisualTileSize.X, tile.Y * VisualTileSize.Y, VisualTileSize.X, VisualTileSize.Y);
+                                var srcRect = new Rect(sprite.X, sprite.Y, sprite.Width, sprite.Height);
+                                context.DrawBitmap(bmpSpriteSheet, srcRect, destRect);
                             }
                         }
                         //    Parallel.ForEach(Board.Tiles.ToArray(), DrawTile);

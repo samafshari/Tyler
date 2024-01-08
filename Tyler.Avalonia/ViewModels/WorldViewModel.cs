@@ -25,6 +25,7 @@ namespace Tyler.ViewModels
         Dictionary<string, SpriteSheetViewModel> spriteSheetsMap = new Dictionary<string, SpriteSheetViewModel>();
         Dictionary<string, SpriteViewModel> spritesMap = new Dictionary<string, SpriteViewModel>();
         Dictionary<string, BoardViewModel> boardMap = new Dictionary<string, BoardViewModel>();
+        Dictionary<char, SpriteViewModel> spriteCharMap = new Dictionary<char, SpriteViewModel>();
 
         public enum Tabs
         {
@@ -111,6 +112,13 @@ namespace Tyler.ViewModels
             set => SetProperty(ref _spriteSheets, value);
         }
 
+        List<SpriteViewModel> _mappedSprites = new List<SpriteViewModel>();
+        public List<SpriteViewModel> MappedSprites
+        {
+            get => _mappedSprites;
+            set => SetProperty(ref _mappedSprites, value);
+        }
+
         public bool IsSelectedBoardVisible => SelectedBoard != null;
         BoardViewModel? _selectedBoard;
         public BoardViewModel? SelectedBoard
@@ -144,14 +152,6 @@ namespace Tyler.ViewModels
         {
             get => _selectedSprite;
             set => SetProperty(ref _selectedSprite, value);
-        }
-
-        public Dictionary<char, SpriteViewModel> SpriteCharMap = new Dictionary<char, SpriteViewModel>();
-        List<SpriteViewModel> _spriteMapList = new List<SpriteViewModel>();
-        public List<SpriteViewModel> SpriteMapList
-        {
-            get => _spriteMapList;
-            set => SetProperty(ref _spriteMapList, value);
         }
 
         TileViewModel? _selectedTile;
@@ -388,17 +388,17 @@ namespace Tyler.ViewModels
 
         public void ReinitializeSpriteMap()
         {
-            SpriteCharMap.Clear();
+            spriteCharMap.Clear();
             spritesMap.Clear();
             foreach (var spriteSheet in SpriteSheets)
                 foreach (var sprite in spriteSheet.Sprites)
                 {
                     if (sprite.RealChar == Vars.DefaultChar) continue;
 
-                    SpriteCharMap[sprite.RealChar] = sprite;
+                    spriteCharMap[sprite.RealChar] = sprite;
                     spritesMap[sprite.Id] = sprite;
                 }
-            SpriteMapList = SpriteCharMap.Values.ToList();
+            MappedSprites = spriteCharMap.Values.ToList();
         }
 
         public void DuplicateBoard()
@@ -442,7 +442,7 @@ namespace Tyler.ViewModels
         public void EditTileDef()
         {
             if (SelectedSprite == null) return;
-            var sprite = SpriteCharMap[SelectedSprite.RealChar];
+            var sprite = spriteCharMap[SelectedSprite.RealChar];
             var spritesheet = SpriteSheets.First(x => x.Sprites.Contains(sprite));
             SelectedSpriteSheet = spritesheet;
             EditSpriteSheet();
@@ -454,8 +454,15 @@ namespace Tyler.ViewModels
             if (x < 0 || y < 0 || x >= SelectedBoard.Width || y >= SelectedBoard.Height) return;
             var tile = SelectedBoard.TileGrid[x, y];
             SelectedTile = tile;
-            if (SelectedTile != null && SpriteCharMap.TryGetValue(SelectedTile.Char, out var sprite))
+            if (SelectedTile != null && spriteCharMap.TryGetValue(SelectedTile.Char, out var sprite))
                 SelectedSprite = sprite;
+        }
+
+        public SpriteViewModel? GetSprite(char c)
+        {
+            if (spriteCharMap.TryGetValue(c, out var sprite))
+                return sprite;
+            return null;
         }
 
         void UpdateBoardMap()
