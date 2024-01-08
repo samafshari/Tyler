@@ -452,7 +452,8 @@ namespace Tyler.Views
                         void DrawTile(TileViewModel? tile)
                         {
                             if (tile == null) return;
-                            var sprite = World!.GetSprite(tile.Char);
+                            var tileDef = World!.GetTileDef(tile.Char);
+                            var sprite = tileDef?.Sprite;
                             if (sprite != null)
                             {
                                 var bmpSpriteSheet = _bitmapCache.Get(sprite.Path);

@@ -36,7 +36,7 @@ namespace Tyler.Views
         void Update()
         {
             if (Tile == null || World == null) sprite.Sprite = null;
-            else sprite.Sprite = World.GetSprite(Tile.Char);
+            else sprite.Sprite = World.GetTileDef(Tile.Char)?.Sprite;
         }
     }
 }

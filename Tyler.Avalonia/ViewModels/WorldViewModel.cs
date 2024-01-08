@@ -25,7 +25,7 @@ namespace Tyler.ViewModels
         Dictionary<string, SpriteSheetViewModel> spriteSheetsMap = new Dictionary<string, SpriteSheetViewModel>();
         Dictionary<string, SpriteViewModel> spritesMap = new Dictionary<string, SpriteViewModel>();
         Dictionary<string, BoardViewModel> boardMap = new Dictionary<string, BoardViewModel>();
-        Dictionary<char, SpriteViewModel> spriteCharMap = new Dictionary<char, SpriteViewModel>();
+        Dictionary<char, TileDefViewModel> charMap = new Dictionary<char, TileDefViewModel>();
 
         public enum Tabs
         {
@@ -425,21 +425,18 @@ namespace Tyler.ViewModels
 
         public void ReinitializeSpriteMap()
         {
-            lock (spriteCharMap)
-                lock (spritesMap)
-                    lock (MappedSprites)
-                    {
-                        spriteCharMap.Clear();
-                        spritesMap.Clear();
-                        foreach (var spriteSheet in SpriteSheets)
-                            foreach (var sprite in spriteSheet.Sprites)
-                            {
-                                spriteCharMap[sprite.RealChar] = sprite;
-                                if (sprite.Id != null)
-                                    spritesMap[sprite.Id] = sprite;
-                            }
-                        MappedSprites = spritesMap.Values.ToList();
-                    }
+            lock (spritesMap)
+                lock (MappedSprites)
+                {
+                    spritesMap.Clear();
+                    foreach (var spriteSheet in SpriteSheets)
+                        foreach (var sprite in spriteSheet.Sprites)
+                        {
+                            if (sprite.Id != null)
+                                spritesMap[sprite.Id] = sprite;
+                        }
+                    MappedSprites = spritesMap.Values.ToList();
+                }
         }
 
         public void DuplicateBoard()
@@ -482,11 +479,9 @@ namespace Tyler.ViewModels
 
         public void EditTileDef()
         {
-            if (SelectedSprite == null) return;
-            var sprite = spriteCharMap[SelectedSprite.RealChar];
-            var spritesheet = SpriteSheets.First(x => x.Sprites.Contains(sprite));
-            SelectedSpriteSheet = spritesheet;
-            EditSpriteSheet();
+            if (SelectedTile == null) return;
+            SelectedTab = Tabs.Tiles;
+            SelectedTileDef = GetTileDef(SelectedTile.Char);
         }
 
         public void SelectTile(int x, int y)
@@ -495,14 +490,14 @@ namespace Tyler.ViewModels
             if (x < 0 || y < 0 || x >= SelectedBoard.Width || y >= SelectedBoard.Height) return;
             var tile = SelectedBoard.TileGrid[x, y];
             SelectedTile = tile;
-            if (SelectedTile != null && spriteCharMap.TryGetValue(SelectedTile.Char, out var sprite))
-                SelectedSprite = sprite;
+            if (SelectedTile != null && charMap.TryGetValue(SelectedTile.Char, out var tileDef))
+                SelectedTileDef = tileDef;
         }
 
-        public SpriteViewModel? GetSprite(char c)
+        public TileDefViewModel? GetTileDef(char c)
         {
-            if (spriteCharMap.TryGetValue(c, out var sprite))
-                return sprite;
+            if (charMap.TryGetValue(c, out var tileDef))
+                return tileDef;
             return null;
         }
 

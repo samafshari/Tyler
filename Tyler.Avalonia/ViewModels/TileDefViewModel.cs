@@ -1,4 +1,6 @@
-﻿using Net.Essentials;
+﻿using Avalonia.Media.Imaging;
+
+using Net.Essentials;
 
 using System.Linq;
 
@@ -11,6 +13,8 @@ namespace Tyler.ViewModels
         public WorldViewModel World { get; }
 
         public string DisplayName => ToString();
+        public CroppedBitmap? Bitmap => Animation.Bitmap;
+        public SpriteViewModel? Sprite => World.GetSprite(Animation.SelectedKeyFrame?.SpriteId);
 
         string? _id;
         public string? Id
@@ -87,6 +91,13 @@ namespace Tyler.ViewModels
             BasedOn = model.BasedOn;
             Char = model.Char;
             Script = model.Script;
+        }
+
+        public static TileDefViewModel FromSpriteId(WorldViewModel world, string spriteId)
+        {
+            var tileDef = new TileDefViewModel(world, null);
+            tileDef.Animation.AddKeyFrame(spriteId);
+            return tileDef;
         }
 
         public TileDef Serialize()
