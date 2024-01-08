@@ -10,58 +10,103 @@ namespace Tyler.ViewModels
     {
         public WorldViewModel World { get; }
 
-        string _char;
-        public string Char
-        {
-            get => _char;
-            set => SetProperty(ref _char, value);
-        }
+        public string DisplayName => ToString();
 
-        string? _spriteId;
-        public string? SpriteId
+        string? _id;
+        public string? Id
         {
-            get => _spriteId;
+            get => _id;
             set
             {
-                SetProperty(ref _spriteId, value);
-                FindSprite();
+                SetProperty(ref _id, value);
+                RaisePropertyChanged(nameof(DisplayName));
             }
         }
 
-        SpriteViewModel? _sprite;
-        public SpriteViewModel? Sprite
+        string? _name;
+        public string? Name
         {
-            get => _sprite;
-            set => SetProperty(ref _sprite, value);
+            get => _name;
+            set
+            {
+                SetProperty(ref _name, value);
+                RaisePropertyChanged(nameof(DisplayName));
+            }
         }
 
-        public TileDefViewModel() : this(new WorldViewModel(), new TileDef()) { }
+        string? _basedOn;
+        public string? BasedOn
+        {
+            get => _basedOn;
+            set => SetProperty(ref _basedOn, value);
+        }
 
-        public TileDefViewModel(WorldViewModel world, TileDef model)
+        char _char;
+        public char Char
+        {
+            get => _char;
+            set
+            {
+                SetProperty(ref _char, value);
+                RaisePropertyChanged(nameof(CharString));
+                RaisePropertyChanged(nameof(DisplayName));
+            }
+        }
+
+        public string CharString
+        {
+            get => Char.ToString();
+            set
+            {
+                if (value.Length > 0)
+                    Char = value[0];
+            }
+        }
+
+        string? _script;
+        public string? Script
+        {
+            get => _script;
+            set => SetProperty(ref _script, value);
+        }
+
+        TileAnimationViewModel _animation;
+        public TileAnimationViewModel Animation
+        {
+            get => _animation;
+            set => SetProperty(ref _animation, value);
+        }
+
+        public TileDefViewModel(WorldViewModel world, TileDef? model)
         {
             World = world;
-            _char = model.Char.ToString();
-            SpriteId = model.SpriteId;
+            _animation = new TileAnimationViewModel(World, model?.Animation);
+            if (model is null) return;
+            Id = model.Id;
+            Name = model.Name;
+            BasedOn = model.BasedOn;
+            Char = model.Char;
+            Script = model.Script;
         }
 
         public TileDef Serialize()
         {
             return new TileDef
             {
-                Char = Char.FirstOrDefault(),
-                SpriteId = SpriteId
+                Id = Id,
+                Name = Name,
+                BasedOn = BasedOn,
+                Char = Char,
+                Script = Script,
+                Animation = Animation.ToModel()
             };
         }
 
-        public void FindSprite()
+        public override string ToString()
         {
-            if (string.IsNullOrWhiteSpace(SpriteId))
-            {
-                Sprite = null;
-                return;
-            }
-
-            Sprite = World.GetSprite(SpriteId);
+            if (string.IsNullOrWhiteSpace(Id))
+                return $"⚠ {Name ?? "NONAME"}";
+            return $"{Id}";
         }
     }
 }
