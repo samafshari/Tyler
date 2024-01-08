@@ -465,6 +465,13 @@ namespace Tyler.ViewModels
             return null;
         }
 
+        public SpriteViewModel? GetSprite(string? id)
+        {
+            if (id == null) return null;
+            spritesMap.TryGetValue(id, out var sprite);
+            return sprite;
+        }
+
         void UpdateBoardMap()
         {
             boardMap.Clear();
@@ -502,7 +509,6 @@ namespace Tyler.ViewModels
         public CommandModel BoardSettingsCommand => new CommandModel(() => SelectedBoard?.ShowSettings());
         public CommandModel AddSpriteSheetCommand => new CommandModel(AddSpriteSheetAsync);
         public CommandModel RemoveSpriteSheetCommand => new CommandModel(RemoveSpriteSheet);
-        public CommandModel ShowTileDefsEditorCommand => new CommandModel(() => _routingService.ShowTileDefsEditor(this));
         public CommandModel ShowSpriteSheetManagerCommand => new CommandModel(() => _routingService.ShowWorldSpriteSheetManager(this));
         public CommandModel ShowSettingsCommand => new CommandModel(() => _routingService.ShowWorldSettings(this));
         public CommandModel ReinitializeSpriteMapCommand => new CommandModel(() =>

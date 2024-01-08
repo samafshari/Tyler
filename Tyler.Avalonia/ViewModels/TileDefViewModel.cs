@@ -17,17 +17,6 @@ namespace Tyler.ViewModels
             set => SetProperty(ref _char, value);
         }
 
-        string? _spriteSheet;
-        public string? SpriteSheet
-        {
-            get => _spriteSheet;
-            set
-            {
-                SetProperty(ref _spriteSheet, value);
-                FindSprite();
-            }
-        }
-
         string? _spriteId;
         public string? SpriteId
         {
@@ -52,7 +41,6 @@ namespace Tyler.ViewModels
         {
             World = world;
             _char = model.Char.ToString();
-            SpriteSheet = model.SpriteSheet;
             SpriteId = model.SpriteId;
         }
 
@@ -61,24 +49,19 @@ namespace Tyler.ViewModels
             return new TileDef
             {
                 Char = Char.FirstOrDefault(),
-                SpriteSheet = SpriteSheet,
                 SpriteId = SpriteId
             };
         }
 
         public void FindSprite()
         {
-            if (string.IsNullOrWhiteSpace(SpriteSheet) || string.IsNullOrWhiteSpace(SpriteId))
+            if (string.IsNullOrWhiteSpace(SpriteId))
             {
                 Sprite = null;
                 return;
             }
 
-            Sprite = World
-                ?.SpriteSheets
-                ?.FirstOrDefault(x => x.Path == SpriteSheet)
-                ?.Sprites
-                ?.FirstOrDefault(x => x.Id == SpriteId);
+            Sprite = World.GetSprite(SpriteId);
         }
     }
 }

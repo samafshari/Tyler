@@ -47,15 +47,21 @@
 		</Border>
 
 		<TabControl Grid.Row="1" SelectedIndex="{Binding SelectedTabIndex}">
-			<TabItem Header="Boards">
-				<Border BorderThickness="1" BorderBrush="#333">
-					<local:BoardsEditorControl />
-				</Border>
-			</TabItem>
-
 			<TabItem Header="Sprites">
 				<Border BorderThickness="1" BorderBrush="#333">
 					<local:SpriteSheetEditorControl />
+				</Border>
+			</TabItem>
+
+			<TabItem Header="TileDefs">
+				<Border BorderThickness="1" BorderBrush="#333">
+					<local:TileDefsEditorControl />
+				</Border>
+			</TabItem>
+
+			<TabItem Header="Boards">
+				<Border BorderThickness="1" BorderBrush="#333">
+					<local:BoardsEditorControl />
 				</Border>
 			</TabItem>
 		</TabControl>

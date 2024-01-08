@@ -197,17 +197,6 @@ namespace Tyler.Services
             });
         }
 
-        public void ShowTileDefsEditor(WorldViewModel world)
-        {
-            var vm = new TileDefsEditorViewModel(world);
-            RunOnUI(() =>
-            {
-                var window = new TileDefsEditorWindow();
-                window.DataContext = vm;
-                window.Show();
-            });
-        }
-
         public void ShowWorldSpriteSheetManager(WorldViewModel world)
         {
             var vm = new WorldSpriteSheetManagerViewModel(world);
