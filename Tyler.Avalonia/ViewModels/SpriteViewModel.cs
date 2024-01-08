@@ -91,7 +91,7 @@ namespace Tyler.ViewModels
             get => _char.ToString();
             set
             {
-                SetProperty(ref _char, value?.LastOrDefault() ?? Vars.DefaultChar);
+                SetProperty(ref _char, value?.LastOrDefault() ?? Vars.EmptyTileChar);
                 RaisePropertyChanged(nameof(DisplayName));
                 RaisePropertyChanged(nameof(RealChar));
             }

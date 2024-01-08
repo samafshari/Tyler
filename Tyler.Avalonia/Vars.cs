@@ -13,8 +13,8 @@ namespace Tyler
         public const string FileDialogTypePNG = "PNG Image";
         public const string FileDialogTypeSheet = "Tyler Sprite Sheet";
         public const string FileDialogTypeWorld = "Tyler World";
-        public const char DefaultChar = '.';
-        public const char UnassignedChar = ' ';
+        public const char EmptyTileChar = '.'; // Empty tile char
+        public const char UnassignedChar = ' '; // New tile char
         public const int StateMax = int.MaxValue - 1;
         public const int StateMin = int.MinValue + 1;
 

@@ -28,7 +28,7 @@ namespace Tyler.Services
                     if (sortedTiles.TryGetValue((x, y), out var tile) && tile != null)
                         grid[x, y] = tile.Char;
                     else
-                        grid[x, y] = Vars.DefaultChar;
+                        grid[x, y] = Vars.EmptyTileChar;
                 }
             }
 
