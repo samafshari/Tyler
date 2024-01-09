@@ -28,8 +28,8 @@ namespace Tyler.ViewModels
             set => SetProperty(ref _spriteSheets, value);
         }
 
-        List<SpriteViewModel> _mappedSprites = new List<SpriteViewModel>();
-        public List<SpriteViewModel> MappedSprites
+        ObservableCollection<SpriteViewModel> _mappedSprites = new ObservableCollection<SpriteViewModel>();
+        public ObservableCollection<SpriteViewModel> MappedSprites
         {
             get => _mappedSprites;
             set => SetProperty(ref _mappedSprites, value);
@@ -69,6 +69,7 @@ namespace Tyler.ViewModels
         {
             worldDef.SpriteSheets = SpriteSheets.Select(x => x.Serialize()).ToList();
         }
+
         public async Task AddSpriteSheetAsync()
         {
             var path = await _routingService.ShowOpenFileDialogAsync(default, "Open Sprite Sheet PNG", ".png", Vars.FileDialogTypePNG);
@@ -130,37 +131,43 @@ namespace Tyler.ViewModels
             if (e.Entity is not SpriteSheetViewModel spriteSheet) return;
             if (spriteSheetsMap.ContainsValue(spriteSheet))
             {
-                var key = spriteSheetsMap.First(x => x.Value == spriteSheet).Key;
-                spriteSheetsMap.Remove(key);
+                lock (spriteSheetsMap)
+                {
+                    var key = spriteSheetsMap.First(x => x.Value == spriteSheet).Key;
+                    spriteSheetsMap.Remove(key);
+                }
             }
-            if (e.NewName != null)
-                spriteSheetsMap[e.NewName] = spriteSheet;
+            if (!string.IsNullOrWhiteSpace(e.NewName))
+            {
+                lock (spriteSheetsMap)
+                {
+                    spriteSheetsMap[e.NewName] = spriteSheet;
+                }
+            }
         }
 
         private void SpriteSheet_SpriteIdChanged(object? sender, NameChangeEventArgs e)
         {
             if (e.Entity is not SpriteViewModel sprite) return;
-            bool isDirty = false;
             if (spritesMap.ContainsValue(sprite))
             {
                 lock (spritesMap)
                 {
                     var key = spritesMap.First(x => x.Value == sprite).Key;
                     spritesMap.Remove(key);
-                    isDirty = true;
                 }
             }
-            if (e.NewName != null)
+            if (!string.IsNullOrWhiteSpace(e.NewName))
             {
                 lock (spritesMap)
                 {
                     spritesMap[e.NewName] = sprite;
-                    isDirty = true;
                 }
+                if (string.IsNullOrWhiteSpace(e.OldName))
+                    lock (MappedSprites) MappedSprites.Add(sprite);
             }
-            if (isDirty)
-                lock (MappedSprites)
-                    MappedSprites = spritesMap.Values.ToList();
+            else if (!string.IsNullOrWhiteSpace(e.OldName))
+                lock (MappedSprites) MappedSprites.Remove(sprite);
         }
 
         public void ReinitializeSpriteMap()
@@ -172,10 +179,10 @@ namespace Tyler.ViewModels
                     foreach (var spriteSheet in SpriteSheets)
                         foreach (var sprite in spriteSheet.Sprites)
                         {
-                            if (sprite.Id != null)
+                            if (!string.IsNullOrWhiteSpace(sprite.Id))
                                 spritesMap[sprite.Id] = sprite;
                         }
-                    MappedSprites = spritesMap.Values.ToList();
+                    MappedSprites = new ObservableCollection<SpriteViewModel>(spritesMap.Values);
                 }
         }
 
@@ -197,7 +204,7 @@ namespace Tyler.ViewModels
             lock (spriteSheetsMap)
             {
                 spriteSheetsMap.Clear();
-                foreach (var spriteSheet in SpriteSheets.Where(x => x.Id != null))
+                foreach (var spriteSheet in SpriteSheets.Where(x => !string.IsNullOrWhiteSpace(x.Id)))
                     spriteSheetsMap[spriteSheet.Id!] = spriteSheet;
             }
         }
@@ -209,9 +216,9 @@ namespace Tyler.ViewModels
                 {
                     spritesMap.Clear();
                     foreach (var spriteSheet in SpriteSheets)
-                        foreach (var sprite in spriteSheet.Sprites.Where(x => x.Id != null))
+                        foreach (var sprite in spriteSheet.Sprites.Where(x => !string.IsNullOrWhiteSpace(x.Id)))
                             spritesMap[sprite.Id!] = sprite;
-                    MappedSprites = spritesMap.Values.ToList();
+                    MappedSprites = new ObservableCollection<SpriteViewModel>(spritesMap.Values);
                 }
         }
 

@@ -1,8 +1,28 @@
-<UserControl xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="Tyler.Views.TileDefsEditorControl">
-  Welcome to Avalonia!
+<UserControl 
+	xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+	xmlns:local="clr-namespace:Tyler.Views"
+	xmlns:vm="clr-namespace:Tyler.ViewModels"
+    x:Class="Tyler.Views.TileDefsEditorControl"
+	x:DataType="vm:WorldViewModel">
+	<Grid DataContext="{Binding TilesManager}">
+		<Grid ColumnDefinitions="250, 300, *">
+			<Grid Grid.Column="0">
+				<ListBox
+					ItemsSource="{Binding World.SpriteSheetsManager.MappedSprites}">
+					<ListBox.ItemTemplate>
+						<DataTemplate>
+							<Grid ColumnDefinitions="40, 5, *">
+								<local:SpriteControl Width="32" Height="32" Stretch="Uniform" Sprite="{Binding}" />
+								<TextBlock Grid.Column="2" Text="{Binding DisplayName}" />
+							</Grid>
+						</DataTemplate>
+					</ListBox.ItemTemplate>
+				</ListBox>
+			</Grid>
+		</Grid>
+	</Grid>
 </UserControl>

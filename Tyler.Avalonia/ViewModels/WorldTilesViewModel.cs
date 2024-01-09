@@ -81,6 +81,5 @@ namespace Tyler.ViewModels
             if (SelectedTile != null && charMap.TryGetValue(SelectedTile.Char, out var tileDef))
                 SelectedTileDef = tileDef;
         }
-
     }
 }

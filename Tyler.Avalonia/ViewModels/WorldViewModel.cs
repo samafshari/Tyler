@@ -17,8 +17,6 @@ namespace Tyler.ViewModels
     {
         readonly RoutingService _routingService;
         readonly SettingsService _settingsService;
-        readonly ScriptingService _scriptingService;
-        
 
         public WorldSpriteSheetsViewModel SpriteSheetsManager { get; }
         public WorldBoardsViewModel BoardsManager { get; }
@@ -94,7 +92,7 @@ namespace Tyler.ViewModels
         {
             _routingService = ContainerService.Instance.GetOrCreate<RoutingService>();
             _settingsService = ContainerService.Instance.GetOrCreate<SettingsService>();
-            _scriptingService = ContainerService.Instance.GetOrCreate<ScriptingService>();
+
             SpriteSheetsManager = new WorldSpriteSheetsViewModel(this);
             BoardsManager = new WorldBoardsViewModel(this);
             TilesManager = new WorldTilesViewModel(this);
