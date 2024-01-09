@@ -47,15 +47,16 @@
 					Grid.Row="1"
 					Margin="0, 0, 5, 5"
 					BorderBrush="#111"
-					BorderThickness="1">
+					BorderThickness="1"
+					DataContext="{Binding World}">
 						<local:BoardPreviewControl
 							x:Name="boardPreviewControl"
-							TileWidth="{Binding World.TileWidth}"
-							TileHeight="{Binding World.TileHeight}"
-							World="{Binding World}"
-							Board="{Binding World.BoardsManager.SelectedBoard}"
-							State="{Binding World.BoardsManager.SelectedBoard.State}"
-							SelectedTile="{Binding World.SelectedTile}"
+							TileWidth="{Binding TileWidth}"
+							TileHeight="{Binding TileHeight}"
+							World="{Binding }"
+							Board="{Binding BoardsManager.SelectedBoard}"
+							State="{Binding BoardsManager.SelectedBoard.State}"
+							SelectedTile="{Binding TilesManager.SelectedTile}"
 							HorizontalAlignment="Stretch"
 							VerticalAlignment="Stretch"
 							Zoom="{Binding ElementName=sldZoom, Path=Value, Mode=TwoWay}"
@@ -96,7 +97,7 @@
 					</TabItem>
 					<TabItem 
 						Header="Tile" 
-						DataContext="{Binding World}"
+						DataContext="{Binding World.TilesManager}"
 						IsVisible="{Binding IsSelectedTileVisible}">
 						<Grid RowDefinitions="Auto, *, Auto">
 							<TextBlock
@@ -150,14 +151,7 @@
 			Grid.Row="1"
 			DataContext="{Binding World.SpriteSheetsManager}"
 			Sprites="{Binding MappedSprites}"
-			SelectedSprite="{Binding SelectedSprite, Mode=TwoWay}">
-			<local:SpriteSheetExplorerControl.ContextMenu>
-				<ContextMenu>
-					<MenuItem Header="Edit..." Command="{Binding World.EditTileDefCommand}" />
-				</ContextMenu>
-			</local:SpriteSheetExplorerControl.ContextMenu>
-		</local:SpriteSheetExplorerControl>
-
+			SelectedSprite="{Binding SelectedSprite, Mode=TwoWay}" />
 		<GridSplitter Classes="h" />
 	</Grid>
 </UserControl>

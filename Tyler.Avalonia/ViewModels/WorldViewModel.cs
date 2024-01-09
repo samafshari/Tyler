@@ -19,10 +19,10 @@ namespace Tyler.ViewModels
         readonly SettingsService _settingsService;
         readonly ScriptingService _scriptingService;
         
-        Dictionary<char, TileDefViewModel> charMap = new Dictionary<char, TileDefViewModel>();
 
         public WorldSpriteSheetsViewModel SpriteSheetsManager { get; }
         public WorldBoardsViewModel BoardsManager { get; }
+        public WorldTilesViewModel TilesManager { get; }
 
         public enum Tabs
         {
@@ -90,33 +90,6 @@ namespace Tyler.ViewModels
             set => SetProperty(ref _tileHeight, value);
         }
 
-        ObservableCollection<TileDefViewModel> _tileDefs = new ObservableCollection<TileDefViewModel>();
-        public ObservableCollection<TileDefViewModel> TileDefs
-        {
-            get => _tileDefs;
-            set => SetProperty(ref _tileDefs, value);
-        }
-
-
-        TileDefViewModel? _selectedTileDef;
-        public TileDefViewModel? SelectedTileDef
-        {
-            get => _selectedTileDef;
-            set => SetProperty(ref _selectedTileDef, value);
-        }
-
-        TileViewModel? _selectedTile;
-        public TileViewModel? SelectedTile
-        {
-            get => _selectedTile;
-            set
-            {
-                SetProperty(ref _selectedTile, value);
-                RaisePropertyChanged(nameof(IsSelectedTileVisible));
-            }
-        }
-        public bool IsSelectedTileVisible => SelectedTile != null;
-
         public WorldViewModel()
         {
             _routingService = ContainerService.Instance.GetOrCreate<RoutingService>();
@@ -124,6 +97,7 @@ namespace Tyler.ViewModels
             _scriptingService = ContainerService.Instance.GetOrCreate<ScriptingService>();
             SpriteSheetsManager = new WorldSpriteSheetsViewModel(this);
             BoardsManager = new WorldBoardsViewModel(this);
+            TilesManager = new WorldTilesViewModel(this);
         }
 
         public WorldViewModel(string path) : this()
@@ -183,7 +157,7 @@ namespace Tyler.ViewModels
             TileHeight = worldDef.TileHeight;
             SpriteSheetsManager.Reload(worldDef);
             BoardsManager.Reload(worldDef);
-            TileDefs = new ObservableCollection<TileDefViewModel>(worldDef.TileDefs.Select(x => new TileDefViewModel(this, x)));
+            TilesManager.Reload(worldDef);
         }
 
         public World Serialize()
@@ -191,9 +165,9 @@ namespace Tyler.ViewModels
             World worldDef = new World();
             worldDef.Width = Width;
             worldDef.Height = Height;
-            worldDef.TileDefs = TileDefs.Select(x => x.Serialize()).ToList();
-            BoardsManager.SerializeInto(worldDef);
             SpriteSheetsManager.SerializeInto(worldDef);
+            BoardsManager.SerializeInto(worldDef);
+            TilesManager.SerializeInto(worldDef);
             return worldDef;
         }
 
@@ -222,29 +196,6 @@ namespace Tyler.ViewModels
             await _routingService.ShowDialogAsync(default, "Success", $"World saved to {Path}");
         }
 
-        
-
-        public void EditTileDef()
-        {
-            if (SelectedTile == null) return;
-            SelectedTab = Tabs.Tiles;
-            SelectedTileDef = GetTileDef(SelectedTile.Char);
-        }
-
-        public TileDefViewModel? GetTileDef(char c)
-        {
-            if (charMap.TryGetValue(c, out var tileDef))
-                return tileDef;
-            return null;
-        }
-
-        public void SelectTile(TileViewModel? tile)
-        {
-            SelectedTile = tile;
-            if (SelectedTile != null && charMap.TryGetValue(SelectedTile.Char, out var tileDef))
-                SelectedTileDef = tileDef;
-        }
-
         public override string ToString()
         {
             return Path ?? "Untitled";
@@ -256,7 +207,6 @@ namespace Tyler.ViewModels
         public CommandModel SaveCommand => new CommandModel(SaveAsync);
         public CommandModel SaveAsCommand => new CommandModel(SaveAsAsync);
         public CommandModel ShowSettingsCommand => new CommandModel(() => _routingService.ShowWorldSettings(this));
-        public CommandModel EditTileDefCommand => new CommandModel(EditTileDef);
         public CommandModel ShowBenchmarksCommand => new CommandModel(_routingService.ShowBenchmarks);
     }
 }

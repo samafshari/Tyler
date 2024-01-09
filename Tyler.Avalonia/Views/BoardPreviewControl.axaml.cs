@@ -452,7 +452,7 @@ namespace Tyler.Views
                         void DrawTile(TileViewModel? tile)
                         {
                             if (tile == null) return;
-                            var tileDef = World!.GetTileDef(tile.Char);
+                            var tileDef = World!.TilesManager.GetTileDef(tile.Char);
                             var sprite = tileDef?.Sprite;
                             if (sprite != null)
                             {

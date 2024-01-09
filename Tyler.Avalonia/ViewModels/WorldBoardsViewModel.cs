@@ -37,7 +37,7 @@ namespace Tyler.ViewModels
             {
                 var isDirty = value != SelectedBoard;
                 SetProperty(ref _selectedBoard, value);
-                if (isDirty) World.SelectedTile = null;
+                if (isDirty) World.TilesManager.SelectedTile = null;
                 RaisePropertyChanged(nameof(IsSelectedBoardVisible));
             }
         }
@@ -155,7 +155,7 @@ namespace Tyler.ViewModels
             if (SelectedBoard == null) return;
             if (x < 0 || y < 0 || x >= SelectedBoard.Width || y >= SelectedBoard.Height) return;
             var tile = SelectedBoard.TileGrid[x, y];
-            World.SelectTile(tile);
+            World.TilesManager.SelectTile(tile);
         }
 
         public CommandModel AddBoardCommand => new CommandModel(AddBoard);
