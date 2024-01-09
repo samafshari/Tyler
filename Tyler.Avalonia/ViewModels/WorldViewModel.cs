@@ -19,10 +19,10 @@ namespace Tyler.ViewModels
         readonly SettingsService _settingsService;
         readonly ScriptingService _scriptingService;
         
-        Dictionary<string, BoardViewModel> boardMap = new Dictionary<string, BoardViewModel>();
         Dictionary<char, TileDefViewModel> charMap = new Dictionary<char, TileDefViewModel>();
 
         public WorldSpriteSheetsViewModel SpriteSheetsManager { get; }
+        public WorldBoardsViewModel BoardsManager { get; }
 
         public enum Tabs
         {
@@ -90,13 +90,6 @@ namespace Tyler.ViewModels
             set => SetProperty(ref _tileHeight, value);
         }
 
-        ObservableCollection<BoardViewModel> _boards = new ObservableCollection<BoardViewModel>();
-        public ObservableCollection<BoardViewModel> Boards
-        {
-            get => _boards;
-            set => SetProperty(ref _boards, value);
-        }
-
         ObservableCollection<TileDefViewModel> _tileDefs = new ObservableCollection<TileDefViewModel>();
         public ObservableCollection<TileDefViewModel> TileDefs
         {
@@ -104,19 +97,6 @@ namespace Tyler.ViewModels
             set => SetProperty(ref _tileDefs, value);
         }
 
-        public bool IsSelectedBoardVisible => SelectedBoard != null;
-        BoardViewModel? _selectedBoard;
-        public BoardViewModel? SelectedBoard
-        {
-            get => _selectedBoard;
-            set
-            {
-                var isDirty = value != SelectedBoard;
-                SetProperty(ref _selectedBoard, value);
-                if (isDirty) SelectedTile = null;
-                RaisePropertyChanged(nameof(IsSelectedBoardVisible));
-            }
-        }
 
         TileDefViewModel? _selectedTileDef;
         public TileDefViewModel? SelectedTileDef
@@ -143,6 +123,7 @@ namespace Tyler.ViewModels
             _settingsService = ContainerService.Instance.GetOrCreate<SettingsService>();
             _scriptingService = ContainerService.Instance.GetOrCreate<ScriptingService>();
             SpriteSheetsManager = new WorldSpriteSheetsViewModel(this);
+            BoardsManager = new WorldBoardsViewModel(this);
         }
 
         public WorldViewModel(string path) : this()
@@ -186,18 +167,10 @@ namespace Tyler.ViewModels
                     _settingsService.SaveWithLock();
                 }
             }
-            if (SelectedBoard == null)
-                SelectedBoard = Boards.FirstOrDefault();
         }
 
         public void New()
         {
-            //var confirm = await _routingService.ShowConfirmDialogAsync(default, "Warning", "Your unsaved changes will be lost. Are you sure?");
-            //if (confirm)
-            //{
-            //    Path = null;
-            //    Load(new World());
-            //}
             _routingService.ShowWorldEditor(false);
         }
 
@@ -209,9 +182,8 @@ namespace Tyler.ViewModels
             TileWidth = worldDef.TileWidth;
             TileHeight = worldDef.TileHeight;
             SpriteSheetsManager.Reload(worldDef);
-            Boards = new ObservableCollection<BoardViewModel>(worldDef.Boards.Select(x => new BoardViewModel(this, x)));
+            BoardsManager.Reload(worldDef);
             TileDefs = new ObservableCollection<TileDefViewModel>(worldDef.TileDefs.Select(x => new TileDefViewModel(this, x)));
-            UpdateBoardMap();
         }
 
         public World Serialize()
@@ -219,8 +191,8 @@ namespace Tyler.ViewModels
             World worldDef = new World();
             worldDef.Width = Width;
             worldDef.Height = Height;
-            worldDef.Boards = Boards.Select(x => x.Serialize()).ToList();
             worldDef.TileDefs = TileDefs.Select(x => x.Serialize()).ToList();
+            BoardsManager.SerializeInto(worldDef);
             SpriteSheetsManager.SerializeInto(worldDef);
             return worldDef;
         }
@@ -250,99 +222,13 @@ namespace Tyler.ViewModels
             await _routingService.ShowDialogAsync(default, "Success", $"World saved to {Path}");
         }
 
-        public void AddBoard()
-        {
-            var board = new BoardViewModel(this, new Board
-            {
-                Id = Boards.Count.ToString(),
-                Width = Width,
-                Height = Height
-            });
-            Boards.Add(board);
-            SelectedBoard = board;
-        }
-
-        public async Task RemoveBoardAsync()
-        {
-            await RemoveBoardAsync(SelectedBoard);
-        }
-
-        public async Task RemoveBoardAsync(BoardViewModel? board)
-        {
-            if (board == null) return;
-            if (SelectedBoard != null)
-                if (await _routingService.ShowConfirmDialogAsync(default, "Confirm Deletion", $"Board {board.Name} ({board.Id}) will be deleted.. Are you sure?"))
-                {
-                    if (SelectedBoard == board)
-                        SelectedBoard = null;
-                    Boards.Remove(board);
-                }
-        }
-
-        public void MoveBoard(BoardViewModel? board, int direction)
-        {
-            if (board == null) return;
-            var index = Boards.IndexOf(board);
-            if (index == -1) return;
-            var newIndex = index + direction;
-            if (newIndex < 0 || newIndex >= Boards.Count) return;
-            Boards.Move(index, newIndex);
-        }
-
-        public void MoveBoard(int direction)
-        {
-            MoveBoard(SelectedBoard, direction);
-        }
-
-
-
-        public void DuplicateBoard()
-        {
-            if (SelectedBoard == null) return;
-            var board = SelectedBoard.Serialize();
-            board.Id = Boards.Count.ToString();
-            board.Name += " (Copy)";
-            Boards.Add(new BoardViewModel(this, board));
-        }
-
-        public async Task ExportLevelsAsync()
-        {
-            var folder = await _routingService.ShowOpenFolderDialogAsync(default, "Select Folder to Export Levels");
-            var folderPath = folder?.Path?.LocalPath;
-            if (folderPath != null)
-            {
-                _scriptingService.ExportBoardsToFolder(Boards.Select(x => x.Serialize()).ToList(), folderPath);
-                await _routingService.ShowDialogAsync(default, "Success", $"Levels exported to {folderPath}");
-            }
-        }
-
-        public async Task ImportLevelsAsync()
-        {
-            var file = await _routingService.ShowOpenFileDialogAsync(default, "Select levels.txt", ".txt", "levels.txt");
-            var path = file?.Path?.LocalPath;
-            if (path != null)
-            {
-                var boards = _scriptingService.ImportBoardsFromFolder(path);
-                Boards = new ObservableCollection<BoardViewModel>(boards.Select(x => new BoardViewModel(this, x)));
-                await _routingService.ShowDialogAsync(default, "Success", $"Levels imported from {path}");
-            }
-        }
+        
 
         public void EditTileDef()
         {
             if (SelectedTile == null) return;
             SelectedTab = Tabs.Tiles;
             SelectedTileDef = GetTileDef(SelectedTile.Char);
-        }
-
-        public void SelectTile(int x, int y)
-        {
-            if (SelectedBoard == null) return;
-            if (x < 0 || y < 0 || x >= SelectedBoard.Width || y >= SelectedBoard.Height) return;
-            var tile = SelectedBoard.TileGrid[x, y];
-            SelectedTile = tile;
-            if (SelectedTile != null && charMap.TryGetValue(SelectedTile.Char, out var tileDef))
-                SelectedTileDef = tileDef;
         }
 
         public TileDefViewModel? GetTileDef(char c)
@@ -352,14 +238,11 @@ namespace Tyler.ViewModels
             return null;
         }
 
-        void UpdateBoardMap()
+        public void SelectTile(TileViewModel? tile)
         {
-            lock (boardMap)
-            {
-                boardMap.Clear();
-                foreach (var board in Boards.Where(x => x.Id != null))
-                    boardMap[board.Id!] = board;
-            }
+            SelectedTile = tile;
+            if (SelectedTile != null && charMap.TryGetValue(SelectedTile.Char, out var tileDef))
+                SelectedTileDef = tileDef;
         }
 
         public override string ToString()
@@ -372,15 +255,7 @@ namespace Tyler.ViewModels
         public CommandModel RevertCommand => new CommandModel(RevertAsync);
         public CommandModel SaveCommand => new CommandModel(SaveAsync);
         public CommandModel SaveAsCommand => new CommandModel(SaveAsAsync);
-        public CommandModel AddBoardCommand => new CommandModel(AddBoard);
-        public CommandModel RemoveBoardCommand => new CommandModel(RemoveBoardAsync);
-        public CommandModel BoardSettingsCommand => new CommandModel(() => SelectedBoard?.ShowSettings());
         public CommandModel ShowSettingsCommand => new CommandModel(() => _routingService.ShowWorldSettings(this));
-        public CommandModel MoveBoardUpCommand => new CommandModel(() => MoveBoard(SelectedBoard, -1));
-        public CommandModel MoveBoardDownCommand => new CommandModel(() => MoveBoard(SelectedBoard, 1));
-        public CommandModel ExportLevelsCommand => new CommandModel(ExportLevelsAsync);
-        public CommandModel ImportLevelsCommand => new CommandModel(ImportLevelsAsync);
-        public CommandModel DuplicateBoardCommand => new CommandModel(DuplicateBoard);
         public CommandModel EditTileDefCommand => new CommandModel(EditTileDef);
         public CommandModel ShowBenchmarksCommand => new CommandModel(_routingService.ShowBenchmarks);
     }

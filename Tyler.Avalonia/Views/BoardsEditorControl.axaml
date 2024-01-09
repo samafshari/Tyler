@@ -8,7 +8,7 @@
 	xmlns:local="clr-namespace:Tyler.Views"
 	xmlns:vm="clr-namespace:Tyler.ViewModels"
 	x:DataType="vm:WorldViewModel">
-	<Grid RowDefinitions="*, 200">
+	<Grid RowDefinitions="*, 200" DataContext="{Binding BoardsManager}">
 		<Grid ColumnDefinitions="200, *, 300">
 			<Grid Grid.Column="0" x:Name="LeftGrid">
 				<ListBox
@@ -50,12 +50,12 @@
 					BorderThickness="1">
 						<local:BoardPreviewControl
 							x:Name="boardPreviewControl"
-							TileWidth="{Binding TileWidth}"
-							TileHeight="{Binding TileHeight}"
-							World="{Binding}"
-							Board="{Binding SelectedBoard}"
-							State="{Binding SelectedBoard.State}"
-							SelectedTile="{Binding SelectedTile}"
+							TileWidth="{Binding World.TileWidth}"
+							TileHeight="{Binding World.TileHeight}"
+							World="{Binding World}"
+							Board="{Binding World.BoardsManager.SelectedBoard}"
+							State="{Binding World.BoardsManager.SelectedBoard.State}"
+							SelectedTile="{Binding World.SelectedTile}"
 							HorizontalAlignment="Stretch"
 							VerticalAlignment="Stretch"
 							Zoom="{Binding ElementName=sldZoom, Path=Value, Mode=TwoWay}"
@@ -94,7 +94,10 @@
 								AcceptsTab="True" />
 						</Grid>
 					</TabItem>
-					<TabItem Header="Tile" IsVisible="{Binding IsSelectedTileVisible}">
+					<TabItem 
+						Header="Tile" 
+						DataContext="{Binding World}"
+						IsVisible="{Binding IsSelectedTileVisible}">
 						<Grid RowDefinitions="Auto, *, Auto">
 							<TextBlock
 								Grid.Row="0"
@@ -145,11 +148,12 @@
 		</Grid>
 		<local:SpriteSheetExplorerControl
 			Grid.Row="1"
-			Sprites="{Binding SpriteSheetsManager.MappedSprites}"
-			SelectedSprite="{Binding SpriteSheetsManager.SelectedSprite, Mode=TwoWay}">
+			DataContext="{Binding World.SpriteSheetsManager}"
+			Sprites="{Binding MappedSprites}"
+			SelectedSprite="{Binding SelectedSprite, Mode=TwoWay}">
 			<local:SpriteSheetExplorerControl.ContextMenu>
 				<ContextMenu>
-					<MenuItem Header="Edit..." Command="{Binding EditTileDefCommand}" />
+					<MenuItem Header="Edit..." Command="{Binding World.EditTileDefCommand}" />
 				</ContextMenu>
 			</local:SpriteSheetExplorerControl.ContextMenu>
 		</local:SpriteSheetExplorerControl>

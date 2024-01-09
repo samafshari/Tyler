@@ -174,7 +174,12 @@ namespace Tyler.ViewModels
                 Parallel.For(0, Tiles.Count, i =>
                 {
                     var tile = Tiles[i];
-                    if (tile.X >= Width || tile.Y >= Height)
+                    if (tile == null)
+                    {
+                        hasGarbage = true;
+                        return;
+                    }
+                    else if (tile.X >= Width || tile.Y >= Height)
                     {
                         hasGarbage = true;
                         Tiles[i] = null;
@@ -204,7 +209,7 @@ namespace Tyler.ViewModels
                 Name = Name,
                 Width = Width,
                 Height = Height,
-                Tiles = Tiles.Select(x => x.Serialize()).ToList(),
+                Tiles = Tiles.Where(x => x != null).Select(x => x!.Serialize()).ToList(),
                 BeforeScript = BeforeScript,
                 AfterScript = AfterScript
             };

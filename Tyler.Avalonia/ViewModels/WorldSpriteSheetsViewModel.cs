@@ -10,8 +10,6 @@ using System.Threading.Tasks;
 using Tyler.Models;
 using Tyler.Services;
 
-using static Tyler.ViewModels.WorldViewModel;
-
 namespace Tyler.ViewModels
 {
     public class WorldSpriteSheetsViewModel : TinyViewModel
@@ -97,7 +95,7 @@ namespace Tyler.ViewModels
             if (!silent)
             {
                 ReinitializeSpriteMap();
-                World.SelectedTab = Tabs.Sprites;
+                World.SelectedTab = WorldViewModel.Tabs.Sprites;
             }
         }
 
@@ -184,7 +182,7 @@ namespace Tyler.ViewModels
         public void EditSpriteSheet()
         {
             if (SelectedSpriteSheet == null) return;
-            World.SelectedTab = Tabs.Sprites;
+            World.SelectedTab = WorldViewModel.Tabs.Sprites;
         }
 
         public SpriteViewModel? GetSprite(string? id)

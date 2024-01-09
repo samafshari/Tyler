@@ -373,7 +373,7 @@ namespace Tyler.Views
 
         void Select(Point p)
         {
-            World?.SelectTile((int)p.X, (int)p.Y);
+            World?.BoardsManager?.SelectTile((int)p.X, (int)p.Y);
         }
 
         void Draw(Point p)
