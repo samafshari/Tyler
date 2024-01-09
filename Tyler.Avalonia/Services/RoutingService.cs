@@ -197,17 +197,6 @@ namespace Tyler.Services
             });
         }
 
-        public void ShowWorldSpriteSheetManager(WorldViewModel world)
-        {
-            var vm = new WorldSpriteSheetManagerViewModel(world);
-            RunOnUI(() =>
-            {
-                var window = new WorldSpriteSheetManagerWindow();
-                window.DataContext = vm;
-                window.Show();
-            });
-        }
-
         public void ShowBoardSettings(BoardViewModel board)
         {
             var owner = GetMainWindow();

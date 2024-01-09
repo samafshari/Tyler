@@ -2,14 +2,11 @@
 
 using Newtonsoft.Json;
 
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using System.Windows;
 
 using Tyler.Models;
 using Tyler.Services;
@@ -556,7 +553,6 @@ namespace Tyler.ViewModels
         public CommandModel BoardSettingsCommand => new CommandModel(() => SelectedBoard?.ShowSettings());
         public CommandModel AddSpriteSheetCommand => new CommandModel(AddSpriteSheetAsync);
         public CommandModel RemoveSpriteSheetCommand => new CommandModel(RemoveSpriteSheet);
-        public CommandModel ShowSpriteSheetManagerCommand => new CommandModel(() => _routingService.ShowWorldSpriteSheetManager(this));
         public CommandModel ShowSettingsCommand => new CommandModel(() => _routingService.ShowWorldSettings(this));
         public CommandModel ReinitializeSpriteMapCommand => new CommandModel(() =>
         {
