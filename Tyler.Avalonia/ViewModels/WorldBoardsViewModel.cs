@@ -17,9 +17,9 @@ namespace Tyler.ViewModels
         readonly RoutingService _routingService;
         readonly ScriptingService _scriptingService;
 
-        public WorldViewModel World { get; }
+        readonly Dictionary<string, BoardViewModel> boardMap = new Dictionary<string, BoardViewModel>();
 
-        Dictionary<string, BoardViewModel> boardMap = new Dictionary<string, BoardViewModel>();
+        public WorldViewModel World { get; }
 
         ObservableCollection<BoardViewModel> _boards = new ObservableCollection<BoardViewModel>();
         public ObservableCollection<BoardViewModel> Boards

@@ -23,6 +23,12 @@
 					</ListBox.ItemTemplate>
 				</ListBox>
 			</Grid>
+
+			<Grid Grid.Column="1" RowDefinitions="Auto, *">
+				<StackPanel Grid.Row="0" Classes="ToolBar">
+					<Button Command="{Binding NewTileDefCommand}" />
+				</StackPanel>
+ 			</Grid>
 		</Grid>
 	</Grid>
 </UserControl>

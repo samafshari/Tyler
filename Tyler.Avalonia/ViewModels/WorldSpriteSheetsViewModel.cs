@@ -16,8 +16,8 @@ namespace Tyler.ViewModels
     {
         readonly RoutingService _routingService;
 
-        Dictionary<string, SpriteSheetViewModel> spriteSheetsMap = new Dictionary<string, SpriteSheetViewModel>();
-        Dictionary<string, SpriteViewModel> spritesMap = new Dictionary<string, SpriteViewModel>();
+        readonly Dictionary<string, SpriteSheetViewModel> spriteSheetsMap = new Dictionary<string, SpriteSheetViewModel>();
+        readonly Dictionary<string, SpriteViewModel> spritesMap = new Dictionary<string, SpriteViewModel>();
 
         public WorldViewModel World { get; }
 

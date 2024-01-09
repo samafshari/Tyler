@@ -9,13 +9,11 @@ using System.Threading.Tasks;
 
 using Tyler.Models;
 
-using static Tyler.ViewModels.WorldViewModel;
-
 namespace Tyler.ViewModels
 {
     public class WorldTilesViewModel : TinyViewModel
     {
-        Dictionary<char, TileDefViewModel> charMap = new Dictionary<char, TileDefViewModel>();
+        readonly Dictionary<char, TileDefViewModel> charMap = new Dictionary<char, TileDefViewModel>();
 
         public WorldViewModel World { get; }
 
@@ -70,8 +68,11 @@ namespace Tyler.ViewModels
 
         public TileDefViewModel? GetTileDef(char c)
         {
-            if (charMap.TryGetValue(c, out var tileDef))
-                return tileDef;
+            lock (charMap)
+            {
+                if (charMap.TryGetValue(c, out var tileDef))
+                    return tileDef;
+            }
             return null;
         }
 
@@ -81,5 +82,98 @@ namespace Tyler.ViewModels
             if (SelectedTile != null && charMap.TryGetValue(SelectedTile.Char, out var tileDef))
                 SelectedTileDef = tileDef;
         }
+
+        string GetNewId(string? proposal = null)
+        {
+            string id = proposal ?? TileDefs.Count.ToString();
+            if (TileDefs.Any(x => x.Id == id))
+            {
+                int max = TileDefs.Max(x =>
+                {
+                    if (x.Id != null && int.TryParse(x.Id, out var i))
+                        return i;
+                    return 0;
+                });
+                id = (max + 1).ToString();
+            }
+            return id;
+        }
+
+        public void NewTileDef()
+        {
+            var tileDef = new TileDef
+            {
+                Id = GetNewId(),
+                Char = Vars.UnassignedChar,
+            };
+            AddTileDef(tileDef);
+        }
+
+        public void AddTileDef(string? spriteId)
+        {
+            if (string.IsNullOrWhiteSpace(spriteId)) return;
+            var sprite = World.SpriteSheetsManager.GetSprite(spriteId);
+            if (sprite != null) AddTileDef(sprite);
+        }
+
+        public void AddTileDef(SpriteViewModel sprite)
+        {
+            var tileDef = new TileDef
+            {
+                Id = GetNewId(sprite.Id),
+                Char = Vars.UnassignedChar,
+                Animation = new TileAnimation
+                {
+                    KeyFrames = new []
+                    {
+                        new SpriteKeyFrame
+                        {
+                            SpriteId = sprite.Id,
+                            Duration = 1
+                        }
+                    }
+                }
+            };
+            AddTileDef(tileDef);
+        }
+
+        public void AddTileDef(TileDef tileDef)
+        {
+            var tileDefViewModel = new TileDefViewModel(World, tileDef);
+            AddTileDef(tileDefViewModel);
+        }
+
+        public void AddTileDef(TileDefViewModel tileDef)
+        {
+            TileDefs.Add(tileDef);
+            lock (charMap)
+            {
+                if (charMap.ContainsKey(tileDef.Char)) return;
+                charMap[tileDef.Char] = tileDef;
+            }
+            SelectedTileDef = tileDef;
+        }
+
+        public void RemoveTileDef(TileDefViewModel? tileDef)
+        {
+            if (tileDef == null) return;
+            TileDefs.Remove(tileDef);
+            lock (charMap)
+            {
+                if (charMap.ContainsKey(tileDef.Char))
+                    charMap.Remove(tileDef.Char);
+            }
+            if (SelectedTileDef == tileDef)
+                SelectedTileDef = null;
+        }
+
+        public void RemoveTileDef()
+        {
+            RemoveTileDef(SelectedTileDef);
+        }
+        
+        public CommandModel NewTileDefCommand => new CommandModel(NewTileDef);
+        public CommandModel<string?> NewTileFromSpriteCommand => new CommandModel<string?>(AddTileDef);
+        public CommandModel RemoveTileDefCommand => new CommandModel(RemoveTileDef);
     }
 }
