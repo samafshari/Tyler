@@ -8,7 +8,7 @@
     mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
     x:Class="Tyler.Views.SpriteSheetEditorControl"
 	x:DataType="vm:WorldViewModel">
-	<Grid ColumnDefinitions="200, *">
+	<Grid ColumnDefinitions="200, *" DataContext="{Binding SpriteSheetsManager}">
 		<ListBox
 			ItemsSource="{Binding SpriteSheets}"
 			SelectedItem="{Binding SelectedSpriteSheet, Mode=TwoWay}">

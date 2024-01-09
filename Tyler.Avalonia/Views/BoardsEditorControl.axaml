@@ -145,8 +145,8 @@
 		</Grid>
 		<local:SpriteSheetExplorerControl
 			Grid.Row="1"
-			Sprites="{Binding MappedSprites}"
-			SelectedSprite="{Binding SelectedSprite, Mode=TwoWay}">
+			Sprites="{Binding SpriteSheetsManager.MappedSprites}"
+			SelectedSprite="{Binding SpriteSheetsManager.SelectedSprite, Mode=TwoWay}">
 			<local:SpriteSheetExplorerControl.ContextMenu>
 				<ContextMenu>
 					<MenuItem Header="Edit..." Command="{Binding EditTileDefCommand}" />

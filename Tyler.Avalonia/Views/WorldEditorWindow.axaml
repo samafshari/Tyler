@@ -25,8 +25,8 @@
 					<MenuItem Header="Benchmark" Command="{Binding ShowBenchmarksCommand}" />
 				</MenuItem>
 				<MenuItem Header="Sprite">
-					<MenuItem Header="Load Sprite Sheet..." Command="{Binding AddSpriteSheetCommand}" />
-					<MenuItem Header="Reinitialize Sprite Map" Command="{Binding ReinitializeSpriteMapCommand}" />
+					<MenuItem Header="Load Sprite Sheet..." Command="{Binding SpriteSheetsManager.AddSpriteSheetCommand}" />
+					<MenuItem Header="Reinitialize Sprite Map" Command="{Binding SpriteSheetsManager.ReinitializeSpriteMapCommand}" />
 				</MenuItem>
 				<MenuItem Header="Board">
 					<MenuItem Header="New Board" Command="{Binding AddBoardCommand}" />

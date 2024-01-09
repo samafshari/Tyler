@@ -378,10 +378,10 @@ namespace Tyler.Views
 
         void Draw(Point p)
         {
-            if (World != null && Board != null && World.SelectedSprite != null)
+            if (World != null && Board != null && World.SpriteSheetsManager.SelectedSprite != null)
             {
                 if (p.X < 0 || p.Y < 0 || p.X >= Board.Width || p.Y >= Board.Height) return;
-                Board.SetTile((int)p.X, (int)p.Y, 0, World.SelectedSprite.RealChar);
+                Board.SetTile((int)p.X, (int)p.Y, 0, World.SpriteSheetsManager.SelectedSprite.RealChar);
                 InvalidateVisual();
             }
         }

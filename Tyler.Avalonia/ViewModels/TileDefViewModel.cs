@@ -14,7 +14,7 @@ namespace Tyler.ViewModels
 
         public string DisplayName => ToString();
         public CroppedBitmap? Bitmap => Animation.Bitmap;
-        public SpriteViewModel? Sprite => World.GetSprite(Animation.SelectedKeyFrame?.SpriteId);
+        public SpriteViewModel? Sprite => World.SpriteSheetsManager.GetSprite(Animation.SelectedKeyFrame?.SpriteId);
 
         string? _id;
         public string? Id

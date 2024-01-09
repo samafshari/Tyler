@@ -37,7 +37,7 @@ namespace Tyler.ViewModels
             set => SetProperty(ref _duration, value);
         }
 
-        public CroppedBitmap? Bitmap => World?.GetSprite(SpriteId)?.Bitmap;
+        public CroppedBitmap? Bitmap => World?.SpriteSheetsManager.GetSprite(SpriteId)?.Bitmap;
 
         public SpriteKeyFrameViewModel(WorldViewModel world, SpriteKeyFrame? model)
         {
