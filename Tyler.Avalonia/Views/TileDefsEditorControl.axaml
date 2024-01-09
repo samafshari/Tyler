@@ -9,10 +9,11 @@
     x:Class="Tyler.Views.TileDefsEditorControl"
 	x:DataType="vm:WorldViewModel">
 	<Grid DataContext="{Binding TilesManager}">
-		<Grid ColumnDefinitions="250, 300, *">
+		<Grid ColumnDefinitions="250, 250, *">
 			<Grid Grid.Column="0">
 				<ListBox
-					ItemsSource="{Binding World.SpriteSheetsManager.MappedSprites}">
+					ItemsSource="{Binding World.SpriteSheetsManager.MappedSprites}"
+					SelectedItem="{Binding SelectedSprite}">
 					<ListBox.ItemTemplate>
 						<DataTemplate>
 							<Grid ColumnDefinitions="40, 5, *">
@@ -21,14 +22,113 @@
 							</Grid>
 						</DataTemplate>
 					</ListBox.ItemTemplate>
+					<ListBox.ContextMenu>
+						<ContextMenu>
+							<MenuItem Header="Create Tile" Command="{Binding NewTileFromSpriteCommand}" CommandParameter="{Binding SelectedSprite}" />
+							<MenuItem Header="Edit" Command="{Binding EditSpriteCommand}" CommandParameter="{Binding SelectedSprite}" />
+						</ContextMenu>
+					</ListBox.ContextMenu>
 				</ListBox>
 			</Grid>
 
 			<Grid Grid.Column="1" RowDefinitions="Auto, *">
 				<StackPanel Grid.Row="0" Classes="ToolBar">
-					<Button Command="{Binding NewTileDefCommand}" />
+					<Button Command="{Binding NewTileDefCommand}">New Tile</Button>
 				</StackPanel>
+				<ListBox
+					Grid.Row="1"
+					ItemsSource="{Binding TileDefs}"
+					SelectedItem="{Binding SelectedTileDef}">
+					<ListBox.ItemTemplate>
+						<DataTemplate>
+							<Grid ColumnDefinitions="40, 5, *">
+								<Image 
+									Width="32" 
+									Height="32" 
+									Stretch="Uniform" 
+									Source="{Binding Bitmap}" 
+									RenderOptions.BitmapInterpolationMode="None" />
+								<TextBlock Grid.Column="2" Text="{Binding DisplayName}" />
+							</Grid> 
+						</DataTemplate>
+					</ListBox.ItemTemplate>
+					<ListBox.ContextMenu>
+						<ContextMenu>
+							<MenuItem Header="Duplicate" Command="{Binding DuplicateTileDefCommand}" CommandParameter="{Binding SelectedTileDef}" />
+							<MenuItem Header="Remove" Command="{Binding RemoveTileDefCommand}" />
+						</ContextMenu>
+					</ListBox.ContextMenu>
+				</ListBox>
  			</Grid>
+
+			<Grid Grid.Column="2" IsVisible="{Binding HasSelectedTileDef}">
+				<Grid Margin="10">
+					<Grid ColumnDefinitions="Auto, *" RowDefinitions="Auto, Auto, Auto, Auto, Auto, *">
+						<TextBlock Text="Char:" />
+						<TextBox Grid.Column="1" Text="{Binding SelectedTileDef.CharString}" />
+						<TextBlock Grid.Row="1" Text="Id:" />
+						<TextBox Grid.Row="1" Grid.Column="1" Text="{Binding SelectedTileDef.Id}" />
+						<TextBlock Grid.Row="2" Text="Animation Mode:" />
+						<ComboBox
+							Grid.Row="2"
+							Grid.Column="1"
+							ItemsSource="{Binding AnimationModes}"
+							SelectedItem="{Binding SelectedTileDef.Animation.AnimationMode}" />
+						<TextBlock
+							Grid.Row="3"
+							Text="Speed:" />
+						<TextBox
+							Grid.Row="3"
+							Grid.Column="1" 
+							Text="{Binding SelectedTileDef.Animation.Rate}" />
+						<TextBlock
+							Grid.Row="4"
+							Text="Time Variance:" />
+						<TextBox
+							Grid.Row="4"
+							Grid.Column="1"
+							Text="{Binding SelectedTileDef.Animation.InitialTimeVariance}" />
+						<TextBlock 
+							Grid.Row="5"
+							Text="Key Frames:"
+							VerticalAlignment="Top" />
+						<Grid
+							Grid.Row="5"
+							Grid.Column="1">
+							<Border
+								BorderThickness="1"
+								BorderBrush="#111">
+								<ListBox
+									ItemsSource="{Binding SelectedTileDef.Animation.KeyFrames}"
+									SelectedItem="{Binding SelectedTileDef.Animation.SelectedKeyFrame}">
+									<ListBox.ItemTemplate>
+										<DataTemplate>
+											<Grid ColumnDefinitions="40, 5, *, 5, Auto">
+												<Image
+													Width="32"
+													Height="32"
+													Stretch="Uniform"
+													Source="{Binding Bitmap}"
+													RenderOptions.BitmapInterpolationMode="None"
+													/>
+												<TextBox
+													Grid.Column="2"
+													Text="{Binding SpriteId}" />
+												<TextBox
+													Grid.Column="4"
+													Text="{Binding Duration}" />
+											</Grid>
+										</DataTemplate>
+									</ListBox.ItemTemplate>
+								</ListBox>
+							</Border>
+						</Grid>
+					</Grid>
+				</Grid>
+			</Grid>
+			
+			<GridSplitter Classes="v" />
+			<GridSplitter Classes="v" Grid.Column="1" />
 		</Grid>
 	</Grid>
 </UserControl>

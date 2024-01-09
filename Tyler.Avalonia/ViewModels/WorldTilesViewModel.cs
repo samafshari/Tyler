@@ -17,6 +17,8 @@ namespace Tyler.ViewModels
 
         public WorldViewModel World { get; }
 
+        public List<AnimationMode> AnimationModes { get; } = Enum.GetValues(typeof(AnimationMode)).Cast<AnimationMode>().ToList();
+
         ObservableCollection<TileDefViewModel> _tileDefs = new ObservableCollection<TileDefViewModel>();
         public ObservableCollection<TileDefViewModel> TileDefs
         {
@@ -24,12 +26,24 @@ namespace Tyler.ViewModels
             set => SetProperty(ref _tileDefs, value);
         }
 
+        SpriteViewModel? _selectedSprite;
+        public SpriteViewModel? SelectedSprite
+        {
+            get => _selectedSprite;
+            set => SetProperty(ref _selectedSprite, value);
+        }
+
         TileDefViewModel? _selectedTileDef;
         public TileDefViewModel? SelectedTileDef
         {
             get => _selectedTileDef;
-            set => SetProperty(ref _selectedTileDef, value);
+            set
+            {
+                SetProperty(ref _selectedTileDef, value);
+                RaisePropertyChanged(nameof(HasSelectedTileDef));
+            }
         }
+        public bool HasSelectedTileDef => SelectedTileDef != null;
 
         TileViewModel? _selectedTile;
         public TileViewModel? SelectedTile
@@ -46,6 +60,11 @@ namespace Tyler.ViewModels
         public WorldTilesViewModel(WorldViewModel world)
         {
             World = world;
+            World.SpriteSheetsManager.MappedSpritesUpdated += (s, e) =>
+            {
+                if (SelectedSprite != null && !e.Contains(SelectedSprite))
+                    SelectedSprite = null;
+            };
         }
 
         public void Reload(World worldDef)
@@ -116,8 +135,9 @@ namespace Tyler.ViewModels
             if (sprite != null) AddTileDef(sprite);
         }
 
-        public void AddTileDef(SpriteViewModel sprite)
+        public void AddTileDef(SpriteViewModel? sprite)
         {
+            if (sprite == null) return;
             var tileDef = new TileDef
             {
                 Id = GetNewId(sprite.Id),
@@ -143,8 +163,9 @@ namespace Tyler.ViewModels
             AddTileDef(tileDefViewModel);
         }
 
-        public void AddTileDef(TileDefViewModel tileDef)
+        public void AddTileDef(TileDefViewModel? tileDef)
         {
+            if (tileDef == null) return;
             TileDefs.Add(tileDef);
             lock (charMap)
             {
@@ -171,9 +192,24 @@ namespace Tyler.ViewModels
         {
             RemoveTileDef(SelectedTileDef);
         }
+
+        public void DuplicateTileDef(TileDefViewModel? tileDef)
+        {
+            if (tileDef == null) return;
+            var newTileDef = tileDef.Serialize();
+            newTileDef.Id = GetNewId($"{tileDef.Id} (Copy)");
+            AddTileDef(newTileDef);
+        }
         
+        public void EditSprite(SpriteViewModel? sprite)
+        {
+            World.SpriteSheetsManager.EditSprite(sprite);
+        }
+
+        public CommandModel<SpriteViewModel?> EditSpriteCommand => new CommandModel<SpriteViewModel?>(EditSprite);
+        public CommandModel<SpriteViewModel?> NewTileFromSpriteCommand => new CommandModel<SpriteViewModel?>(AddTileDef);
         public CommandModel NewTileDefCommand => new CommandModel(NewTileDef);
-        public CommandModel<string?> NewTileFromSpriteCommand => new CommandModel<string?>(AddTileDef);
+        public CommandModel<TileDefViewModel?> DuplicateTileDefCommand => new CommandModel<TileDefViewModel?>(DuplicateTileDef);
         public CommandModel RemoveTileDefCommand => new CommandModel(RemoveTileDef);
     }
 }

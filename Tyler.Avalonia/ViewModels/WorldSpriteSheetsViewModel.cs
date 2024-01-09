@@ -14,6 +14,8 @@ namespace Tyler.ViewModels
 {
     public class WorldSpriteSheetsViewModel : TinyViewModel
     {
+        public event EventHandler<ObservableCollection<SpriteViewModel>>? MappedSpritesUpdated;
+
         readonly RoutingService _routingService;
 
         readonly Dictionary<string, SpriteSheetViewModel> spriteSheetsMap = new Dictionary<string, SpriteSheetViewModel>();
@@ -32,7 +34,12 @@ namespace Tyler.ViewModels
         public ObservableCollection<SpriteViewModel> MappedSprites
         {
             get => _mappedSprites;
-            set => SetProperty(ref _mappedSprites, value);
+            set
+            {
+                var isDirty = _mappedSprites != value;
+                SetProperty(ref _mappedSprites, value);
+                if (isDirty) MappedSpritesUpdated?.Invoke(this, MappedSprites);
+            }
         }
 
         SpriteSheetViewModel? _selectedSpriteSheet;
@@ -164,10 +171,18 @@ namespace Tyler.ViewModels
                     spritesMap[e.NewName] = sprite;
                 }
                 if (string.IsNullOrWhiteSpace(e.OldName))
-                    lock (MappedSprites) MappedSprites.Add(sprite);
+                    lock (MappedSprites)
+                    {
+                        MappedSprites.Add(sprite);
+                        MappedSpritesUpdated?.Invoke(this, MappedSprites);
+                    }
             }
             else if (!string.IsNullOrWhiteSpace(e.OldName))
-                lock (MappedSprites) MappedSprites.Remove(sprite);
+                lock (MappedSprites)
+                {
+                    MappedSprites.Remove(sprite);
+                    MappedSpritesUpdated?.Invoke(this, MappedSprites);
+                }
         }
 
         public void ReinitializeSpriteMap()
@@ -184,6 +199,16 @@ namespace Tyler.ViewModels
                         }
                     MappedSprites = new ObservableCollection<SpriteViewModel>(spritesMap.Values);
                 }
+        }
+
+        public void EditSprite(SpriteViewModel? sprite)
+        {
+            if (sprite == null) return;
+            var spriteSheet = SpriteSheets.FirstOrDefault(x => x.Sprites.Contains(sprite));
+            if (spriteSheet == null) return;
+            World.SelectedTab = WorldViewModel.Tabs.Sprites;
+            SelectedSpriteSheet = spriteSheet;
+            SelectedSprite = sprite;
         }
 
         public void EditSpriteSheet()
